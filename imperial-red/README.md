@@ -1,4 +1,4 @@
-# Project "Demo"
+# Project "Imperial Red"
 [![Build Status](https://travis-ci.org/MrJavo94/UrlShortener2015.svg)](https://travis-ci.org/MrJavo94/UrlShortener2015)
 
 
