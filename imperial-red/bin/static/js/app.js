@@ -8,6 +8,7 @@ $(document).ready(
                     url : "/link",
                     data : $(this).serialize(),
                     success : function(msg) {
+                    	var custom = document.getElementsByName("custom");
                         $("#result").html(
                             "<div class='alert alert-success lead'><a target='_blank' href='"
                             + msg.uri

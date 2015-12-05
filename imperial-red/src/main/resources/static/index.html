@@ -19,11 +19,36 @@
 				<p class="lead">A front-end example page for the project</p>
 				<br>
 				<form class="col-lg-12" role="form" id="shortener" action="">
-					<div class="input-group input-group-lg col-sm-offset-4 col-sm-4">
-						<input type="text" class="center-block form-control input-lg"
-							title="Enter a URL" placeholder="Enter a URL" name="url">
-						<span class="input-group-btn"><button
-								class="btn btn-lg btn-primary" type="submit">Short me!</button></span>
+					<div class="row">
+						<div class="input-group input-group-lg col-sm-offset-4 col-sm-4">
+							<input type="text" class="center-block form-control input-lg"
+								title="Enter a URL" placeholder="Enter a URL" name="url">
+							<span class="input-group-btn"><button
+									class="btn btn-lg btn-primary" type="submit">Short me!</button></span>
+						</div>
+					</div>
+					<div class="row">
+						<div class="checkbox col-lg-4 col-lg-offset-4 bg-info">
+							<label>
+								<input type="checkbox" name="hasToken" value="true">
+								Check if you want to secure your URL
+							</label>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-4"></div>
+						<div class="input-group input-group-lg col-lg-offset-4 col-lg-4">
+							<h3>If you want a custom URL, write it here:</h3>
+							<input type="text" class="center-block form-control input-lg"
+								title="Custom URL" placeholder="Your custom name here" name="custom">
+						</div>
+					</div>
+					<div class="row">
+						<div class="input-group input-group-lg col-lg-offset-4 col-lg-4">
+							<h3>Select an expire date (or leave it blank)</h3>
+							<input type="date" class="center-block form-control input-lg"
+								title="Expire Date" name="expire">
+						</div>
 					</div>
 				</form>
 			</div>
