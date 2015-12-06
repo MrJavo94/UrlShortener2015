@@ -21,6 +21,7 @@ mainClassName = 'urlshortener2015.imperialred.Application'
 
 dependencies {
     compile project(':common')
+    
 
     // Provides the production database
     runtime 'org.hsqldb:hsqldb'
@@ -28,6 +29,9 @@ dependencies {
     // Provides java script libraries for static content
     compile 'org.webjars:bootstrap:3.3.5'
     compile 'org.webjars:jquery:2.1.4'
+    
+    // Provides access to mongodb framework
+    compile 'org.springframework.data:spring-data-mongodb:1.8.1.RELEASE'
 
     // Testing framework
     testCompile 'org.springframework.boot:spring-boot-starter-test'
