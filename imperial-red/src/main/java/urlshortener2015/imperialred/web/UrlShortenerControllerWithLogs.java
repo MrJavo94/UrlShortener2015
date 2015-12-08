@@ -28,6 +28,7 @@ import com.google.common.hash.Hashing;
 import urlshortener2015.imperialred.objects.Click;
 import urlshortener2015.imperialred.objects.ShortURL;
 import urlshortener2015.imperialred.repository.ClickRepository;
+import urlshortener2015.imperialred.repository.ShortURLRepository;
 
 @RestController
 public class UrlShortenerControllerWithLogs{
@@ -35,6 +36,9 @@ public class UrlShortenerControllerWithLogs{
 	
 	@Autowired 
 	protected ClickRepository clickRepository;
+	
+	@Autowired 
+	protected ShortURLRepository shortURLRepository;
 	
 	/**
 	 * The HTTP {@code Referer} header field name.
@@ -56,8 +60,7 @@ public class UrlShortenerControllerWithLogs{
 	 */
 	public ResponseEntity<?> redirectTo(@PathVariable String id, HttpServletRequest request) {
 		logger.info("Requested redirection with hash " + id);
-		//ShortURL l = shortURLRepository.findByKey(id);
-		ShortURL l = null;
+		ShortURL l = shortURLRepository.findByHash(id);
 		if (l != null) {
 			createAndSaveClick(id, request);
 			return createSuccessfulRedirectToResponse(l);
@@ -117,8 +120,7 @@ public class UrlShortenerControllerWithLogs{
 			/*
 			 * Insercion en la base de datos
 			 */
-			return null;
-			//return shortURLRepository.save(su);
+			return shortURLRepository.save(su);
 		} else {
 			return null;
 		}
