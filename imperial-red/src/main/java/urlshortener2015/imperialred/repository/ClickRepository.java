@@ -5,25 +5,20 @@ import java.util.List;
 import urlshortener2015.imperialred.objects.Click;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 
-//public interface ClickRepository extends MongoRepository<Click, String>{
-public interface ClickRepository {
-
+public interface ClickRepository extends MongoRepository<Click, Long>, ClickRepositoryCustom{
+	
 	List<Click> findByHash(String hash);
-
-	Long clicksByHash(String hash);
 
 	Click save(Click cl);
 
-	void update(Click cl);
-
+	void deleteAll();
+		
 	void delete(Long id);
 
-	void deleteAll();
-
 	long count();
-
-	List<Click> list(Long limit, Long offset);
 }
 

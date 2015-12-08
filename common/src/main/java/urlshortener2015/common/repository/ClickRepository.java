@@ -2,8 +2,11 @@ package urlshortener2015.common.repository;
 
 import java.util.List;
 
+import org.springframework.stereotype.Repository;
+
 import urlshortener2015.common.domain.Click;
 
+@Repository
 public interface ClickRepository {
 
 	List<Click> findByHash(String hash);
