@@ -1,7 +1,7 @@
 package urlshortener2015.imperialred.objects;
 
 import java.net.URI;
-import java.sql.Date;
+import java.util.Date;
 
 import org.springframework.data.annotation.Id;
 
