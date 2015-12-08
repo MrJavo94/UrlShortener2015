@@ -1,5 +1,7 @@
 package urlshortener2015.imperialred.objects;
 
+import java.math.BigInteger;
+
 public class StatsURL {
 
     private String target;
@@ -31,7 +33,7 @@ public class StatsURL {
         return clicks;
     }
 
-    public void setClicks(int clicks) {
+    public void setClicks(long clicks) {
         this.clicks = clicks;
     }
 

@@ -1,15 +1,14 @@
 package urlshortener2015.imperialred.repository;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import urlshortener2015.imperialred.objects.Click;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 
 
-public interface ClickRepository extends MongoRepository<Click, Long>, ClickRepositoryCustom{
+public interface ClickRepository extends MongoRepository<Click, BigInteger>, ClickRepositoryCustom{
 	
 	List<Click> findByHash(String hash);
 
@@ -17,7 +16,7 @@ public interface ClickRepository extends MongoRepository<Click, Long>, ClickRepo
 
 	void deleteAll();
 		
-	void delete(Long id);
+	void delete(BigInteger id);
 
 	long count();
 }
