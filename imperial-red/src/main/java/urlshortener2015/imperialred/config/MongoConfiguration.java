@@ -9,9 +9,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
+import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
@@ -19,8 +22,9 @@ import com.mongodb.ServerAddress;
 import urlshortener2015.imperialred.web.UrlShortenerControllerWithLogs;
 
 @Configuration
+@EnableMongoRepositories(basePackageClasses=urlshortener2015.imperialred.repository.ClickRepository.class)
 @PropertySource("classpath:mongo.properties")
-public class MongoConfiguration {
+public class MongoConfiguration extends AbstractMongoConfiguration {
 	
 	
 	private static final Logger logger = LoggerFactory.getLogger(UrlShortenerControllerWithLogs.class);
@@ -48,4 +52,21 @@ public class MongoConfiguration {
 	public @Bean MongoTemplate mongoTemplate() throws Exception {
 		return new MongoTemplate(mongoDbFactory());
 	}
+	
+	  @Override
+	  protected String getDatabaseName() {
+	    return db;
+	  }
+
+	  @Override
+	  public MongoClient mongo() throws Exception {
+		  ServerAddress sv = new ServerAddress(ip, Integer.parseInt(puerto));
+			MongoCredential credential = MongoCredential.createCredential(usuario, db, contraseña.toCharArray());
+			return new MongoClient(sv, Arrays.asList(credential));
+	  }
+
+	  @Override
+	  protected String getMappingBasePackage() {
+	    return "com.oreilly.springdata.mongodb";
+	  }
 }

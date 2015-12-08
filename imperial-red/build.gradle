@@ -20,7 +20,13 @@ apply plugin: 'spring-boot'
 mainClassName = 'urlshortener2015.imperialred.Application'
 
 dependencies {
-    compile project(':common')
+    compile 'org.springframework.boot:spring-boot-starter-web:1.2.6.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-jdbc:1.2.6.RELEASE'
+    compile 'org.springframework.hateoas:spring-hateoas:0.16.0.RELEASE'
+    compile 'org.springframework.plugin:spring-plugin-core:1.1.0.RELEASE'
+
+    compile 'commons-validator:commons-validator:1.4.0'
+	compile 'com.google.guava:guava:17.0'
     
 
     // Provides the production database

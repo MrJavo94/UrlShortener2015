@@ -3,6 +3,7 @@ package urlshortener2015.imperialred.web;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.util.UUID;
@@ -13,7 +14,6 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,15 +25,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.hash.Hashing;
 
-import urlshortener2015.common.domain.Click;
-import urlshortener2015.common.domain.ShortURL;
-import urlshortener2015.common.web.UrlShortenerController;
+import urlshortener2015.imperialred.objects.Click;
+import urlshortener2015.imperialred.objects.ShortURL;
+import urlshortener2015.imperialred.repository.ClickRepository;
+import urlshortener2015.imperialred.repository.ShortURLRepository;
 
 @RestController
-public class UrlShortenerControllerWithLogs extends UrlShortenerController {
+public class UrlShortenerControllerWithLogs{
 	
-	@Autowired
-    private MongoTemplate mongoTemplate;
+	
+	@Autowired 
+	protected ClickRepository clickRepository;
+	
+	@Autowired 
+	protected ShortURLRepository shortURLRepository;
 	
 	/**
 	 * The HTTP {@code Referer} header field name.
@@ -49,14 +54,13 @@ public class UrlShortenerControllerWithLogs extends UrlShortenerController {
 
 	private static final Logger logger = LoggerFactory.getLogger(UrlShortenerControllerWithLogs.class);
 
-	@Override
 	@RequestMapping(value = "/{id:(?!link|index).*}", method = RequestMethod.GET)
 	/**
 	 * 
 	 */
 	public ResponseEntity<?> redirectTo(@PathVariable String id, HttpServletRequest request) {
 		logger.info("Requested redirection with hash " + id);
-		ShortURL l = shortURLRepository.findByKey(id);
+		ShortURL l = shortURLRepository.findByHash(id);
 		if (l != null) {
 			createAndSaveClick(id, request);
 			return createSuccessfulRedirectToResponse(l);
@@ -93,7 +97,6 @@ public class UrlShortenerControllerWithLogs extends UrlShortenerController {
 		logger.info(cl != null ? "[" + hash + "] saved with id [" + cl.getId() + "]" : "[" + hash + "] was not saved");
 	}
 
-	@Override
 	/**
 	 * Creacion y guardado de la URL
 	 */
@@ -112,7 +115,7 @@ public class UrlShortenerControllerWithLogs extends UrlShortenerController {
 			 * Creacion del objeto ShortURL
 			 */
 			ShortURL su = new ShortURL(id, url,
-					linkTo(methodOn(UrlShortenerController.class).redirectTo(id, null)).toUri(), sponsor,
+					linkTo(methodOn(UrlShortenerControllerWithLogs.class).redirectTo(id, null)).toUri(), sponsor,
 					new Date(System.currentTimeMillis()), owner, HttpStatus.TEMPORARY_REDIRECT.value(), true, ip, null);
 			/*
 			 * Insercion en la base de datos
@@ -121,6 +124,16 @@ public class UrlShortenerControllerWithLogs extends UrlShortenerController {
 		} else {
 			return null;
 		}
+	}
+	
+	protected String extractIP(HttpServletRequest request) {
+		return request.getRemoteAddr();
+	}
+
+	protected ResponseEntity<?> createSuccessfulRedirectToResponse(ShortURL l) {
+		HttpHeaders h = new HttpHeaders();
+		h.setLocation(URI.create(l.getTarget()));
+		return new ResponseEntity<>(h, HttpStatus.valueOf(l.getMode()));
 	}
 
 }
