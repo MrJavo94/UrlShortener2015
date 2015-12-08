@@ -1,6 +1,7 @@
 package urlshortener2015.imperialred.objects;
 
-import java.sql.Date;
+import java.math.BigInteger;
+import java.util.Date;
 
 import org.springframework.data.annotation.Id;
 
@@ -8,7 +9,7 @@ public class Click {
 
 	
 	@Id
-	private Long id;
+	private BigInteger id;
 	private String hash;
 	private Date created;
 	private String referrer;
@@ -17,7 +18,7 @@ public class Click {
 	private String ip;
 	private String country;
 
-	public Click(Long id, String hash, Date created, String referrer,
+	public Click(BigInteger id, String hash, Date created, String referrer,
 			String browser, String platform, String ip, String country) {
 		this.id = id;
 		this.hash = hash;
@@ -29,7 +30,7 @@ public class Click {
 		this.country = country;
 	}
 
-	public Long getId() {
+	public BigInteger getId() {
 		return id;
 	}
 
