@@ -35,6 +35,9 @@ dependencies {
     // Provides java script libraries for static content
     compile 'org.webjars:bootstrap:3.3.5'
     compile 'org.webjars:jquery:2.1.4'
+    compile 'jstl:jstl:1.2'
+    compile 'org.springframework.boot:spring-boot-starter-web:1.2.6.RELEASE'
+    compile 'org.apache.tomcat.embed:tomcat-embed-jasper:8.0.28'
     
     // Provides access to mongodb framework
     compile 'org.springframework.data:spring-data-mongodb:1.8.1.RELEASE'
