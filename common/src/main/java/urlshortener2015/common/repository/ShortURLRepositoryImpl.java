@@ -58,17 +58,14 @@ public class ShortURLRepositoryImpl implements ShortURLRepository {
 	@Override
 	public ShortURL save(ShortURL su) {
 		try {
-			System.out.println("cachonda");
 			jdbc.update("INSERT INTO shorturl VALUES (?,?,?,?,?,?,?,?,?)",
 					su.getHash(), su.getTarget(), su.getSponsor(),
 					su.getCreated(), su.getOwner(), su.getMode(), su.getSafe(),
 					su.getIP(), su.getCountry());
 		} catch (DuplicateKeyException e) {
-			System.out.println("anastasia");
 			log.debug("When insert for key " + su.getHash(), e);
 			return su;
 		} catch (Exception e) {
-			System.out.println("ajrejajrrjajrj" + e);
 			log.debug("When insert", e);
 			return null;
 		}
