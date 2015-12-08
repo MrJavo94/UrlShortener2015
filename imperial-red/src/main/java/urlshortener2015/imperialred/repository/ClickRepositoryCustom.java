@@ -1,5 +1,6 @@
 package urlshortener2015.imperialred.repository;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import urlshortener2015.imperialred.objects.Click;
@@ -8,9 +9,9 @@ import urlshortener2015.imperialred.objects.Click;
 
 public interface ClickRepositoryCustom {
 	
-	Long clicksByHash(String hash);
+	long clicksByHash(String hash);
 	
 	void update(Click cl);
 	
-	List<Click> list(Long limit, Long offset);
+	List<Click> list(BigInteger limit, BigInteger offset);
 }

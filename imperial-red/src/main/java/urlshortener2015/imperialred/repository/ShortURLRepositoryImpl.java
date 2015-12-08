@@ -1,5 +1,6 @@
 package urlshortener2015.imperialred.repository;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,8 @@ public class ShortURLRepositoryImpl implements ShortURLRepositoryCustom{
 	MongoTemplate mongoTemplate;
 	
 	@Override
-	public List<ShortURL> list(Long limit, Long offset) {
-		return mongoTemplate.findAll(ShortURL.class).subList(Math.toIntExact(offset), Math.toIntExact(limit));		
+	public List<ShortURL> list(BigInteger limit, BigInteger offset) {
+		return mongoTemplate.findAll(ShortURL.class).subList(offset.intValue(), limit.intValue());		
 	}	
 
 	@Override
