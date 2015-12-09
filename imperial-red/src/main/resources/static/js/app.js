@@ -11,18 +11,20 @@ $(document).ready(
                     	var custom = document.getElementsByName("custom");
                         if(msg.owner!=null){
                             $("#result").html(
-                                "<div class='alert alert-success lead'><a target='_blank' href='"
+                                "<h3>Aquí tiene su enlace acortado</h3>"
+                                + "<div class='alert alert-success lead'><a target='_blank' href='"
                                 + msg.uri
                                 + "'>"
                                 + msg.uri
-                                + "</a></div></br>"
-                                + " <div class='alert alert-success lead'>Token:</br>?token="
+                                + "</a></div></br><h3>Token: <h3>"
+                                + " <div class='alert alert-success lead'>?token="
                                 + msg.owner
                                 + "</div>");
                         }
                         else{
                             $("#result").html(
-                                "<div class='alert alert-success lead'><a target='_blank' href='"
+                                "<h3>Aquí tiene su enlace acortado</h3>"
+                                + "<div class='alert alert-success lead'><a target='_blank' href='"
                                 + msg.uri
                                 + "'>"
                                 + msg.uri
