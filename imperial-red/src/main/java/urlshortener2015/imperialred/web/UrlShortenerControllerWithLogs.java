@@ -69,8 +69,18 @@ public class UrlShortenerControllerWithLogs {
 		logger.info("Requested redirection with hash " + id);
 		ShortURL l = shortURLRepository.findByHash(id);
 		if (l != null) {
-			createAndSaveClick(id, request);
-			return createSuccessfulRedirectToResponse(l);
+			Date d = new Date(System.currentTimeMillis());
+			if (d.after(l.getExpire())) {
+				/*
+				 * La fecha ha expirado
+				 */
+				String msg="<h1> El enlace ha expirado</h1>";
+				return new ResponseEntity<>(msg, HttpStatus.OK);
+			}
+			else {
+				createAndSaveClick(id, request);
+				return createSuccessfulRedirectToResponse(l);
+			}
 		}
 		else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -139,7 +149,7 @@ public class UrlShortenerControllerWithLogs {
 			/*
 			 * Si ya existe no se crea, de momento
 			 */
-			if (shortURLRepository.findByHash(id)==null) {
+			//if (shortURLRepository.findByHash(id) == null) {
 
 				/*
 				 * Has Token
@@ -175,10 +185,10 @@ public class UrlShortenerControllerWithLogs {
 				 * Insercion en la base de datos
 				 */
 				return shortURLRepository.save(su);
-			}
+			/*}
 			else {
 				return null;
-			}
+			}*/
 		}
 		else {
 			return null;

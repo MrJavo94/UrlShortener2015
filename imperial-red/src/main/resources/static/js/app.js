@@ -9,12 +9,26 @@ $(document).ready(
                     data : $(this).serialize(),
                     success : function(msg) {
                     	var custom = document.getElementsByName("custom");
-                        $("#result").html(
-                            "<div class='alert alert-success lead'><a target='_blank' href='"
-                            + msg.uri
-                            + "'>"
-                            + msg.uri
-                            + "</a></div>");
+                        if(msg.owner!=null){
+                            $("#result").html(
+                                "<div class='alert alert-success lead'><a target='_blank' href='"
+                                + msg.uri
+                                + "'>"
+                                + msg.uri
+                                + "</a></div></br>"
+                                + " <div class='alert alert-success lead'>Token:</br>"
+                                + msg.owner
+                                + "</div>");
+                        }
+                        else{
+                            $("#result").html(
+                                "<div class='alert alert-success lead'><a target='_blank' href='"
+                                + msg.uri
+                                + "'>"
+                                + msg.uri
+                                + "</a></div>");
+                        }
+                        
                     },
                     error : function() {
                         $("#result").html(
