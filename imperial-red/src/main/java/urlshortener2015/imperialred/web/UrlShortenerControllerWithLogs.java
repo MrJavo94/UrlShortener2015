@@ -71,9 +71,10 @@ public class UrlShortenerControllerWithLogs{
 	
 	@RequestMapping(value = "/link", method = RequestMethod.POST)
 	public ResponseEntity<ShortURL> shortener(@RequestParam("url") String url,
-			@RequestParam(value = "sponsor", required = false) String sponsor,
-			@RequestParam(value = "brand", required = false) String brand, HttpServletRequest request) {
-		ShortURL su = createAndSaveIfValid(url, sponsor, brand, UUID.randomUUID().toString(), extractIP(request));
+			@RequestParam("custom") String custom, @RequestParam("hasToken") String hasToken,
+			@RequestParam("expireDate") String expireDate, HttpServletRequest request) {
+		ShortURL su = createAndSaveIfValid(url, custom, hasToken, expireDate, 
+				UUID.randomUUID().toString(), extractIP(request));
 		if (su != null) {
 			HttpHeaders h = new HttpHeaders();
 			h.setLocation(su.getUri());
@@ -100,7 +101,8 @@ public class UrlShortenerControllerWithLogs{
 	/**
 	 * Creacion y guardado de la URL
 	 */
-	protected ShortURL createAndSaveIfValid(String url, String sponsor, String brand, String owner, String ip) {	
+	protected ShortURL createAndSaveIfValid(String url, String custom, String hasToken,
+			String expireDate, String owner, String ip) {	
 		UrlValidator urlValidator = new UrlValidator(new String[] { "http", "https" });
 		/*
 		 * Comprueba si la url viene con http o https
@@ -114,9 +116,10 @@ public class UrlShortenerControllerWithLogs{
 			/*
 			 * Creacion del objeto ShortURL
 			 */
+			Date expire = new Date(); //Cambiar esto e incluir todas las comprobaciones.
 			ShortURL su = new ShortURL(id, url,
-					linkTo(methodOn(UrlShortenerControllerWithLogs.class).redirectTo(id, null)).toUri(), sponsor,
-					new Date(System.currentTimeMillis()), owner, HttpStatus.TEMPORARY_REDIRECT.value(), true, ip, null);
+					linkTo(methodOn(UrlShortenerControllerWithLogs.class).redirectTo(id, null)).toUri(),
+					new Date(System.currentTimeMillis()), expire, owner, HttpStatus.TEMPORARY_REDIRECT.value(), ip, null);
 			/*
 			 * Insercion en la base de datos
 			 */

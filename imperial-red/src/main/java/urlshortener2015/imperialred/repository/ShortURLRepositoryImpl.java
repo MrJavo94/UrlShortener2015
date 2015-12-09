@@ -18,13 +18,6 @@ public class ShortURLRepositoryImpl implements ShortURLRepositoryCustom{
 	@Override
 	public List<ShortURL> list(BigInteger limit, BigInteger offset) {
 		return mongoTemplate.findAll(ShortURL.class).subList(offset.intValue(), limit.intValue());		
-	}	
-
-	@Override
-	public ShortURL mark(ShortURL urlSafe, boolean safeness) {
-		urlSafe.setSafe(safeness);
-		mongoTemplate.save(urlSafe);
-		return urlSafe;
 	}
 	
 	@Override

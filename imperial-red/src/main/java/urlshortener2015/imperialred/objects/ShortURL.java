@@ -6,31 +6,27 @@ import java.util.Date;
 import org.springframework.data.annotation.Id;
 
 public class ShortURL {
-
 	
 	@Id
 	private String hash;
 	private String target;
 	private URI uri;
-	private String sponsor;
 	private Date created;
+	private Date expire;
 	private String owner;
 	private Integer mode;
-	private Boolean safe;
 	private String ip;
 	private String country;
 
-	public ShortURL(String hash, String target, URI uri, String sponsor,
-			Date created, String owner, Integer mode, Boolean safe, String ip,
-			String country) {
+	public ShortURL(String hash, String target, URI uri, Date created,
+			Date expire, String owner, Integer mode, String ip, String country) {
 		this.hash = hash;
 		this.target = target;
 		this.uri = uri;
-		this.sponsor = sponsor;
 		this.created = created;
+		this.expire = expire;
 		this.owner = owner;
 		this.mode = mode;
-		this.safe = safe;
 		this.ip = ip;
 		this.country = country;
 	}
@@ -53,6 +49,10 @@ public class ShortURL {
 	public Date getCreated() {
 		return created;
 	}
+	
+	public Date getExpire() {
+		return expire;
+	}
 
 	public String getOwner() {
 		return owner;
@@ -60,18 +60,6 @@ public class ShortURL {
 
 	public Integer getMode() {
 		return mode;
-	}
-
-	public String getSponsor() {
-		return sponsor;
-	}
-
-	public Boolean getSafe() {
-		return safe;
-	}
-	
-	public void setSafe(boolean newState) {
-		safe = newState;
 	}
 
 	public String getIP() {

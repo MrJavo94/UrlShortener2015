@@ -11,6 +11,4 @@ public interface ShortURLRepositoryCustom {
 	
 	void update(ShortURL su);
 	
-	ShortURL mark(ShortURL urlSafe, boolean safeness);
-
 }
