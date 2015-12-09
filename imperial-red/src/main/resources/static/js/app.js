@@ -16,7 +16,7 @@ $(document).ready(
                                 + "'>"
                                 + msg.uri
                                 + "</a></div></br>"
-                                + " <div class='alert alert-success lead'>Token:</br>"
+                                + " <div class='alert alert-success lead'>Token:</br>?token="
                                 + msg.owner
                                 + "</div>");
                         }
