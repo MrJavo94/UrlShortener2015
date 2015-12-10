@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.hash.Hashing;
 
+import urlshortener2015.imperialred.exception.CustomException;
 import urlshortener2015.imperialred.objects.Click;
 import urlshortener2015.imperialred.objects.ShortURL;
 import urlshortener2015.imperialred.repository.ClickRepository;
@@ -79,8 +80,7 @@ public class UrlShortenerControllerWithLogs {
 				/*
 				 * Token incorrecto
 				 */
-				String msg = "<h1> Se necesita un token</h1>";
-				return new ResponseEntity<>(msg, HttpStatus.OK);
+				throw new CustomException("400", "Se necesita un token");
 			}
 			else {
 
@@ -89,8 +89,7 @@ public class UrlShortenerControllerWithLogs {
 					/*
 					 * La fecha ha expirado
 					 */
-					String msg = "<h1> El enlace ha expirado</h1>";
-					return new ResponseEntity<>(msg, HttpStatus.OK);
+					throw new CustomException("400", "Enlace ha expirado");
 
 				}
 				else {
@@ -100,7 +99,8 @@ public class UrlShortenerControllerWithLogs {
 			}
 		}
 		else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			throw new CustomException("404", "NOT_FOUND");
+
 		}
 	}
 
@@ -110,7 +110,7 @@ public class UrlShortenerControllerWithLogs {
 			@RequestParam(value = "custom", required = false) String custom,
 			@RequestParam(value = "expire", required = false) String expireDate,
 			@RequestParam(value = "hasToken", required = false) String hasToken,
-			HttpServletRequest request) {
+			HttpServletRequest request) throws Exception {
 		ShortURL su = createAndSaveIfValid(url, custom, hasToken, expireDate,
 				extractIP(request));
 		if (su != null) {

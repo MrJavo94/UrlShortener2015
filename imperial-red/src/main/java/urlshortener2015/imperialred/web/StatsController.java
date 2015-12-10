@@ -1,8 +1,6 @@
 package urlshortener2015.imperialred.web;
 
-
 import java.util.Iterator;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -15,9 +13,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
 import com.mongodb.DBObject;
 
+import urlshortener2015.imperialred.exception.CustomException;
 import urlshortener2015.imperialred.objects.StatsURL;
 import urlshortener2015.imperialred.objects.Click;
 import urlshortener2015.imperialred.objects.ShortURL;
@@ -36,25 +34,29 @@ public class StatsController {
 	private static final Logger logger = LoggerFactory
 			.getLogger(StatsController.class);
 
-
 	@RequestMapping(value = "/{id:(?!link|index|stats).*}+", method = RequestMethod.GET, produces = "text/html")
 	public String redirectToStatistics(@PathVariable String id,
-			HttpServletRequest request, Model model) {
+			HttpServletRequest request, Model model) throws Exception {
 
 		logger.info("Requested redirection to statistics with hash " + id);
 		ShortURL l = shortURLRepository.findByHash(id);
-		model.addAttribute("target", l.getTarget());
-		model.addAttribute("date", l.getCreated());
-		model.addAttribute("clicks", clickRepository.clicksByHash(l.getHash()));
-		
-		/* Adds JSON array for clicks by country */
-		DBObject groupObject = clickRepository.getClicksByCountry(id).getRawResults();
-		String list = groupObject.get("retval").toString();
-		logger.info("JSON data 1: " + list);
-		String countryData = processCountryJSON(list);
-		logger.info("JSON data 2: " + countryData);
-		model.addAttribute("clicksByCountry", countryData);
-		return "stats";
+
+		if (l != null) {
+			model.addAttribute("target", l.getTarget());
+			model.addAttribute("date", l.getCreated());
+			model.addAttribute("clicks", clickRepository.clicksByHash(l.getHash()));
+			
+			/* Adds JSON array for clicks by country */
+			DBObject groupObject = clickRepository.getClicksByCountry(id).getRawResults();
+			String list = groupObject.get("retval").toString();
+			logger.info("JSON data 1: " + list);
+			String countryData = processCountryJSON(list);
+			logger.info("JSON data 2: " + countryData);
+			model.addAttribute("clicksByCountry", countryData);
+			return "stats";
+		} else {
+			throw new CustomException("404", "NOT_FOUND");
+		}
 	}
 
 	@RequestMapping(value = "/{id:(?!link|index).*}+", method = RequestMethod.GET, produces = "application/json")
