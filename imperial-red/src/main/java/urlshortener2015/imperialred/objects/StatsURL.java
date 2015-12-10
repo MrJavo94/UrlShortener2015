@@ -39,10 +39,10 @@ public class StatsURL {
 
     @Override
     public String toString() {
-        return "StatsURL{" +
-                "longURI=" + target +
-                ", date=" + date +
-                ", clicks=" + clicks +
+        return "\"StatsURL\" : {" +
+                "\"longURI\" :" + target +
+                ", \"date\" :" + date +
+                ", \"clicks\" :" + clicks +
                 '}';
     }
 }
