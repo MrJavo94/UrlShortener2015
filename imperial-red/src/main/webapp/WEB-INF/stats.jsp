@@ -6,8 +6,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" type="text/css"
 	href="webjars/bootstrap/3.3.5/css/bootstrap.min.css" />
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script type="text/javascript">
+	      google.load("visualization", "1", {packages:["geochart"]});
+	      google.setOnLoadCallback(drawRegionsMap);
 
-
+	      function drawRegionsMap() {
+			var data = google.visualization.arrayToDataTable(${clicksByCountry});
+	        var options = {};
+	        var chart = new google.visualization.GeoChart(document.getElementById('geo_chart'));
+	        chart.draw(data, options);
+	      }
+	</script>
 </head>
 <body>
 	<div class="container-full">
@@ -26,8 +36,11 @@
               <p>Clicks ${clicks}</p>
             </div>
           </div>
-          
-        </div>
+
+      </div>
+			<div class="col-sm-4">
+				<div id="geo_chart" style="width: 900px; height: 500px;"></div>
+			</div>
 		</div>
 
 </body>

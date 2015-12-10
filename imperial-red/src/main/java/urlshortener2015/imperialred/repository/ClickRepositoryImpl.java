@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.mapreduce.GroupBy;
+import org.springframework.data.mongodb.core.mapreduce.GroupByResults;
 import org.springframework.stereotype.Repository;
 
 
@@ -31,6 +33,12 @@ public class ClickRepositoryImpl implements ClickRepositoryCustom{
 	@Override
 	public void update(Click cl) {
 		mongoTemplate.save(cl);
+	}
+	
+	public GroupByResults<Click> getClicksByCountry(String url) {
+		return mongoTemplate.group(where("hash").is(url),"click", 
+				GroupBy.key("country").initialDocument("{ count: 0}")
+				.reduceFunction("function(doc, prev) { prev.count += 1}"), Click.class);
 	}
 
 }

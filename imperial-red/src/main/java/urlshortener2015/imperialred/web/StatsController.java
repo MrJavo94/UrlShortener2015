@@ -1,6 +1,8 @@
 package urlshortener2015.imperialred.web;
 
 
+import java.util.Iterator;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -14,7 +16,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.mongodb.DBObject;
+
 import urlshortener2015.imperialred.objects.StatsURL;
+import urlshortener2015.imperialred.objects.Click;
 import urlshortener2015.imperialred.objects.ShortURL;
 import urlshortener2015.imperialred.repository.ClickRepository;
 import urlshortener2015.imperialred.repository.ShortURLRepository;
@@ -41,10 +46,18 @@ public class StatsController {
 		model.addAttribute("target", l.getTarget());
 		model.addAttribute("date", l.getCreated());
 		model.addAttribute("clicks", clickRepository.clicksByHash(l.getHash()));
+		
+		/* Adds JSON array for clicks by country */
+		DBObject groupObject = clickRepository.getClicksByCountry(id).getRawResults();
+		String list = groupObject.get("retval").toString();
+		logger.info("JSON data 1: " + list);
+		String countryData = processCountryJSON(list);
+		logger.info("JSON data 2: " + countryData);
+		model.addAttribute("clicksByCountry", countryData);
 		return "stats";
 	}
 
-	@RequestMapping(value = "/{id:(?!link|index).*}+", method = RequestMethod.GET, produces = "aplication/json")
+	@RequestMapping(value = "/{id:(?!link|index).*}+", method = RequestMethod.GET, produces = "application/json")
 	public ResponseEntity<?> statsJSON(@PathVariable String id,
 			HttpServletRequest request) {
 
@@ -53,6 +66,28 @@ public class StatsController {
 		StatsURL stats = new StatsURL(l.getTarget(), l.getCreated().toString(),
 				clickRepository.clicksByHash(l.getHash()));
 		return new ResponseEntity<>(stats, HttpStatus.OK);
+	}
+	
+	/**
+	 * Converts a ResultsByGroup JSON text into a text array of elements
+	 * in a format suitable for Google Charts API.
+	 */
+	private String processCountryJSON(String text) {
+		String res = "[[\"Country\",\"Clicks\"]";
+		text = text.replace("[", "").replace("]", "").replace("{","")
+				.replace("}", "").replace(" ", "");
+		String[] parts = text.split(",");
+		for (int i=0; i<parts.length; i++) {
+			res += ",";
+			String[] keyValue = parts[i].split(":");
+			if (keyValue[0].equals("\"country\"")) {
+				res += "[" + keyValue[1];
+			} else if (keyValue[0].equals("\"count\"")) {
+				res += keyValue[1] + "]";
+			}
+		}
+		res += "]";
+		return res;
 	}
 
 }
