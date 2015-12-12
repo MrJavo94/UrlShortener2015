@@ -3,6 +3,7 @@ package urlshortener2015.imperialred.web;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -29,8 +30,10 @@ import com.google.common.hash.Hashing;
 
 import urlshortener2015.imperialred.exception.CustomException;
 import urlshortener2015.imperialred.objects.Click;
+import urlshortener2015.imperialred.objects.Ip;
 import urlshortener2015.imperialred.objects.ShortURL;
 import urlshortener2015.imperialred.repository.ClickRepository;
+import urlshortener2015.imperialred.repository.IpRepository;
 import urlshortener2015.imperialred.repository.ShortURLRepository;
 
 @RestController
@@ -41,6 +44,9 @@ public class UrlShortenerControllerWithLogs {
 
 	@Autowired
 	protected ShortURLRepository shortURLRepository;
+	
+	@Autowired
+	protected IpRepository ipRepository;
 
 	/**
 	 * The HTTP {@code Referer} header field name.
@@ -124,19 +130,39 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	/**
-	 * 
+	 * Registers a click in the database, calculating previously the ip
+	 * and country of the request.
 	 */
 	protected void createAndSaveClick(String hash, HttpServletRequest request) {
-		/*
-		 * 
-		 */
+		/* Gets the IP from the request, and looks in the db for its country */
+		String dirIp = extractIP(request);
+		logger.info("IP: " + dirIp);
+		BigInteger valueIp = getIpValue(dirIp);
+		logger.info("IP2: " + valueIp);
+		Ip subnet = ipRepository.findSubnet(valueIp);
+		logger.info("COUNTRY: " + subnet.getCountry());
+		
 		request.getHeader(USER_AGENT);
 		Click cl = new Click(null, hash, new Date(System.currentTimeMillis()),
 				request.getHeader(REFERER), request.getHeader(USER_AGENT),
-				request.getHeader(USER_AGENT), extractIP(request), null);
+				request.getHeader(USER_AGENT),dirIp, subnet.getCountry());
 		cl = clickRepository.save(cl);
 		logger.info(cl != null ? "[" + hash + "] saved with id [" + cl.getId()
 				+ "]" : "[" + hash + "] was not saved");
+	}
+
+	/**
+	 * Given an IP string, returns the corresponding number of that IP
+	 */
+	private BigInteger getIpValue(String dirIp) {
+		logger.info("ENTERED");
+		String[] parts = dirIp.split("\\.");
+		logger.info("PARTS: "+ parts.length);
+		long num = Long.parseLong(parts[0])*16777216 + 
+				Long.parseLong(parts[1])*65536 + 
+				Long.parseLong(parts[2])*256 + 
+				Long.parseLong(parts[3]);
+		return BigInteger.valueOf(num);
 	}
 
 	/**
