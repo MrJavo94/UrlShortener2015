@@ -174,11 +174,8 @@ public class UrlShortenerControllerWithLogs {
 	protected void createAndSaveClick(String hash, HttpServletRequest request) {
 		/* Gets the IP from the request, and looks in the db for its country */
 		String dirIp = extractIP(request);
-		logger.info("Extraida IP " + dirIp);
 		BigInteger valueIp = getIpValue(dirIp);
-		logger.info("Valor IP " + valueIp);
 		Ip subnet = ipRepository.findSubnet(valueIp);
-		logger.info("Obtenida subred " + subnet);
 		String country = (subnet !=null) ? (subnet.getCountry()) : ("");
 		
 		request.getHeader(USER_AGENT);
