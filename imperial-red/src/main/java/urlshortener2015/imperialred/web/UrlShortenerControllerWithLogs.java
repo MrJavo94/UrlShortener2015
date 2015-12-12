@@ -1,4 +1,3 @@
-
 package urlshortener2015.imperialred.web;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -45,7 +44,7 @@ public class UrlShortenerControllerWithLogs {
 
 	@Autowired
 	protected ShortURLRepository shortURLRepository;
-	
+
 	@Autowired
 	protected IpRepository ipRepository;
 
@@ -129,7 +128,7 @@ public class UrlShortenerControllerWithLogs {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	@RequestMapping(value = "/recomendaciones", method = RequestMethod.POST)
 	public ResponseEntity<ShortURL> recomendaciones(
 			@RequestParam("url") String url,
@@ -137,10 +136,9 @@ public class UrlShortenerControllerWithLogs {
 			@RequestParam(value = "expire", required = false) String expireDate,
 			@RequestParam(value = "hasToken", required = false) String hasToken,
 			HttpServletRequest request) throws Exception {
-		
 
 		UrlValidator urlValidator = new UrlValidator(new String[] { "http",
-		"https" });
+				"https" });
 		/*
 		 * Comprueba si la url viene con http o https
 		 */
@@ -156,10 +154,11 @@ public class UrlShortenerControllerWithLogs {
 			else {
 				id = custom;
 			}
-			
+
 			if (shortURLRepository.findByHash(id) == null) {
 				return new ResponseEntity<>(HttpStatus.CREATED);
-			} else{
+			}
+			else {
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
 		}
@@ -169,20 +168,20 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	/**
-	 * Registers a click in the database, calculating previously the ip
-	 * and country of the request.
+	 * Registers a click in the database, calculating previously the ip and
+	 * country of the request.
 	 */
 	protected void createAndSaveClick(String hash, HttpServletRequest request) {
 		/* Gets the IP from the request, and looks in the db for its country */
 		String dirIp = extractIP(request);
 		BigInteger valueIp = getIpValue(dirIp);
 		Ip subnet = ipRepository.findSubnet(valueIp);
-		String country = (subnet !=null) ? (subnet.getCountry()) : ("");
-		
+		String country = (subnet != null) ? (subnet.getCountry()) : ("");
+
 		request.getHeader(USER_AGENT);
 		Click cl = new Click(null, hash, new Date(System.currentTimeMillis()),
 				request.getHeader(REFERER), request.getHeader(USER_AGENT),
-				request.getHeader(USER_AGENT),dirIp, country);
+				request.getHeader(USER_AGENT), dirIp, country);
 		cl = clickRepository.save(cl);
 		logger.info(cl != null ? "[" + hash + "] saved with id [" + cl.getId()
 				+ "]" : "[" + hash + "] was not saved");
@@ -194,16 +193,16 @@ public class UrlShortenerControllerWithLogs {
 	private BigInteger getIpValue(String dirIp) {
 		if (dirIp.contains(".")) {
 			String[] parts = dirIp.split("\\.");
-			long num = Long.parseLong(parts[0])*16777216 + 
-					Long.parseLong(parts[1])*65536 + 
-					Long.parseLong(parts[2])*256 + 
-					Long.parseLong(parts[3]);
+			long num = Long.parseLong(parts[0]) * 16777216
+					+ Long.parseLong(parts[1]) * 65536
+					+ Long.parseLong(parts[2]) * 256 + Long.parseLong(parts[3]);
 			return BigInteger.valueOf(num);
 
-		} else {
+		}
+		else {
 			/* Still not implemented for IPv6 */
 			return BigInteger.valueOf(-1);
-		}		
+		}
 	}
 
 	/**
@@ -233,45 +232,48 @@ public class UrlShortenerControllerWithLogs {
 			/*
 			 * Si ya existe no se crea, de momento
 			 */
-			// if (shortURLRepository.findByHash(id) == null) {
+			if (shortURLRepository.findByHash(id) == null) {
 
-			/*
-			 * Has Token
-			 */
-			String owner = null;
-			if (hasToken != null) {
-				owner = UUID.randomUUID().toString();
-			}
-			/*
-			 * Fecha de expiracion
-			 */
-			Date expire = null;
-			if (!expireDate.equals("")) {
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				/*
+				 * Has Token
+				 */
+				String owner = null;
+				if (hasToken != null) {
+					owner = UUID.randomUUID().toString();
+				}
+				/*
+				 * Fecha de expiracion
+				 */
+				Date expire = null;
+				if (!expireDate.equals("")) {
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-				try {
-					expire = sdf.parse(expireDate);
+					try {
+						expire = sdf.parse(expireDate);
+					}
+					catch (ParseException e) {
+						e.printStackTrace();
+						logger.info("Fecha mal introducida");
+					}
 				}
-				catch (ParseException e) {
-					e.printStackTrace();
-					logger.info("Fecha mal introducida");
-				}
+				/*
+				 * Creacion del objeto ShortURL
+				 */
+				ShortURL su = new ShortURL(id, url, linkTo(
+						methodOn(UrlShortenerControllerWithLogs.class)
+								.redirectTo(id, null, null)).toUri(), new Date(
+						System.currentTimeMillis()), expire, owner,
+						HttpStatus.TEMPORARY_REDIRECT.value(), ip, null);
+				/*
+				 * Insercion en la base de datos
+				 */
+				return shortURLRepository.save(su);
+
 			}
-			/*
-			 * Creacion del objeto ShortURL
-			 */
-			ShortURL su = new ShortURL(id, url, linkTo(
-					methodOn(UrlShortenerControllerWithLogs.class).redirectTo(
-							id, null, null)).toUri(), new Date(
-					System.currentTimeMillis()), expire, owner,
-					HttpStatus.TEMPORARY_REDIRECT.value(), ip, null);
-			/*
-			 * Insercion en la base de datos
-			 */
-			return shortURLRepository.save(su);
-			/*
-			 * } else { return null; }
-			 */
+			else {
+				return null;
+			}
+
 		}
 		else {
 			return null;
