@@ -19,8 +19,8 @@ public class IpRepositoryImpl implements IpRepositoryCustom {
 	@Override
 	public Ip findSubnet(BigInteger ip) {
 		/* (min_ip > ip) and (max_ip < ip) */
-		Query query = new BasicQuery("{$and: [{minip: {$gte: " +
-				ip.toString() + "}}, {maxip: {$lte: "+ 
+		Query query = new BasicQuery("{$and: [{minip: {$lte: " +
+				ip.toString() + "}}, {maxip: {$gte: "+ 
 				ip.toString() +"}}]}");
 		return mongoTemplate.findOne(query, Ip.class);
 	}
