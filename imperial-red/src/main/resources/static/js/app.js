@@ -4,10 +4,12 @@ $(document).ready(
     
       $("#personal").keypress(
                 function(event) {
+                $("#no").hide();
+                $("#yes").hide();
                 $("#loading").show();
                 $.ajax({
                 type:"POST",
-                url:"/link",
+                url:"/recomendaciones",
                 data:$("#shortener").serialize(),
                 success : function() {
                     $("#loading").hide();
