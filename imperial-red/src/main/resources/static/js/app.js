@@ -1,5 +1,28 @@
 $(document).ready(
     function() {
+    
+    
+      $("#personal").keypress(
+                function(event) {
+                $("#loading").show();
+                $.ajax({
+                type:"POST",
+                url:"/link",
+                data:$("#shortener").serialize(),
+                success : function() {
+                    $("#loading").hide();
+                    $("#no").hide();
+                    $("#yes").show();
+                },
+                error : function() {
+	                $("#loading").hide();
+	                $("#yes").hide();
+	                $("#no").show();
+                }
+            });
+        });
+        
+        
         $("#shortener").submit(
             function(event) {
                 event.preventDefault();
