@@ -136,16 +136,14 @@ public class UrlShortenerControllerWithLogs {
 	protected void createAndSaveClick(String hash, HttpServletRequest request) {
 		/* Gets the IP from the request, and looks in the db for its country */
 		String dirIp = extractIP(request);
-		logger.info("IP: " + dirIp);
 		BigInteger valueIp = getIpValue(dirIp);
-		logger.info("IP2: " + valueIp);
 		Ip subnet = ipRepository.findSubnet(valueIp);
-		logger.info("COUNTRY: " + subnet.getCountry());
+		String country = (subnet !=null) ? (subnet.getCountry()) : ("");
 		
 		request.getHeader(USER_AGENT);
 		Click cl = new Click(null, hash, new Date(System.currentTimeMillis()),
 				request.getHeader(REFERER), request.getHeader(USER_AGENT),
-				request.getHeader(USER_AGENT),dirIp, subnet.getCountry());
+				request.getHeader(USER_AGENT),dirIp, country);
 		cl = clickRepository.save(cl);
 		logger.info(cl != null ? "[" + hash + "] saved with id [" + cl.getId()
 				+ "]" : "[" + hash + "] was not saved");
@@ -155,14 +153,18 @@ public class UrlShortenerControllerWithLogs {
 	 * Given an IP string, returns the corresponding number of that IP
 	 */
 	private BigInteger getIpValue(String dirIp) {
-		logger.info("ENTERED");
-		String[] parts = dirIp.split("\\.");
-		logger.info("PARTS: "+ parts.length);
-		long num = Long.parseLong(parts[0])*16777216 + 
-				Long.parseLong(parts[1])*65536 + 
-				Long.parseLong(parts[2])*256 + 
-				Long.parseLong(parts[3]);
-		return BigInteger.valueOf(num);
+		if (dirIp.contains(".")) {
+			String[] parts = dirIp.split("\\.");
+			long num = Long.parseLong(parts[0])*16777216 + 
+					Long.parseLong(parts[1])*65536 + 
+					Long.parseLong(parts[2])*256 + 
+					Long.parseLong(parts[3]);
+			return BigInteger.valueOf(num);
+
+		} else {
+			/* Still not implemented for IPv6 */
+			return BigInteger.valueOf(-1);
+		}		
 	}
 
 	/**
