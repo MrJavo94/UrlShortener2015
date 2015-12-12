@@ -129,7 +129,7 @@ public class UrlShortenerControllerWithLogs {
 		}
 	}
 	
-	@RequestMapping(value = "/recomendaciones", method = RequestMethod.POST)
+	@RequestMapping(value = "/rec/rec", method = RequestMethod.GET)
 	public ResponseEntity<ShortURL> recomendaciones(
 			@RequestParam("url") String url,
 			@RequestParam(value = "custom", required = false) String custom,
@@ -157,12 +157,15 @@ public class UrlShortenerControllerWithLogs {
 			}
 			
 			if (shortURLRepository.findByHash(id) == null) {
+				System.out.println("1");
 				return new ResponseEntity<>(HttpStatus.CREATED);
 			} else{
+				System.out.println("2");
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
 		}
 		else {
+			System.out.println("3");
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
