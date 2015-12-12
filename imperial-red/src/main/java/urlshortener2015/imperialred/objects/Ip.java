@@ -44,7 +44,7 @@ public class Ip {
 	
 	public String toString() {
 		return String.format(
-                "Ip[id=%s, subnet='%s', minip='%t', maxip='%s', country='%s']",
+                "Ip[id=%s, subnet='%s', minip='%s', maxip='%s', country='%s']",
                 id, subnet, minip, maxip, country);
 	}
 	
