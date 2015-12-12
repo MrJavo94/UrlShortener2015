@@ -3,11 +3,7 @@ package urlshortener2015.imperialred.web;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -15,7 +11,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.validator.routines.UrlValidator;
@@ -24,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,8 +30,10 @@ import com.google.common.hash.Hashing;
 
 import urlshortener2015.imperialred.exception.CustomException;
 import urlshortener2015.imperialred.objects.Click;
+import urlshortener2015.imperialred.objects.Ip;
 import urlshortener2015.imperialred.objects.ShortURL;
 import urlshortener2015.imperialred.repository.ClickRepository;
+import urlshortener2015.imperialred.repository.IpRepository;
 import urlshortener2015.imperialred.repository.ShortURLRepository;
 
 @RestController
@@ -48,6 +44,9 @@ public class UrlShortenerControllerWithLogs {
 
 	@Autowired
 	protected ShortURLRepository shortURLRepository;
+	
+	@Autowired
+	protected IpRepository ipRepository;
 
 	/**
 	 * The HTTP {@code Referer} header field name.
@@ -110,7 +109,6 @@ public class UrlShortenerControllerWithLogs {
 
 		}
 	}
-	
 
 	@RequestMapping(value = "/link", method = RequestMethod.POST)
 	public ResponseEntity<ShortURL> shortener(
@@ -119,7 +117,6 @@ public class UrlShortenerControllerWithLogs {
 			@RequestParam(value = "expire", required = false) String expireDate,
 			@RequestParam(value = "hasToken", required = false) String hasToken,
 			HttpServletRequest request) throws Exception {
-		System.out.println("yihaaaaaaaaad");
 		ShortURL su = createAndSaveIfValid(url, custom, hasToken, expireDate,
 				extractIP(request));
 		if (su != null) {
@@ -133,19 +130,41 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	/**
-	 * 
+	 * Registers a click in the database, calculating previously the ip
+	 * and country of the request.
 	 */
 	protected void createAndSaveClick(String hash, HttpServletRequest request) {
-		/*
-		 * 
-		 */
+		/* Gets the IP from the request, and looks in the db for its country */
+		String dirIp = extractIP(request);
+		BigInteger valueIp = getIpValue(dirIp);
+		Ip subnet = ipRepository.findSubnet(valueIp);
+		String country = (subnet !=null) ? (subnet.getCountry()) : ("");
+		
 		request.getHeader(USER_AGENT);
 		Click cl = new Click(null, hash, new Date(System.currentTimeMillis()),
 				request.getHeader(REFERER), request.getHeader(USER_AGENT),
-				request.getHeader(USER_AGENT), extractIP(request), null);
+				request.getHeader(USER_AGENT),dirIp, country);
 		cl = clickRepository.save(cl);
 		logger.info(cl != null ? "[" + hash + "] saved with id [" + cl.getId()
 				+ "]" : "[" + hash + "] was not saved");
+	}
+
+	/**
+	 * Given an IP string, returns the corresponding number of that IP
+	 */
+	private BigInteger getIpValue(String dirIp) {
+		if (dirIp.contains(".")) {
+			String[] parts = dirIp.split("\\.");
+			long num = Long.parseLong(parts[0])*16777216 + 
+					Long.parseLong(parts[1])*65536 + 
+					Long.parseLong(parts[2])*256 + 
+					Long.parseLong(parts[3]);
+			return BigInteger.valueOf(num);
+
+		} else {
+			/* Still not implemented for IPv6 */
+			return BigInteger.valueOf(-1);
+		}		
 	}
 
 	/**
