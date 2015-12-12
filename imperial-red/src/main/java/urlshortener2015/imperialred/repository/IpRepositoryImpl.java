@@ -4,13 +4,13 @@ import java.math.BigInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import urlshortener2015.imperialred.objects.Ip;
 
-@Repository
+@Repository 
 public class IpRepositoryImpl implements IpRepositoryCustom {
 	
 	@Autowired
@@ -18,9 +18,11 @@ public class IpRepositoryImpl implements IpRepositoryCustom {
 	
 	@Override
 	public Ip findSubnet(BigInteger ip) {
-		Query query = new Query(Criteria.where("minip").gte(ip)
-				.andOperator(Criteria.where("maxip").lte(ip)));
-		return mongoTemplate.findOne(new Query(new Criteria("{$and: [{minip: {$gte: "+ip+"}}, {maxip: {$lte: "+ip+"}}]}")), Ip.class, "ip");
+		/* (min_ip > ip) and (max_ip < ip) */
+		Query query = new BasicQuery("{$and: [{minip: {$gte: " +
+				ip.toString() + "}}, {maxip: {$lte: "+ 
+				ip.toString() +"}}]}");
+		return mongoTemplate.findOne(query, Ip.class);
 	}
 
 }
