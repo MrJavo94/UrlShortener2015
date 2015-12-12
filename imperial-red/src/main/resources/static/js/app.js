@@ -2,14 +2,14 @@ $(document).ready(
     function() {
     
     
-      $("#personal").keypress(
+      $("#personal").keyup(
                 function(event) {
                 $("#no").hide();
                 $("#yes").hide();
                 $("#loading").show();
                 $.ajax({
-                type:"POST",
-                url:"/recomendaciones",
+                type:"GET",
+                url:"/rec/rec",
                 data:$("#shortener").serialize(),
                 success : function() {
                     $("#loading").hide();
