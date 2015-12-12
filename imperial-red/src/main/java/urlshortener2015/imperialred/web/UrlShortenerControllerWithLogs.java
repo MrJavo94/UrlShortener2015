@@ -174,27 +174,32 @@ public class UrlShortenerControllerWithLogs {
 	 * Registers a click in the database, calculating previously the ip
 	 * and country of the request.
 	 */
-	protected void createAndSaveClick(String hash, HttpServletRequest request) {
-		/* Gets the IP from the request, and looks in the db for its country */
-		String dirIp = extractIP(request);
-		BigInteger valueIp = getIpValue(dirIp);
-		Ip subnet = ipRepository.findSubnet(valueIp);
-		String country = (subnet !=null) ? (subnet.getCountry()) : ("");
-		
-		request.getHeader(USER_AGENT);
-		Click cl = new Click(null, hash, new Date(System.currentTimeMillis()),
-				request.getHeader(REFERER), request.getHeader(USER_AGENT),
-				request.getHeader(USER_AGENT),dirIp, country);
-		cl = clickRepository.save(cl);
-		logger.info(cl != null ? "[" + hash + "] saved with id [" + cl.getId()
-				+ "]" : "[" + hash + "] was not saved");
-	}
+	 protected void createAndSaveClick(String hash, HttpServletRequest request) {
+         /* Gets the IP from the request, and looks in the db for its country */
+         String dirIp = extractIP(request);
+         logger.info("Extraida IP " + dirIp);
+         BigInteger valueIp = getIpValue(dirIp);
+         logger.info("Valor IP " + valueIp);
+         Ip subnet = ipRepository.findSubnet(valueIp);
+         logger.info("Obtenida subred " + subnet);
+         String country = (subnet !=null) ? (subnet.getCountry()) : ("");
+         logger.info("Pais " + country);
+        
+         request.getHeader(USER_AGENT);
+         Click cl = new Click(null, hash, new Date(System.currentTimeMillis()),
+                         request.getHeader(REFERER), request.getHeader(USER_AGENT),
+                         request.getHeader(USER_AGENT),dirIp, country);
+         cl = clickRepository.save(cl);
+         logger.info(cl != null ? "[" + hash + "] saved with id [" + cl.getId()
+                         + "]" : "[" + hash + "] was not saved");
+ }
 
-	/**
-	 * Given an IP string, returns the corresponding number of that IP
-	 */
-	private BigInteger getIpValue(String dirIp) {
-		if (dirIp.contains(".")) {
+ /**
+  * Given an IP string, returns the corresponding number of that IP
+  */
+ private BigInteger getIpValue(String dirIp) {
+         if (dirIp.contains(".")) {
+                 logger.info("Es IPv4");
 			String[] parts = dirIp.split("\\.");
 			long num = Long.parseLong(parts[0])*16777216 + 
 					Long.parseLong(parts[1])*65536 + 
