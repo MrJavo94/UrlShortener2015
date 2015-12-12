@@ -128,6 +128,44 @@ public class UrlShortenerControllerWithLogs {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	@RequestMapping(value = "/recomendaciones", method = RequestMethod.POST)
+	public ResponseEntity<ShortURL> recomendaciones(
+			@RequestParam("url") String url,
+			@RequestParam(value = "custom", required = false) String custom,
+			@RequestParam(value = "expire", required = false) String expireDate,
+			@RequestParam(value = "hasToken", required = false) String hasToken,
+			HttpServletRequest request) throws Exception {
+		
+
+		UrlValidator urlValidator = new UrlValidator(new String[] { "http",
+		"https" });
+		/*
+		 * Comprueba si la url viene con http o https
+		 */
+		if (urlValidator.isValid(url)) {
+			/*
+			 * Hasheado de la URL o personalizado
+			 */
+			String id;
+			if (custom.equals("")) {
+				id = Hashing.murmur3_32()
+						.hashString(url, StandardCharsets.UTF_8).toString();
+			}
+			else {
+				id = custom;
+			}
+			
+			if (shortURLRepository.findByHash(id) == null) {
+				return new ResponseEntity<>(HttpStatus.CREATED);
+			} else{
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
+		}
+		else {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+	}
 
 	/**
 	 * Registers a click in the database, calculating previously the ip
