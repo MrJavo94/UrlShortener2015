@@ -99,7 +99,6 @@ public class UrlShortenerControllerWithLogs {
 			}
 		} else {
 			throw new CustomException("404", "NOT_FOUND");
-
 		}
 	}
 

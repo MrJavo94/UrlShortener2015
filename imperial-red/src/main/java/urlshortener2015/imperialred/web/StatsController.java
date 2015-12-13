@@ -53,6 +53,8 @@ public class StatsController {
 			model.addAttribute("target", l.getTarget());
 			model.addAttribute("date", l.getCreated());
 			model.addAttribute("clicks", clickRepository.clicksByHash(l.getHash(), from, to));
+			model.addAttribute("from", from);
+			model.addAttribute("to", to);
 			
 			/* Adds JSON array for clicks by country */
 			DBObject groupObject = clickRepository.getClicksByCountry(id, from, to).getRawResults();
@@ -78,7 +80,7 @@ public class StatsController {
 		logger.info("Requested json with hash " + id);
 		ShortURL l = shortURLRepository.findByHash(id);
 		StatsURL stats = new StatsURL(l.getTarget(), l.getCreated().toString(),
-				clickRepository.clicksByHash(l.getHash(), from, to));
+				clickRepository.clicksByHash(l.getHash(), from, to), from, to);
 		return new ResponseEntity<>(stats, HttpStatus.OK);
 	}
 	

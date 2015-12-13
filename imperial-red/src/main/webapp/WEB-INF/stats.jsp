@@ -34,6 +34,8 @@
               <p>Target ${target}</p>
               <p>Created date ${date}</p>
               <p>Clicks ${clicks}</p>
+							<div id="show_from">From ${from}</div>
+							<div id="show_to">To ${to}</div>
             </div>
           </div>
 
