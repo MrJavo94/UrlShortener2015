@@ -26,12 +26,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.Hashing;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
 
 import urlshortener2015.imperialred.exception.CustomException;
 import urlshortener2015.imperialred.objects.Click;
 import urlshortener2015.imperialred.objects.Ip;
 import urlshortener2015.imperialred.objects.ShortURL;
+import urlshortener2015.imperialred.objects.Synonym;
 import urlshortener2015.imperialred.repository.ClickRepository;
 import urlshortener2015.imperialred.repository.IpRepository;
 import urlshortener2015.imperialred.repository.ShortURLRepository;
@@ -119,7 +124,7 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	@RequestMapping(value = "/rec/rec", method = RequestMethod.GET)
-	public ResponseEntity<ShortURL> recomendaciones(@RequestParam("url") String url,
+	public ResponseEntity<Synonym> recomendaciones(@RequestParam("url") String url,
 			@RequestParam(value = "custom", required = false) String custom,
 			@RequestParam(value = "expire", required = false) String expireDate,
 			@RequestParam(value = "hasToken", required = false) String hasToken, HttpServletRequest request)
@@ -145,6 +150,18 @@ public class UrlShortenerControllerWithLogs {
 				return new ResponseEntity<>(HttpStatus.CREATED);
 			} else {
 				System.out.println("2");
+				try{
+					HttpResponse<JsonNode> response = Unirest.get("https://wordsapiv1.p.mashape.com/words/" + id + "/synonyms")
+					.header("X-Mashape-Key", "VLzNEVr9zQmsh0gOlqs6wudMxDo1p1vCnjEjsnjNBhOCFeqLxr")
+					.header("Accept", "application/json")
+					.asJson();
+					ObjectMapper map= new ObjectMapper();					
+					Synonym sin = map.readValue(response.getBody().toString(), Synonym.class);
+					return new ResponseEntity<>(sin,HttpStatus.BAD_REQUEST);
+				} catch(Exception e){
+					e.printStackTrace();					
+				}
+				
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
 		} else {
