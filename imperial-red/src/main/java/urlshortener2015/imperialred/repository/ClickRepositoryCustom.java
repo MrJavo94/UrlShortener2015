@@ -18,3 +18,4 @@ public interface ClickRepositoryCustom {
 	
 	GroupByResults<Click> getClicksByCountry(String url, Date from, Date to);
 }
+

@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" type="text/css"
 	href="webjars/bootstrap/3.3.5/css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css"
+	href="/css/estilos.css" />
 <script type="text/javascript" src="webjars/jquery/2.1.4/jquery.min.js"></script>
 <script type="text/javascript"
 	src="webjars/bootstrap/3.3.5/js/bootstrap.min.js"></script>
@@ -43,9 +45,6 @@
 							<h3>If you want a custom URL, write it here:</h3>
 							<input type="text" id="personal" class="center-block form-control input-lg"
 								title="Custom URL" placeholder="Your custom name here" name="custom">
-							<img id="loading" style="display:none;" src="/image/ripple.svg">
-							<img id="yes" style="display:none;" src="/image/basic14.svg">
-							<img id="no" style="display:none;" src="/image/delete85.svg">
 						</div>
 					</div>
 					<div class="row">
@@ -57,7 +56,11 @@
 					</div>
 					<div class="row" style="margin-top: 15px;">
 						<div class="input-group input-group-lg col-lg-offset-4 col-lg-4">
-							<button type="submit" class="btn btn-lg btn-primary">Acortame!</button>
+							<button type="submit" class="btn btn-lg btn-primary">Acortame!   
+								<img id="loading" style="display:none;" class="image_buscar" src="/image/ripple.svg">
+								<img id="yes" style="display:none;" class="image_buscar" src="/image/yes.png">
+								<img id="no" style="display:none;" class="image_buscar" src="/image/no.png">
+							</button>
 						</div>
 					</div>
 				</form>
