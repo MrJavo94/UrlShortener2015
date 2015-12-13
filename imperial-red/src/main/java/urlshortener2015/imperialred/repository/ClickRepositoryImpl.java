@@ -26,8 +26,24 @@ public class ClickRepositoryImpl implements ClickRepositoryCustom{
 	}
 
 	@Override
-	public long clicksByHash(String hash) {
-		return mongoTemplate.count(Query.query(Criteria.where("hash").is(hash)), Click.class);
+	public long clicksByHash(String hash, Date from, Date to) {
+		/* Chooses a constraint for the query */
+		Criteria criteria;
+		if (from == null && to == null) {
+			criteria = Criteria.where("hash").is(hash);
+		} else if (from == null) {
+			criteria = Criteria.where("hash").is(hash)
+					.andOperator(Criteria.where("created").lt(to));
+		} else if (to == null) {
+			criteria = Criteria.where("hash").is(hash)
+					.andOperator(Criteria.where("created").gte(from));
+		} else {
+			criteria = Criteria.where("hash").is(hash)
+					.andOperator(Criteria.where("created").lt(to),
+							Criteria.where("created").gte(from));
+		}
+		/* Returns count of clicks */
+		return mongoTemplate.count(Query.query(criteria), Click.class);
 	}
 
 	@Override

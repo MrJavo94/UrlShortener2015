@@ -10,7 +10,7 @@ import urlshortener2015.imperialred.objects.Click;
 
 public interface ClickRepositoryCustom {
 	
-	long clicksByHash(String hash);
+	long clicksByHash(String hash, Date from, Date to);
 	
 	void update(Click cl);
 	
