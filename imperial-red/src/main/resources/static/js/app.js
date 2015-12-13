@@ -16,7 +16,7 @@ $(document).ready(
                     $("#no").hide();
                     $("#yes").show();
                 },
-                error : function() {
+                error : function(msg) {
 	                $("#loading").hide();
 	                $("#yes").hide();
 	                $("#no").show();
