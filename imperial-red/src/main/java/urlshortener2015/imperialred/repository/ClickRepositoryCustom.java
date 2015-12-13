@@ -1,13 +1,12 @@
 package urlshortener2015.imperialred.repository;
 
 import java.math.BigInteger;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.mapreduce.GroupByResults;
 
 import urlshortener2015.imperialred.objects.Click;
-
-
 
 public interface ClickRepositoryCustom {
 	
@@ -17,5 +16,5 @@ public interface ClickRepositoryCustom {
 	
 	List<Click> list(BigInteger limit, BigInteger offset);
 	
-	GroupByResults<Click> getClicksByCountry(String url);
+	GroupByResults<Click> getClicksByCountry(String url, Date from, Date to);
 }

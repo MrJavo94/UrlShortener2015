@@ -1,6 +1,7 @@
 package urlshortener2015.imperialred.repository;
 
 import java.math.BigInteger;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +10,8 @@ import org.springframework.data.mongodb.core.mapreduce.GroupBy;
 import org.springframework.data.mongodb.core.mapreduce.GroupByResults;
 import org.springframework.stereotype.Repository;
 
-
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Query.query;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import urlshortener2015.imperialred.objects.Click;
 
@@ -27,7 +27,7 @@ public class ClickRepositoryImpl implements ClickRepositoryCustom{
 
 	@Override
 	public long clicksByHash(String hash) {
-		return mongoTemplate.count(query(where("hash").is(hash)), Click.class);
+		return mongoTemplate.count(Query.query(Criteria.where("hash").is(hash)), Click.class);
 	}
 
 	@Override
@@ -35,10 +35,30 @@ public class ClickRepositoryImpl implements ClickRepositoryCustom{
 		mongoTemplate.save(cl);
 	}
 	
-	public GroupByResults<Click> getClicksByCountry(String url) {
-		return mongoTemplate.group(where("hash").is(url),"click", 
+	/**
+	 * Gets the number of clicks to a URL, aggregated by countries. Optionally,
+	 * a <from> date and a <to> date can be specified.
+	 */
+	public GroupByResults<Click> getClicksByCountry(String url, Date from, Date to) {
+		/* Chooses a constraint for the query */
+		Criteria criteria;
+		if (from == null && to == null) {
+			criteria = Criteria.where("hash").is(url);
+		} else if (from == null) {
+			criteria = Criteria.where("hash").is(url)
+					.andOperator(Criteria.where("created").lt(to));
+		} else if (to == null) {
+			criteria = Criteria.where("hash").is(url)
+					.andOperator(Criteria.where("created").gte(from));
+		} else {
+			criteria = Criteria.where("hash").is(url)
+					.andOperator(Criteria.where("created").lt(to),
+							Criteria.where("created").gte(from));
+		}
+		/* Returns the aggregation */
+		return mongoTemplate.group(criteria,"click", 
 				GroupBy.key("country").initialDocument("{ count: 0}")
-				.reduceFunction("function(doc, prev) { prev.count += 1}"), Click.class);
+				.reduceFunction("function(doc, prev) { prev.count += 1}"), Click.class);		
 	}
 
 }

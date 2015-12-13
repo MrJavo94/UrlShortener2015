@@ -11,7 +11,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import urlshortener2015.imperialred.objects.Ip;
-import urlshortener2015.imperialred.web.UrlShortenerControllerWithLogs;
 
 @Repository 
 public class IpRepositoryImpl implements IpRepositoryCustom {
@@ -24,7 +23,7 @@ public class IpRepositoryImpl implements IpRepositoryCustom {
 	
 	@Override
 	public Ip findSubnet(BigInteger ip) {
-		/* (min_ip > ip) and (max_ip < ip) */
+		/* (min_ip < ip) and (max_ip > ip) */
 		Query query = new BasicQuery("{$and: [{minip: {$lte: " +
 				ip.toString() + "}}, {maxip: {$gte: "+ 
 				ip.toString() +"}}]}");
