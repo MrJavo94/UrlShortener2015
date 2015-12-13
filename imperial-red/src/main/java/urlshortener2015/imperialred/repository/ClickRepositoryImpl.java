@@ -62,3 +62,4 @@ public class ClickRepositoryImpl implements ClickRepositoryCustom{
 	}
 
 }
+
