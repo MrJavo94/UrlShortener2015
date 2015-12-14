@@ -39,7 +39,6 @@ public class StatsController {
 
 	@RequestMapping(value = "/sign_up", method = RequestMethod.GET,produces = "text/html")
 	public String goTo() {
-		System.out.println(234);
 		return "sign_up";
 	}
 
