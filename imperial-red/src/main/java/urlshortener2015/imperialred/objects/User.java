@@ -37,8 +37,8 @@ public class User {
 
 	@Override
 	public String toString() {
-		return "Usuario [id=" + id + ", mail=" + mail + ", user=" + user + ", password=" + password 
-				+ ", createdLinks=" + createdLinks + ", availableLinks=" + availableLinks + "]";
+		return "User[id=" + id + ", mail='" + mail + "', user='" + user + "', password='" + password 
+				+ "', createdLinks=" + createdLinks + ", availableLinks=" + availableLinks + "]";
 	}
 	
 }
