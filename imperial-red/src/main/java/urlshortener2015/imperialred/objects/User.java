@@ -15,16 +15,6 @@ public class User {
 	private List<ShortURL> createdLinks;
 	private List<ShortURL> availableLinks;
 	
-	public User(BigInteger id, String mail, String nick, String password, 
-			List<ShortURL> createdLinks, List<ShortURL> availableLinks) {
-		this.id = id;
-		this.mail = mail;
-		this.nick = nick;
-		this.password = password;
-		this.createdLinks = createdLinks;
-		this.availableLinks = availableLinks;
-	}
-	
 	public User(String mail, String nick, String password, 
 			List<ShortURL> createdLinks, List<ShortURL> availableLinks) {
 		this.mail = mail;
@@ -56,6 +46,30 @@ public class User {
 	
 	public List<ShortURL> getAvailableLinks() {
 		return availableLinks;
+	}
+
+	public void setId(BigInteger id) {
+		this.id = id;
+	}
+
+	public void setMail(String mail) {
+		this.mail = mail;
+	}
+
+	public void setNick(String nick) {
+		this.nick = nick;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public void setCreatedLinks(List<ShortURL> createdLinks) {
+		this.createdLinks = createdLinks;
+	}
+
+	public void setAvailableLinks(List<ShortURL> availableLinks) {
+		this.availableLinks = availableLinks;
 	}
 
 	@Override

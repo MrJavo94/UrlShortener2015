@@ -1,6 +1,7 @@
 package urlshortener2015.imperialred.repository;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
@@ -19,5 +20,7 @@ public interface UserRepository extends MongoRepository<User, BigInteger>  {
 	void deleteByMail(String mail);
 	
 	void deleteByNick(String nick);
+	
+	List<User> findAll();
 	
 }

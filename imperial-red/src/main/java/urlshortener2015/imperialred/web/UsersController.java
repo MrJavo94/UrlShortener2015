@@ -1,5 +1,7 @@
 package urlshortener2015.imperialred.web;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +22,20 @@ public class UsersController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(UrlShortenerControllerWithLogs.class);
 	
-	@RequestMapping(value = "/users/{nick}", method = RequestMethod.GET)
+	/**
+	 * Returns the user identified by {nick} in a JSON representation
+	 */
+	@RequestMapping(value = "/users/{nick}", method = RequestMethod.GET, produces = "application/json")
 	public User getUser(@PathVariable String nick) {
 		return userRepository.findByNick(nick);
 	}
 	
-	@RequestMapping(value = "/users", method = RequestMethod.POST)
+	/**
+	 * Creates a new user with the specified mail, nick and password.
+	 * XXX: It's using POST, should it use PUT?
+	 * XXX: JSON empty lists are being passed with null, is that correct?
+	 */
+	@RequestMapping(value = "/users", method = RequestMethod.POST, produces = "application/json")
 	public User addUser(@RequestParam(value = "mail", required = true) String mail,
 			@RequestParam(value = "nick", required = true) String nick,
 			@RequestParam(value = "password", required = true) String password) {
@@ -33,19 +43,26 @@ public class UsersController {
 		return userRepository.save(user);
 	}
 	
-	@RequestMapping(value = "/users/{nick}", method = RequestMethod.PUT)
+	/**
+	 * Modifies the password of the user identified by {nick}
+	 * XXX: NOT WORKING (error 405: JSPs only permit GET POST or HEAD)
+	 */
+	@RequestMapping(value = "/users/{nick}", method = RequestMethod.PUT, produces = "application/json")
 	public User modifyUser(@PathVariable String nick,
 			@RequestParam(value = "password", required = true) String password) {
 		User user = userRepository.findByNick(nick);
-		User userModified = new User(user.getId(), user.getMail(), user.getNick(),
-				user.getPassword(), user.getCreatedLinks(), user.getAvailableLinks());
-		return userRepository.save(userModified);
+		user.setPassword(password);
+		return userRepository.save(user);
 	}
 	
-	@RequestMapping(value = "/users/{nick}", method = RequestMethod.DELETE)
-	public String deleteUser(@PathVariable String nick) {
+	/**
+	 * Deletes the user identified by {nick}
+	 * XXX: I don't know what should be returned here
+	 */
+	@RequestMapping(value = "/users/{nick}", method = RequestMethod.DELETE, produces = "application/json")
+	public List<User> deleteUser(@PathVariable String nick) {
 		userRepository.deleteByNick(nick);
-		return "/users";
+		return userRepository.findAll();
 	}
 	
 }
