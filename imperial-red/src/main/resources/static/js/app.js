@@ -15,11 +15,14 @@ $(document).ready(
                     $("#loading").hide();
                     $("#no").hide();
                     $("#yes").show();
+                    $("#validation").removeClass("has-error").addClass("has-success");
                 },
                 error : function(msg) {
 	                $("#loading").hide();
 	                $("#yes").hide();
 	                $("#no").show();
+                    $("#validation").removeClass("has-success").addClass("has-error");
+
                 }
             });
         });
