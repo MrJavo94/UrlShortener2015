@@ -162,20 +162,20 @@ public class UrlShortenerControllerWithLogs {
 			}
 			else {
 				System.out.println("2");
-				try {
-					HttpResponse<JsonNode> response = Unirest
-							.get("https://wordsapiv1.p.mashape.com/words/" + id
-									+ "/synonyms")
-							.header("X-Mashape-Key",
-									"VLzNEVr9zQmsh0gOlqs6wudMxDo1p1vCnjEjsnjNBhOCFeqLxr")
-							.header("Accept", "application/json").asJson();
-					ObjectMapper map = new ObjectMapper();
-					Synonym sin = map.readValue(response.getBody().toString(),
-							Synonym.class);
-					return new ResponseEntity<>(sin, HttpStatus.BAD_REQUEST);
-				}
-				catch (Exception e) {
-					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+				try{
+					HttpResponse<JsonNode> response = Unirest.get("https://wordsapiv1.p.mashape.com/words/" + id + "/synonyms")
+					.header("X-Mashape-Key", "VLzNEVr9zQmsh0gOlqs6wudMxDo1p1vCnjEjsnjNBhOCFeqLxr")
+					.header("Accept", "application/json")
+					.asJson();
+					ObjectMapper map= new ObjectMapper();					
+					Synonym sin = map.readValue(response.getBody().toString(), Synonym.class);
+					return new ResponseEntity<>(sin,HttpStatus.BAD_REQUEST);
+				} catch(Exception e){
+					/*
+					 * Caso en el que la id seleccionada esta cogida y la API
+					 * no da alternativas
+					 */
+					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);				
 				}
 			}
 		}
