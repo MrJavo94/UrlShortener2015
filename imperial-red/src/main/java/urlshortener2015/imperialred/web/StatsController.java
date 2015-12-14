@@ -1,6 +1,7 @@
 package urlshortener2015.imperialred.web;
 
 import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -36,6 +37,13 @@ public class StatsController {
 	private static final Logger logger = LoggerFactory
 			.getLogger(StatsController.class);
 
+	@RequestMapping(value = "/sign_up", method = RequestMethod.GET,produces = "text/html")
+	public String goTo() {
+		System.out.println(234);
+		return "sign_up";
+	}
+
+	
 	@RequestMapping(value = "/{id:(?!link|index|stats).*}+", 
 			method = RequestMethod.GET, produces = "text/html")
 	public String redirectToStatistics(@PathVariable String id,
