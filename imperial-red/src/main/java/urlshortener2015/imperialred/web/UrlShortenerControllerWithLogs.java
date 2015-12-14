@@ -158,6 +158,10 @@ public class UrlShortenerControllerWithLogs {
 					Synonym sin = map.readValue(response.getBody().toString(), Synonym.class);
 					return new ResponseEntity<>(sin,HttpStatus.BAD_REQUEST);
 				} catch(Exception e){
+					/*
+					 * Caso en el que la id seleccionada esta cogida y la API
+					 * no da alternativas
+					 */
 					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);				
 				}
 			}
