@@ -127,8 +127,7 @@ public class UrlShortenerControllerWithLogs {
 	public ResponseEntity<Synonym> recomendaciones(@RequestParam("url") String url,
 			@RequestParam(value = "custom", required = false) String custom,
 			@RequestParam(value = "expire", required = false) String expireDate,
-			@RequestParam(value = "hasToken", required = false) String hasToken, HttpServletRequest request)
-					throws Exception {
+			@RequestParam(value = "hasToken", required = false) String hasToken, HttpServletRequest request){
 
 		UrlValidator urlValidator = new UrlValidator(new String[] { "http", "https" });
 		/*
@@ -159,10 +158,8 @@ public class UrlShortenerControllerWithLogs {
 					Synonym sin = map.readValue(response.getBody().toString(), Synonym.class);
 					return new ResponseEntity<>(sin,HttpStatus.BAD_REQUEST);
 				} catch(Exception e){
-					e.printStackTrace();					
+					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);				
 				}
-				
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
 		} else {
 			System.out.println("3");

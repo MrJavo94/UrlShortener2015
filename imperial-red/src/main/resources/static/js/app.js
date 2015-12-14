@@ -17,7 +17,7 @@ $(document).ready(
                     $("#yes").show();
                     $("#validation").removeClass("has-error").addClass("has-success");
                 },
-                error : function() {
+                error : function(msg) {
 	                $("#loading").hide();
 	                $("#yes").hide();
 	                $("#no").show();
