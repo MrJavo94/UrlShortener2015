@@ -26,8 +26,17 @@ public class UsersController {
 	 * Returns the user identified by {nick} in a JSON representation
 	 */
 	@RequestMapping(value = "/users/{nick}", method = RequestMethod.GET, produces = "application/json")
-	public User getUser(@PathVariable String nick) {
-		return userRepository.findByNick(nick);
+	public User getUser(@RequestParam(value="nick", required=true) String nick, 
+			@RequestParam(value="password", required=true)String password) {
+		System.out.println(nick);
+		System.out.println(password);
+		User user=userRepository.findByNick(nick);
+		if(user!=null){
+			return user;
+		}
+		else{
+			return null;
+		}
 	}
 	
 	/**
@@ -39,6 +48,9 @@ public class UsersController {
 	public User addUser(@RequestParam(value = "mail", required = true) String mail,
 			@RequestParam(value = "nick", required = true) String nick,
 			@RequestParam(value = "password", required = true) String password) {
+		System.out.println(mail);
+		System.out.println(nick);
+		System.out.println(password);
 		User user = new User(mail, nick, password, null, null);
 		return userRepository.save(user);
 	}

@@ -16,7 +16,7 @@
 
 <div class="row">
     <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
-		<form role="form">
+		<form role="form" action="/users" method="POST">
 			<h2>Reg&iacute;strate <small>Es gratis y siempre lo ser&aacute;.</small></h2>
 			<hr class="colorgraph">
 			<div class="row">
@@ -32,10 +32,10 @@
 				</div>
 			</div>
 			<div class="form-group">
-				<input type="text" name="display_name" id="display_name" class="form-control input-lg" placeholder="Nombre de usuario" tabindex="3">
+				<input type="text" name="nick" id="nick" class="form-control input-lg" placeholder="Nombre de usuario" tabindex="3">
 			</div>
 			<div class="form-group">
-				<input type="email" name="email" id="email" class="form-control input-lg" placeholder="Correo electr&oacute;nico" tabindex="4">
+				<input type="email" name="mail" id="mail" class="form-control input-lg" placeholder="Correo electr&oacute;nico" tabindex="4">
 			</div>
 			<div class="row">
 				<div class="col-xs-12 col-sm-6 col-md-6">
@@ -68,7 +68,11 @@
 			<hr class="colorgraph">
 			<div class="row">
                 <div class="col-xs-12 col-md-3"></div>
-				<div class="col-xs-12 col-md-6"><input type="submit" value="Reg&iacute;strate" class="btn btn-primary btn-block btn-lg" tabindex="7"></div>
+				<div class="col-xs-12 col-md-6">
+				<button type="submit" name="/users" class="btn btn-lg btn-primary btn-block btn-lg">Reg&iacute;strate 
+
+							</button>
+				</div>
 				
 			</div>
 		</form>
