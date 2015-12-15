@@ -5,6 +5,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,18 +28,11 @@ public class UsersController {
 	/**
 	 * Returns the user identified by {nick} in a JSON representation
 	 */
+	@Cacheable("users")
 	@RequestMapping(value = "/users/{nick}", method = RequestMethod.GET, produces = "application/json")
-	public User getUser(@RequestParam(value="nick", required=true) String nick, 
-			@RequestParam(value="password", required=true)String password) {
-		System.out.println(nick);
-		System.out.println(password); 
-		User user=userRepository.findByNick(nick);
-		if(user!=null){
-			return user;
-		}
-		else{
-			return null;
-		}
+	public User getUser(@PathVariable String nick) {
+		logger.info("Getting user " + nick + " from db");
+		return userRepository.findByNick(nick);
 	}
 	
 	/**
@@ -59,6 +55,7 @@ public class UsersController {
 	 * Modifies the password of the user identified by {nick}
 	 * XXX: NOT WORKING (error 405: JSPs only permit GET POST or HEAD)
 	 */
+	@CachePut("users")
 	@RequestMapping(value = "/users/{nick}", method = RequestMethod.PUT, produces = "application/json")
 	public User modifyUser(@PathVariable String nick,
 			@RequestParam(value = "password", required = true) String password) {
@@ -71,6 +68,7 @@ public class UsersController {
 	 * Deletes the user identified by {nick}
 	 * XXX: I don't know what should be returned here
 	 */
+	@CacheEvict("users")
 	@RequestMapping(value = "/users/{nick}", method = RequestMethod.DELETE, produces = "application/json")
 	public List<User> deleteUser(@PathVariable String nick) {
 		userRepository.deleteByNick(nick);
