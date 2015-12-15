@@ -48,6 +48,10 @@ dependencies {
     
     // Provides access to mongodb framework
     compile 'org.springframework.data:spring-data-mongodb:1.8.1.RELEASE'
+    
+    //Redis for caching
+    compile "org.springframework.data:spring-data-redis:1.4.1.RELEASE"
+	compile "redis.clients:jedis:2.6.1"
 
     // Testing framework
     testCompile 'org.springframework.boot:spring-boot-starter-test'
