@@ -29,7 +29,7 @@ public class UsersController {
 	public User getUser(@RequestParam(value="nick", required=true) String nick, 
 			@RequestParam(value="password", required=true)String password) {
 		System.out.println(nick);
-		System.out.println(password);
+		System.out.println(password); 
 		User user=userRepository.findByNick(nick);
 		if(user!=null){
 			return user;
