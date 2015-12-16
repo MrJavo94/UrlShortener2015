@@ -66,7 +66,7 @@ $(document).ready(
         init();
     });
 });
-      $("#personal").keyup(
+      $("#personal").on('keyup change',
                 function(event) {
                 $("#no").hide();
                 $("#yes").hide();
@@ -86,8 +86,19 @@ $(document).ready(
 	                $("#yes").hide();
 	                $("#no").show();
                     $("#validation").removeClass("has-success").addClass("has-error");
-
+                    if(msg.responseJSON.length>0){
+	                    $("#anunc").html( "<h3>URL ya ocupada. Sugerencias :<h3>");
+	          			var botones = "";
+	           			for(var i = 0; i<msg.responseJSON.length; i++)
+						{
+				              var seg = msg.responseJSON[i];
+				              botones += "<button id='" + seg + "' onclick='refrescarSugerencia(this.id)' type='button' class='btn btn-link'>" + seg + " </button>";
+				        }
+				        $("#recom").html(botones);     
+				        $("#recom").addClass("alert alert-success lead");    
+			        }          
                 }
+
             });
         });
         
@@ -131,3 +142,11 @@ $(document).ready(
                 });
             });
     });
+    
+    
+function refrescarSugerencia(id) {
+	$("#personal").val(id);
+	 $("#personal").trigger("keyup");
+}
+    
+    

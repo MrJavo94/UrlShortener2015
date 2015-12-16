@@ -8,12 +8,15 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.validator.routines.UrlValidator;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,28 +72,23 @@ public class UrlShortenerControllerWithLogs {
 	 */
 	public static final String USER_AGENT = "User-Agent";
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(UrlShortenerControllerWithLogs.class);
-
+	private static final Logger logger = LoggerFactory.getLogger(UrlShortenerControllerWithLogs.class);
 
 	@RequestMapping(value = "/{id:(?!link|index).*}", method = RequestMethod.GET)
 	public ResponseEntity<?> redirectTo(@PathVariable String id,
-			@RequestParam(value = "token", required = false) String token,
-			HttpServletRequest request) {
+			@RequestParam(value = "token", required = false) String token, HttpServletRequest request) {
 		logger.info("Requested redirection with hash " + id);
 		ShortURL l = shortURLRepository.findByHash(id);
 		if (l != null) {
 			/*
 			 * Comprobar Token
 			 */
-			if (l.getOwner() != null
-					&& (token == null || !l.getOwner().equals(token))) {
+			if (l.getOwner() != null && (token == null || !l.getOwner().equals(token))) {
 				/*
 				 * Token incorrecto
 				 */
 				throw new CustomException("400", "Se necesita un token");
-			}
-			else {
+			} else {
 
 				Date d = new Date(System.currentTimeMillis());
 				if (l.getExpire() != null && d.after(l.getExpire())) {
@@ -99,47 +97,39 @@ public class UrlShortenerControllerWithLogs {
 					 */
 					throw new CustomException("400", "Enlace ha expirado");
 
-				}
-				else {
+				} else {
 					createAndSaveClick(id, request);
 					return createSuccessfulRedirectToResponse(l);
 				}
 			}
-		}
-		else {
+		} else {
 			throw new CustomException("404", "NOT_FOUND");
 		}
 	}
 
 	@RequestMapping(value = "/link", method = RequestMethod.POST)
-	public ResponseEntity<ShortURL> shortener(
-			@RequestParam("url") String url,
+	public ResponseEntity<ShortURL> shortener(@RequestParam("url") String url,
 			@RequestParam(value = "custom", required = false) String custom,
 			@RequestParam(value = "expire", required = false) String expireDate,
-			@RequestParam(value = "hasToken", required = false) String hasToken,
-			HttpServletRequest request) throws Exception {
-		ShortURL su = createAndSaveIfValid(url, custom, hasToken, expireDate,
-				extractIP(request));
+			@RequestParam(value = "hasToken", required = false) String hasToken, HttpServletRequest request)
+					throws Exception {
+		ShortURL su = createAndSaveIfValid(url, custom, hasToken, expireDate, extractIP(request));
 		if (su != null) {
 			HttpHeaders h = new HttpHeaders();
 			h.setLocation(su.getUri());
 			return new ResponseEntity<>(su, h, HttpStatus.CREATED);
-		}
-		else {
+		} else {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	@RequestMapping(value = "/rec/rec", method = RequestMethod.GET)
-	public ResponseEntity<Synonym> recomendaciones(
-			@RequestParam("url") String url,
+	public ResponseEntity<ArrayList<String>> recomendaciones(@RequestParam("url") String url,
 			@RequestParam(value = "custom", required = false) String custom,
 			@RequestParam(value = "expire", required = false) String expireDate,
-			@RequestParam(value = "hasToken", required = false) String hasToken,
-			HttpServletRequest request) {
+			@RequestParam(value = "hasToken", required = false) String hasToken, HttpServletRequest request) {
 
-		UrlValidator urlValidator = new UrlValidator(new String[] { "http",
-				"https" });
+		UrlValidator urlValidator = new UrlValidator(new String[] { "http", "https" });
 		/*
 		 * Comprueba si la url viene con http o https
 		 */
@@ -148,38 +138,35 @@ public class UrlShortenerControllerWithLogs {
 			 * Hasheado de la URL o personalizado
 			 */
 			String id;
-			if (custom.equals("")) {
-				id = Hashing.murmur3_32()
-						.hashString(url, StandardCharsets.UTF_8).toString();
-			}
-			else {
-				id = custom;
-			}
+			if (!custom.equals("")) {
 
-			if (shortURLRepository.findByHash(id) == null) {
-				System.out.println("1");
-				return new ResponseEntity<>(HttpStatus.CREATED);
-			}
-			else {
-				System.out.println("2");
-				try{
-					HttpResponse<JsonNode> response = Unirest.get("https://wordsapiv1.p.mashape.com/words/" + id + "/synonyms")
-					.header("X-Mashape-Key", "VLzNEVr9zQmsh0gOlqs6wudMxDo1p1vCnjEjsnjNBhOCFeqLxr")
-					.header("Accept", "application/json")
-					.asJson();
-					ObjectMapper map= new ObjectMapper();					
-					Synonym sin = map.readValue(response.getBody().toString(), Synonym.class);
-					return new ResponseEntity<>(sin,HttpStatus.BAD_REQUEST);
-				} catch(Exception e){
-					/*
-					 * Caso en el que la id seleccionada esta cogida y la API
-					 * no da alternativas
-					 */
-					return new ResponseEntity<>(HttpStatus.BAD_REQUEST);				
+				id = custom;
+				
+				if (shortURLRepository.findByHash(id) == null) {
+					System.out.println("1");
+					return new ResponseEntity<>(HttpStatus.CREATED);
+				} else {
+					System.out.println("2");
+					try {
+						HttpResponse<JsonNode> response = Unirest
+								.get("https://wordsapiv1.p.mashape.com/words/" + id + "/synonyms")
+								.header("X-Mashape-Key", "VLzNEVr9zQmsh0gOlqs6wudMxDo1p1vCnjEjsnjNBhOCFeqLxr")
+								.header("Accept", "application/json").asJson();
+						ObjectMapper map = new ObjectMapper();
+						Synonym sin = map.readValue(response.getBody().toString(), Synonym.class);
+						return new ResponseEntity<>(sin.getSynonyms(), HttpStatus.BAD_REQUEST);
+					} catch (Exception e) {
+						/*
+						 * Caso en el que la id seleccionada esta cogida y la
+						 * API no da alternativas
+						 */
+						return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+					}
 				}
-			}
-		}
-		else {
+			} else{
+				return new ResponseEntity<>(HttpStatus.OK);
+			}			
+		} else {
 			System.out.println("3");
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
@@ -193,12 +180,10 @@ public class UrlShortenerControllerWithLogs {
 		String country = (subnet != null) ? (subnet.getCountry()) : ("");
 
 		request.getHeader(USER_AGENT);
-		Click cl = new Click(null, hash, new Date(System.currentTimeMillis()),
-				request.getHeader(REFERER), request.getHeader(USER_AGENT),
-				request.getHeader(USER_AGENT), dirIp, country);
+		Click cl = new Click(null, hash, new Date(System.currentTimeMillis()), request.getHeader(REFERER),
+				request.getHeader(USER_AGENT), request.getHeader(USER_AGENT), dirIp, country);
 		cl = clickRepository.save(cl);
-		logger.info(cl != null ? "[" + hash + "] saved with id [" + cl.getId()
-				+ "]" : "[" + hash + "] was not saved");
+		logger.info(cl != null ? "[" + hash + "] saved with id [" + cl.getId() + "]" : "[" + hash + "] was not saved");
 	}
 
 	/**
@@ -207,13 +192,11 @@ public class UrlShortenerControllerWithLogs {
 	private BigInteger getIpValue(String dirIp) {
 		if (dirIp.contains(".")) {
 			String[] parts = dirIp.split("\\.");
-			long num = Long.parseLong(parts[0]) * 16777216
-					+ Long.parseLong(parts[1]) * 65536
+			long num = Long.parseLong(parts[0]) * 16777216 + Long.parseLong(parts[1]) * 65536
 					+ Long.parseLong(parts[2]) * 256 + Long.parseLong(parts[3]);
 			return BigInteger.valueOf(num);
 
-		}
-		else {
+		} else {
 			/* Still not implemented for IPv6 */
 			return BigInteger.valueOf(-1);
 		}
@@ -222,11 +205,9 @@ public class UrlShortenerControllerWithLogs {
 	/**
 	 * Creacion y guardado de la URL
 	 */
-	protected ShortURL createAndSaveIfValid(String url, String custom,
-			String hasToken, String expireDate, String ip) {
+	protected ShortURL createAndSaveIfValid(String url, String custom, String hasToken, String expireDate, String ip) {
 
-		UrlValidator urlValidator = new UrlValidator(new String[] { "http",
-				"https" });
+		UrlValidator urlValidator = new UrlValidator(new String[] { "http", "https" });
 		/*
 		 * Comprueba si la url viene con http o https
 		 */
@@ -236,10 +217,8 @@ public class UrlShortenerControllerWithLogs {
 			 */
 			String id;
 			if (custom.equals("")) {
-				id = Hashing.murmur3_32()
-						.hashString(url, StandardCharsets.UTF_8).toString();
-			}
-			else {
+				id = Hashing.murmur3_32().hashString(url, StandardCharsets.UTF_8).toString();
+			} else {
 				id = custom;
 			}
 
@@ -264,8 +243,7 @@ public class UrlShortenerControllerWithLogs {
 
 					try {
 						expire = sdf.parse(expireDate);
-					}
-					catch (ParseException e) {
+					} catch (ParseException e) {
 						e.printStackTrace();
 						logger.info("Fecha mal introducida");
 					}
@@ -273,22 +251,19 @@ public class UrlShortenerControllerWithLogs {
 				/*
 				 * Creacion del objeto ShortURL
 				 */
-				ShortURL su = new ShortURL(id, url, linkTo(
-						methodOn(UrlShortenerControllerWithLogs.class)
-								.redirectTo(id, null, null)).toUri(), new Date(
-						System.currentTimeMillis()), expire, owner,
-						HttpStatus.TEMPORARY_REDIRECT.value(), ip, null);
+				ShortURL su = new ShortURL(id, url,
+						linkTo(methodOn(UrlShortenerControllerWithLogs.class).redirectTo(id, null, null)).toUri(),
+						new Date(System.currentTimeMillis()), expire, owner, HttpStatus.TEMPORARY_REDIRECT.value(), ip,
+						null);
 				/*
 				 * Insercion en la base de datos
 				 */
 				return shortURLRepository.save(su);
 
-			}
-			else {
+			} else {
 				return null;
 			}
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
