@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
@@ -35,19 +34,26 @@ public class UsersController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
 	
+	/**
+	 * Handles POST requests from clients authenticated with Google.
+	 * TODO: Do something with the recovered email (database, etc)
+	 * TODO: Handle exceptions properly
+	 * TODO: Change hard-coded values
+	 */
 	@RequestMapping(value = "/google-login", method = RequestMethod.POST)
 	public void googleLogin(@RequestParam(value = "idtoken", required = true) String idTokenString) {
+		/* Created token verifier */
 		HttpTransport transport = new ApacheHttpTransport();
 		JsonFactory jsonFactory = new JacksonFactory();
-		logger.info("Vamos a crear un verificador");
 		GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
 				.setAudience(Arrays.asList("152937226054-ajhhaao7c41md0p7mrti9pgrcaag6nf7.apps.googleusercontent.com")).build();
-		logger.info("Verificador creado");
+		logger.info("Verifier created");
 
+		/* Verifies if the sent token is ok */
 		GoogleIdToken idToken = null;
 		try {
 			idToken = verifier.verify(idTokenString);
-			logger.info("Verificado");
+			logger.info("Verified");
 		} catch (IOException e) {
 			logger.info("Error retrieving ID token.");
 		} catch (GeneralSecurityException e) {
