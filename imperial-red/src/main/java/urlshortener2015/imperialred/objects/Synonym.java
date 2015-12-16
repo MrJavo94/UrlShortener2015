@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class Synonym {
 
 	@JsonProperty("synonyms")
-	private List<String> synonyms = new ArrayList<String>();
+	private ArrayList<String> synonyms = new ArrayList<String>();
 	@JsonProperty("word")
 	private String word;
 
@@ -22,7 +22,7 @@ public class Synonym {
 	 * @return The synonyms
 	 */
 	@JsonProperty("synonyms")
-	public List<String> getSynonyms() {
+	public ArrayList<String> getSynonyms() {
 		return synonyms;
 	}
 
@@ -32,7 +32,7 @@ public class Synonym {
 	 *            The synonyms
 	 */
 	@JsonProperty("synonyms")
-	public void setSynonyms(List<String> synonyms) {
+	public void setSynonyms(ArrayList<String> synonyms) {
 		this.synonyms = synonyms;
 	}
 
