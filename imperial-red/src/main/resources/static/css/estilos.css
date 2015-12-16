@@ -1,3 +1,5 @@
+
+
 img.image_buscar {
 	width: 20px;
 	border: 0px;
@@ -35,4 +37,54 @@ img.image_buscar {
   background-image: -o-linear-gradient(left, #c4e17f, #c4e17f 12.5%, #f7fdca 12.5%, #f7fdca 25%, #fecf71 25%, #fecf71 37.5%, #f0776c 37.5%, #f0776c 50%, #db9dbe 50%, #db9dbe 62.5%, #c49cde 62.5%, #c49cde 75%, #669ae1 75%, #669ae1 87.5%, #62c2e4 87.5%, #62c2e4);
   background-image: linear-gradient(to right, #c4e17f, #c4e17f 12.5%, #f7fdca 12.5%, #f7fdca 25%, #fecf71 25%, #fecf71 37.5%, #f0776c 37.5%, #f0776c 50%, #db9dbe 50%, #db9dbe 62.5%, #c49cde 62.5%, #c49cde 75%, #669ae1 75%, #669ae1 87.5%, #62c2e4 87.5%, #62c2e4);
 }
+
+
+
+.addon-facebook {
+	background-color: #345387;
+	border: none;
+	border-radius: 2px 0px 0px 2px;
+	color: #fff;
+}
+
+.btn-facebook,
+.btn-facebook:hover {
+	background-color: #4b6ea9;
+	color: #fff;
+	border-radius: 0px 2px 2px 0px;
+	font-size: 15px;
+}
+
+.addon-twitter {
+	background-color: #00c6e9;
+	border: none;
+	border-radius: 2px 0px 0px 2px;
+	color: #fff;
+}
+
+.btn-twitter,
+.btn-twitter:hover {
+	background-color: #00d7fa;
+	color: #fff;
+	border-radius: 0px;
+	font-size: 15px;
+}
+
+
+.addon-google {
+	background-color: #e75555;
+	border: none;
+	border-radius: 2px 0px 0px 2px;
+	color: #fff;
+}
+
+.btn-google,
+.btn-google:hover {
+	background-color: #DD4B39;
+	color: #fff;
+	border-radius: 0px;
+	font-size: 15px;
+}
+
+
 
