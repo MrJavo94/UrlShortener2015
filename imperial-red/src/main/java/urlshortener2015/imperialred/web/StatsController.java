@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +43,6 @@ public class StatsController {
 		return "sign_up";
 	}
 
-	
 	@RequestMapping(value = "/{id:(?!link|index|stats).*}+", 
 			method = RequestMethod.GET, produces = "text/html")
 	public String redirectToStatistics(@PathVariable String id,

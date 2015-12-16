@@ -81,11 +81,11 @@ public class UrlShortenerControllerWithLogs {
 		ShortURL l = shortURLRepository.findByHash(id);
 		if (l != null) {
 			/*
-			 * Comprobar Token
+			 * Check Token
 			 */
 			if (l.getOwner() != null && (token == null || !l.getOwner().equals(token))) {
 				/*
-				 * Token incorrecto
+				 * Wrong Token
 				 */
 				throw new CustomException("400", "Se necesita un token");
 			} else {
@@ -93,7 +93,7 @@ public class UrlShortenerControllerWithLogs {
 				Date d = new Date(System.currentTimeMillis());
 				if (l.getExpire() != null && d.after(l.getExpire())) {
 					/*
-					 * La fecha ha expirado
+					 * Date has expired
 					 */
 					throw new CustomException("400", "Enlace ha expirado");
 
@@ -131,11 +131,11 @@ public class UrlShortenerControllerWithLogs {
 
 		UrlValidator urlValidator = new UrlValidator(new String[] { "http", "https" });
 		/*
-		 * Comprueba si la url viene con http o https
+		 * Check if url comes through http or https
 		 */
 		if (urlValidator.isValid(url)) {
 			/*
-			 * Hasheado de la URL o personalizado
+			 * Hash of URL or custom
 			 */
 			String id;
 			if (!custom.equals("")) {
@@ -209,11 +209,11 @@ public class UrlShortenerControllerWithLogs {
 
 		UrlValidator urlValidator = new UrlValidator(new String[] { "http", "https" });
 		/*
-		 * Comprueba si la url viene con http o https
+		 * Check if url comes through http or https
 		 */
 		if (urlValidator.isValid(url)) {
 			/*
-			 * Hasheado de la URL o personalizado
+			 * Hash of URL or custom
 			 */
 			String id;
 			if (custom.equals("")) {
@@ -223,7 +223,7 @@ public class UrlShortenerControllerWithLogs {
 			}
 
 			/*
-			 * Si ya existe no se crea, de momento
+			 * If exists, it isnt created
 			 */
 			if (shortURLRepository.findByHash(id) == null) {
 
@@ -235,7 +235,7 @@ public class UrlShortenerControllerWithLogs {
 					owner = UUID.randomUUID().toString();
 				}
 				/*
-				 * Fecha de expiracion
+				 * Expire date
 				 */
 				Date expire = null;
 				if (!expireDate.equals("")) {
@@ -248,15 +248,18 @@ public class UrlShortenerControllerWithLogs {
 						logger.info("Fecha mal introducida");
 					}
 				}
+
 				/*
 				 * Creacion del objeto ShortURL
 				 */
-				ShortURL su = new ShortURL(id, url,
-						linkTo(methodOn(UrlShortenerControllerWithLogs.class).redirectTo(id, null, null)).toUri(),
-						new Date(System.currentTimeMillis()), expire, owner, HttpStatus.TEMPORARY_REDIRECT.value(), ip,
-						null);
+
+				ShortURL su = new ShortURL(id, url, linkTo(
+						methodOn(UrlShortenerControllerWithLogs.class)
+								.redirectTo(id, null, null)).toUri(), new Date(
+						System.currentTimeMillis()), expire, owner,
+						HttpStatus.TEMPORARY_REDIRECT.value(), ip, null);
 				/*
-				 * Insercion en la base de datos
+				 * Insert to DB
 				 */
 				return shortURLRepository.save(su);
 
