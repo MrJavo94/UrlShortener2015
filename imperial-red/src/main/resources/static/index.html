@@ -44,9 +44,8 @@
 			<div class="col-lg-12 text-center">
 				</br>
 				<div class=" col-lg-offset-9 col-lg-3">
-					<a href="/sign_up"><button  class="btn btn-lg btn-primary">Sign up</button></a>
-					<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal" 
-					style="background-color:#337ab7; border-color:#2e6da4;">Sign in</button>
+					<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#Sign-in" 
+					style="background-color:#337ab7; border-color:#2e6da4;">Login</button>
 				</div>
 				<h1>URL Shortener</h1>
 				<p class="lead">A front-end example page for the project</p>
@@ -110,7 +109,7 @@
 					<div class="row" style="margin-top: 15px;">
 						<div class="input-group input-group-lg col-lg-offset-4 col-lg-4">
 							<button type="submit" class="btn btn-lg btn-primary">Short me!   
-
+ 
 							</button>
 						</div>
 					</div>
@@ -123,61 +122,58 @@
 				<div class="col-sm-offset-4 col-sm-4 text-center">
 					<br />
 					<div id="result" />
-				</div>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-lg-12 text-center">
-				<div class="col-sm-offset-4 col-sm-4 text-center">
-					<div class="g-signin2" data-onsuccess="onSignIn"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-
-
-	<div class="container">
- 
-  <!-- Modal -->
-  <div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog">
-    
-      <!-- Modal content-->
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <form role="form" action="/users/{nick}" method="GET">
-			<fieldset>
-				<h2>Please Sign In</h2>
-				<hr class="colorgraph">
-				<div class="form-group">
-                    <input type="nick" name="nick" id="nick" class="form-control input-lg" placeholder="Nick">
-				</div>
-				<div class="form-group">
-                    <input type="password" name="password" id="password" class="form-control input-lg" placeholder="Password">
-				</div>
-				<span class="button-checkbox">
-					<button type="button" class="btn" data-color="info">Remember Me</button>
-                    <input type="checkbox" name="remember_me" id="remember_me" checked="checked" class="hidden">
-					<a href="" class="btn btn-link pull-right">Forgot Password?</a>
-				</span>
-				<hr class="colorgraph">
-				<div class="row">
-					<div class="col-md-offset-3 col-xs-6 col-sm-6 col-md-6">
-                        <input type="submit" id="login" class="btn btn-lg btn-success btn-block" value="Sign In">
 					</div>
 				</div>
-			</fieldset>
-		</form>
-          
-        </div>
+			</div>
+		</div>
+	<div class="container">
+	  <!-- Modal sign in-->
+	  <div class="modal fade" id="Sign-in" role="dialog">
+	    <div class="modal-dialog">
+	    
+	      <!-- Modal content-->
+	      <div class="modal-content">
+	        <div class="modal-header">
+	          <button type="button" class="close" data-dismiss="modal">&times;</button>
+	          <form role="form" action="/users/{nick}" method="GET">
+				<fieldset>
+					<h2>Please Sign In</h2>
+					<hr class="colorgraph"/>
 
-      </div>
-      
-    </div>
-  </div>
-  
-</div>
+					<div class="input-group">
+
+						<span class="input-group-addon addon-google">
+							<i class="fa fa-fw fa-2x fa-google fa-fw"></i>
+						</span>
+						<div class="g-signin2" data-onsuccess="onSignIn"></div>
+					</div>
+					</br>
+
+					<div class="input-group">
+						<span class="input-group-addon addon-facebook">
+							<i class="fa fa-fw fa-2x fa-facebook fa-fw"></i>
+						</span>
+						<a class="btn btn-lg btn-block btn-facebook" href="#"> Login with Facebook</a>
+					</div>
+					</br>
+
+					<div class="input-group">
+						<span class="input-group-addon addon-twitter">
+							<i class="fa fa-fw fa-2x fa-twitter fa-fw"></i>
+						</span>
+						<a class="btn btn-lg btn-block btn-twitter" href="#"> Login with Twitter</a>
+					</div>
+
+					<hr class="colorgraph"/>
+				</fieldset>
+			</form>
+	          
+	        </div>
+
+	      </div>
+	      
+	    </div>
+	  </div><!--sign up-->
+	  </div>
 </body>
 </html>

@@ -39,6 +39,7 @@ public class UsersController {
 	 * TODO: Do something with the recovered email (database, etc)
 	 * TODO: Handle exceptions properly
 	 * TODO: Change hard-coded values
+	 * TODO: Return response to XHR (js function in index.html)
 	 */
 	@RequestMapping(value = "/google-login", method = RequestMethod.POST)
 	public void googleLogin(@RequestParam(value = "idtoken", required = true) String idTokenString) {

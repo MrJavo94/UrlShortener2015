@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.mongodb.DBObject;
 
@@ -38,10 +39,6 @@ public class StatsController {
 	private static final Logger logger = LoggerFactory
 			.getLogger(StatsController.class);
 
-	@RequestMapping(value = "/sign_up", method = RequestMethod.GET,produces = "text/html")
-	public String goTo() {
-		return "sign_up";
-	}
 
 	@RequestMapping(value = "/{id:(?!link|index|stats).*}+", 
 			method = RequestMethod.GET, produces = "text/html")

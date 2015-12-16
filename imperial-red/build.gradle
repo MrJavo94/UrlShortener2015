@@ -38,7 +38,6 @@ dependencies {
 	//compile 'org.springframework.security:spring-security-web:4.0.3.RELEASE'
 	//compile 'org.springframework.security:spring-security-config:4.0.3.RELEASE'
     
-    
 
     // Provides the production database
     runtime 'org.hsqldb:hsqldb'
