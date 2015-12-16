@@ -52,6 +52,9 @@ dependencies {
     //Redis for caching
     compile "org.springframework.data:spring-data-redis:1.4.1.RELEASE"
 	compile "redis.clients:jedis:2.6.1"
+	
+	//Google Sign-in
+	compile 'com.google.api-client:google-api-client:1.21.0'
 
     // Testing framework
     testCompile 'org.springframework.boot:spring-boot-starter-test'

@@ -11,15 +11,26 @@
 	      google.load("visualization", "1", {packages:["geochart"]});
 	      google.setOnLoadCallback(drawRegionsMap);
 
-	      function drawRegionsMap() {
-			var data = google.visualization.arrayToDataTable(${clicksByCountry});
+	      function drawRegionsMap(data) {
+					var data = google.visualization.arrayToDataTable(data);
 	        var options = {};
 	        var chart = new google.visualization.GeoChart(document.getElementById('geo_chart'));
 	        chart.draw(data, options);
 	      }
+
+				function init() {
+						var socket = new SockJS('/statsMap');
+						stompClient = Stomp.over(socket);
+						stompClient.connect({}, function(frame) {
+							console.log('Connected: ' + frame);
+							stompClient.subscribe('/topic/mapOfStats', function(data) {
+								drawRegionsMap(data);
+							});
+						});
+				}
 	</script>
 </head>
-<body>
+<body onLoad=init()>
 	<div class="container-full">
 			<h1>Stastistics</h1>
 			<p class="lead">Statistic from the URL Shortener</p>

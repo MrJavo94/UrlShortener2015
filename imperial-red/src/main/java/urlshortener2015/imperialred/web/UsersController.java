@@ -1,5 +1,8 @@
 package urlshortener2015.imperialred.web;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -13,6 +16,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 
 import urlshortener2015.imperialred.objects.User;
 import urlshortener2015.imperialred.repository.UserRepository;
@@ -23,7 +33,35 @@ public class UsersController {
 	@Autowired
 	protected UserRepository userRepository;
 	
-	private static final Logger logger = LoggerFactory.getLogger(UrlShortenerControllerWithLogs.class);
+	private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
+	
+	@RequestMapping(value = "/google-login", method = RequestMethod.POST)
+	public void googleLogin(@RequestParam(value = "idtoken", required = true) String idTokenString) {
+		HttpTransport transport = new ApacheHttpTransport();
+		JsonFactory jsonFactory = new JacksonFactory();
+		logger.info("Vamos a crear un verificador");
+		GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+				.setAudience(Arrays.asList("152937226054-ajhhaao7c41md0p7mrti9pgrcaag6nf7.apps.googleusercontent.com")).build();
+		logger.info("Verificador creado");
+
+		GoogleIdToken idToken = null;
+		try {
+			idToken = verifier.verify(idTokenString);
+			logger.info("Verificado");
+		} catch (IOException e) {
+			logger.info("Error retrieving ID token.");
+		} catch (GeneralSecurityException e) {
+			logger.info("General security exception.");
+		}
+		
+		if (idToken != null) {
+			String email = idToken.getPayload().getEmail();
+			//Do insertions, etc
+		} else {
+			logger.info("Invalid ID token.");
+		}
+		
+	}
 	
 	/**
 	 * Returns the user identified by {nick} in a JSON representation
