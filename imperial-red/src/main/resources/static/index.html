@@ -37,22 +37,27 @@
 		xhr.send('idtoken=' + id_token);
 	}
 </script>
+
 </head>
 <body>
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/es_ES/sdk.js#xfbml=1&version=v2.5&appId=545143702330998";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
 	<div class="container-full">
 		<div class="row">
-			<div class="col-lg-12 text-center">
-				</br>
-				<div class=" col-lg-offset-9 col-lg-3">
-					<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#Sign-in" 
-					style="background-color:#337ab7; border-color:#2e6da4;">Login</button>
-				</div>
+			<div class="col-lg-offset-3 col-lg-6 text-center">
+
 				<h1>URL Shortener</h1>
 				<p class="lead">A front-end example page for the project</p>
 				<br>
 				<form class="col-lg-12" role="form" id="shortener" action="">
 					<div class="row">
-						<div class="input-group input-group-lg col-sm-offset-4 col-sm-4">
+						<div class="input-group input-group-lg col-sm-offset-2 col-sm-8">
 							<input type="text" class="center-block form-control input-lg"
 								title="Enter a URL" placeholder="Enter a URL" name="url">
 							<!--	
@@ -62,7 +67,7 @@
 						</div>
 					</div>
 					<div class="row">
-						<div class="checkbox col-lg-4 col-lg-offset-4 bg-info">
+						<div class="checkbox col-lg-offset-2 col-lg-8 text-center  bg-info">
 							<label>
 								<input type="checkbox" name="hasToken" value="true">
 								Check if you want to secure your URL
@@ -70,8 +75,8 @@
 						</div>
 					</div>
 					<div class="row">
-						<div class="col-sm-4"></div>
-						<div class="input-group input-group-lg col-lg-offset-4 col-lg-4">
+						<div class="col-sm-8"></div>
+						<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
 						<h3>If you want a custom URL, write it here:</h3>
 							<div id="validation" class="right-inner-addon">								
 								<input type="text" id="personal" class="center-block form-control input-lg"
@@ -85,7 +90,7 @@
 					</div>
 					<div class="row">
 						<div class="col-lg-12 text-center">
-							<div class="col-sm-offset-4 col-sm-4 text-center">
+							<div class="col-sm-offset-2 col-sm-8 text-center">
 								<div id="anunc" />
 								<br />
 							</div>
@@ -93,21 +98,22 @@
 					</div>
 					<div class="row">
 						<div class="col-lg-12 text-center">
-							<div class="col-sm-offset-4 col-sm-4 text-center">
+							<div class="col-sm-offset-2 col-sm-8 text-center">
 								<div id="recom" />
 								<br />
 							</div>
 						</div>
 					</div>
 					<div class="row">
-						<div class="input-group input-group-lg col-lg-offset-4 col-lg-4">
+						<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
 							<h3>Select an expire date (or leave it blank)</h3>
 							<input type="date" class="center-block form-control input-lg"
 								title="Expire Date" name="expire">
 						</div>
 					</div>
 					<div class="row" style="margin-top: 15px;">
-						<div class="input-group input-group-lg col-lg-offset-4 col-lg-4">
+					</br>
+						<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
 							<button type="submit" class="btn btn-lg btn-primary">Short me!   
  
 							</button>
@@ -118,62 +124,44 @@
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-lg-12 text-center">
-				<div class="col-sm-offset-4 col-sm-4 text-center">
+			<div class="col-lg-offset-3 col-lg-6 text-center">
+				<div class="col-sm-offset-2 col-sm-8 text-center">
 					<br />
 					<div id="result" />
 					</div>
 				</div>
 			</div>
-		</div>
-	<div class="container">
-	  <!-- Modal sign in-->
-	  <div class="modal fade" id="Sign-in" role="dialog">
-	    <div class="modal-dialog">
-	    
-	      <!-- Modal content-->
-	      <div class="modal-content">
-	        <div class="modal-header">
-	          <button type="button" class="close" data-dismiss="modal">&times;</button>
-	          <form role="form" action="/users/{nick}" method="GET">
-				<fieldset>
-					<h2>Please Sign In</h2>
-					<hr class="colorgraph"/>
-
+			<div class=".col-lg-2">
+			<h2>Please Sign In</h2>
+					<br>
 					<div class="input-group">
 
-						<span class="input-group-addon addon-google">
+						<!--<span class="input-group-addon addon-google">
 							<i class="fa fa-fw fa-2x fa-google fa-fw"></i>
-						</span>
+						</span>-->
 						<div class="g-signin2" data-onsuccess="onSignIn"></div>
 					</div>
 					</br>
 
 					<div class="input-group">
-						<span class="input-group-addon addon-facebook">
+						
+						<!--<span class="input-group-addon addon-facebook">
 							<i class="fa fa-fw fa-2x fa-facebook fa-fw"></i>
-						</span>
-						<a class="btn btn-lg btn-block btn-facebook" href="#"> Login with Facebook</a>
+						</span>-->
+						<div class="fb-login-button btn-" data-max-rows="1" data-size="large" data-show-faces="false" data-auto-logout-link="false">
+							Sign in with Facebook
+						</div>
 					</div>
 					</br>
 
 					<div class="input-group">
-						<span class="input-group-addon addon-twitter">
+						<!--<span class="input-group-addon addon-twitter">
 							<i class="fa fa-fw fa-2x fa-twitter fa-fw"></i>
-						</span>
-						<a class="btn btn-lg btn-block btn-twitter" href="#"> Login with Twitter</a>
+						</span>-->
+						<img src="https://g.twimg.com/dev/sites/default/files/images_documentation/sign-in-with-twitter-gray.png" alt="Sign in with Twitter">
 					</div>
+			</div>
+		</div>
 
-					<hr class="colorgraph"/>
-				</fieldset>
-			</form>
-	          
-	        </div>
-
-	      </div>
-	      
-	    </div>
-	  </div><!--sign up-->
-	  </div>
 </body>
 </html>

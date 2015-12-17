@@ -9,7 +9,7 @@ import urlshortener2015.imperialred.objects.ShortURL;
 
 public interface ShortURLRepository extends MongoRepository<ShortURL, String>, ShortURLRepositoryCustom{
 	
-	@Cacheable("shortUrl")
+	//@Cacheable("shortUrl")
 	ShortURL findByHash(String id);
 
 	List<ShortURL> findByTarget(String target);
