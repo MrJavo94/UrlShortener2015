@@ -27,17 +27,17 @@ dependencies {
 
     compile 'commons-validator:commons-validator:1.4.0'
 	compile 'com.google.guava:guava:17.0'
-	
+
 	compile 'com.mashape.unirest:unirest-java:1.4.7'
 	compile 'org.json:json:20140107'
 	compile 'org.apache.httpcomponents:httpclient:4.3.6'
 	compile 'org.apache.httpcomponents:httpmime:4.3.6'
 	compile 'org.apache.httpcomponents:httpasyncclient:4.0.2'
-	
+
 	//security
 	//compile 'org.springframework.security:spring-security-web:4.0.3.RELEASE'
 	//compile 'org.springframework.security:spring-security-config:4.0.3.RELEASE'
-    
+
 
     // Provides the production database
     runtime 'org.hsqldb:hsqldb'
@@ -48,14 +48,14 @@ dependencies {
     compile 'jstl:jstl:1.2'
     compile 'org.springframework.boot:spring-boot-starter-web:1.2.6.RELEASE'
     compile 'org.apache.tomcat.embed:tomcat-embed-jasper:8.0.28'
-    
+
     // Provides access to mongodb framework
     compile 'org.springframework.data:spring-data-mongodb:1.8.1.RELEASE'
-    
+
     //Redis for caching
     compile "org.springframework.data:spring-data-redis:1.4.1.RELEASE"
 	compile "redis.clients:jedis:2.6.1"
-	
+
 	//Google Sign-in
 	compile 'com.google.api-client:google-api-client:1.21.0'
 
