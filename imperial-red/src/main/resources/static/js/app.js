@@ -160,3 +160,27 @@ function refrescarSugerencia(id) {
 	 $("#personal").trigger("keyup");
 }
 
+function onSignIn(googleUser) {
+	var profile = googleUser.getBasicProfile();
+	console.log('ID: ' + profile.getId());
+	console.log('Name: ' + profile.getName());
+	console.log('Image URL: ' + profile.getImageUrl());
+	console.log('Email: ' + profile.getEmail());
+
+	// The ID token you need to pass to your backend:
+	var id_token = googleUser.getAuthResponse().id_token;
+	console.log("ID Token: " + id_token);
+	
+	var xhr = new XMLHttpRequest();
+	console.log('PROTOCOL: ' + window.location.protocol);
+	console.log('HOSTNAME: ' + window.location.hostname);
+	console.log('PORT: ' + window.location.port);
+	console.log('HREF: ' + window.location.href);
+	xhr.open('POST', window.location.href + 'google-login');
+	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	xhr.onload = function() {
+	  console.log('Signed in as: ' + xhr.responseText);
+	};
+	xhr.send('idtoken=' + id_token);
+}
+
