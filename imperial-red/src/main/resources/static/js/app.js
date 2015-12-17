@@ -69,6 +69,7 @@ $(document).ready(
 });
       $("#personal").on('keyup change',
                 function(event) {
+                $("#recom").hide();
                 $("#no").hide();
                 $("#yes").hide();
                 $("#loading").show();
@@ -95,6 +96,7 @@ $(document).ready(
 				              var seg = msg.responseJSON[i];
 				              botones += "<button id='" + seg + "' onclick='refrescarSugerencia(this.id)' type='button' class='btn btn-link'>" + seg + " </button>";
 				        }
+				        $("#recom").show();
 				        $("#recom").html(botones);     
 				        $("#recom").addClass("alert alert-success lead");    
 			        }          
