@@ -1,25 +1,40 @@
 <!doctype html>
 <html>
 <head>
-<title>Statistics</title>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" type="text/css"
-	href="webjars/bootstrap/3.3.5/css/bootstrap.min.css" />
+	<title>Statistics</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css"
+		href="webjars/bootstrap/3.3.5/css/bootstrap.min.css" />
 	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script type="text/javascript" src="js/sockjs-0.3.4.js"></script>
+    <script type="text/javascript" src="js/stomp.js"></script>
 	<script type="text/javascript">
-	      google.load("visualization", "1", {packages:["geochart"]});
-	      google.setOnLoadCallback(drawRegionsMap);
+		var stompClient = null;
+		google.load("visualization", "1", {packages:["geochart"]});
+		google.setOnLoadCallback(drawRegionsMap);
 
-	      function drawRegionsMap() {
-					var data = google.visualization.arrayToDataTable(${clicksByCountry});
-	        var options = {};
-	        var chart = new google.visualization.GeoChart(document.getElementById('geo_chart'));
-	        chart.draw(data, options);
-	      }
+		function drawRegionsMap() {
+			var data = google.visualization.arrayToDataTable(${clicksByCountry});
+			var options = {};
+			var chart = new google.visualization.GeoChart(document.getElementById('geo_chart'));
+			chart.draw(data, options);
+		}
+		
+		function init() {
+			var socket = new SockJS('/hello');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function(frame) {
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/greetings', function(greeting){
+                    showGreeting(JSON.parse(greeting.body).content);
+                });
+            });
+            console.log('Ok');
+		}
 	</script>
 </head>
-<body>
+<body onload=init()>
 	<div class="container-full">
 			<h1>Statistics</h1>
 			<p class="lead">Statistics from the URL Shortener</p>
