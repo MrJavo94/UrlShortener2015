@@ -21,13 +21,22 @@
 			chart.draw(data, options);
 		}
 		
+		function drawRegionsMap2(newdata) {
+			console.log('Updating in client');
+			var data = google.visualization.arrayToDataTable(newdata);
+			var options = {};
+			var chart = new google.visualization.GeoChart(document.getElementById('geo_chart'));
+			chart.draw(data, options);
+		}
+		
 		function init() {
 			var socket = new SockJS('/hello');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function(frame) {
                 console.log('Connected: ' + frame);
-                stompClient.subscribe('/topic/greetings', function(greeting){
-                    showGreeting(JSON.parse(greeting.body).content);
+                stompClient.subscribe('/topic/greetings', function(newdata){
+                	console.log('message arrived');
+                    drawRegionsMap2(newdata);
                 });
             });
             console.log('Ok');
