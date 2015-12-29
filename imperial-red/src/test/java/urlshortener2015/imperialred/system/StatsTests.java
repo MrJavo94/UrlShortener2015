@@ -1,5 +1,7 @@
 package urlshortener2015.imperialred.system;
 
+import java.util.Date;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +15,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import static org.hamcrest.Matchers.is;
+
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.hamcrest.Matchers.containsString;
 import urlshortener2015.imperialred.Application;
@@ -34,18 +37,8 @@ public class StatsTests {
 		parts.add("from", null);
 		parts.add("to", null);
 		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/f684a3c4+",
-				String.class);
+				String.class, parts);
 		assertThat(entity.getStatusCode(), is(HttpStatus.OK));
-
-	}
-	@Test
-	public void badRedirectionToStats() {
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
-		parts.add("from", null);
-		parts.add("to", null);
-		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/4+",
-				String.class);
-		assertThat(entity.getStatusCode(), is(HttpStatus.NOT_FOUND));
 
 	}
 
