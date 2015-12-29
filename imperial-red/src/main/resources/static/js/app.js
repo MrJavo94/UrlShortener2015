@@ -1,33 +1,27 @@
 $(document).ready(
-<<<<<<< HEAD
-    function() {
-	
-	$.ajax({
-		type : "GET",
-		url : "/connect/twitter/check",
-		success : function(msg) {
-			var custom = document.getElementsByName("custom");
-			if(msg.profileImageUrl!=null){
-				$("#tw_signin").hide();
-				$("#tw_div").html(
-						"<img src=\"" + msg.profileImageUrl + "\" alt=\"Image of Twitter\">"
-				);
-			}
-			else{
 
+    function() {	
+		$.ajax({
+			type : "GET",
+			url : "/connect/twitter/check",
+			success : function(msg) {
+				var custom = document.getElementsByName("custom");
+				if(msg.profileImageUrl!=null){
+					$("#tw_signin").hide();
+					$("#tw_div").html(
+							"<img src=\"" + msg.profileImageUrl + "\" alt=\"Image of Twitter\">"
+					);
+				}
+				else{
+	
+				}
+				
+			},
+			error : function() {
+				$("#result").html(
+						"<div class='alert alert-danger lead'>ERROR</div>");
 			}
-			
-		},
-		error : function() {
-			$("#result").html(
-					"<div class='alert alert-danger lead'>ERROR</div>");
-		}
 	});
-
-	
-=======
-function() {
->>>>>>> refs/remotes/upstream/master
     
     $(function () {
         $('.button-checkbox').each(
@@ -180,7 +174,7 @@ function() {
                     }
                 });
             });
-<<<<<<< HEAD
+
         /*
         $("#tw_signin").submit(
                 function(event) {
@@ -221,7 +215,6 @@ function() {
                 });*/
         
     });
-=======
 });
 
 // Function for adding email input
@@ -248,7 +241,6 @@ $(function()
 				return false;
 			});
 });
->>>>>>> refs/remotes/upstream/master
     
     
 function refrescarSugerencia(id) {
