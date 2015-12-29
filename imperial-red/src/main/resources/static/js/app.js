@@ -133,7 +133,8 @@ function() {
                                 + "</a></div></br><h3>Token: <h3>"
                                 + " <div class='alert alert-success lead'>?token="
                                 + msg.owner
-                                + "</div>");
+                                + "</div>"
+                                + "<h3>Código QR:<h3><img src=\"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+msg.uri+"?token="+msg.owner+"\">");
                         }
                         else{
                             $("#result").html(
@@ -142,7 +143,8 @@ function() {
                                 + msg.uri
                                 + "'>"
                                 + msg.uri
-                                + "</a></div>");
+                                + "</a></div>"
+                                + "<h3>Código QR:<h3><img src=\"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+msg.uri+"\">");
                         }
                         
                     },
