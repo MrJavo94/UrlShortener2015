@@ -64,7 +64,6 @@
 								<img id="yes" style="display:none;" src="/image/yes.svg">
 								<img id="no" style="display:none;" src="/image/no.svg">
 							</div>
-
 						</div>
 					</div>
 					<div class="row">
@@ -92,9 +91,10 @@
 					</div>
 					<div class="row" style="margin-top: 15px">
 						<h3>Private link? Insert emails allowed to open it</h3>
-						<div class="formulariomini">
-							<div class="entry input-group col-lg-offset-2 col-lg-8">
-								<input class="form-control" name="emails[]" type="text" placeholder="Introduce un email" />
+						<p class="lead"><small>If no emails are inserted, link will be public</small></p>
+						<div class="list_emails">
+							<div class="entry input-group col-lg-offset-2 col-lg-8" style="margin-bottom: 10px">
+								<input class="form-control" name="emails[]" type="text" placeholder="Insert an email address" />
 								<span class="input-group-btn">
 		                            <button class="btn btn-success btn-add" type="button">
 		                                <span class="glyphicon glyphicon-plus"></span>

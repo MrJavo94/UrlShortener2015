@@ -154,13 +154,14 @@ function() {
             });
 });
 
+// Function for adding email input
 $(function()
 		{
 		    $(document).on('click', '.btn-add', function(e)
 		    {
 		        e.preventDefault();
 		        console.log('Entered');
-		        var controlForm = $('.controls form:first'),
+		        var controlForm = $('.list_emails'),
 		            currentEntry = $(this).parents('.entry:first'),
 		            newEntry = $(currentEntry.clone()).appendTo(controlForm);
 
