@@ -14,10 +14,15 @@ eclipse {
    }
 }
 
+apply plugin: 'java'
 apply plugin: 'eclipse-wtp'
+apply plugin: 'idea'
 apply plugin: 'spring-boot'
 
 mainClassName = 'urlshortener2015.imperialred.Application'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 dependencies {
     compile 'org.springframework.boot:spring-boot-starter-web:1.2.6.RELEASE'
@@ -58,6 +63,19 @@ dependencies {
 
 	//Google Sign-in
 	compile 'com.google.api-client:google-api-client:1.21.0'
+	
+	// OAuth 2.0 support
+    //compile 'org.springframework.security.oauth:spring-security-oauth2:2.0.8.RELEASE'
+    // OAuth 1.0a support
+    //compile 'org.springframework.security.oauth:spring-security-oauth:2.0.8.RELEASE'
+    // Twitter support
+    compile "org.springframework.social:spring-social-twitter:1.1.0.RELEASE"
+    
+    // Social Web
+    compile("org.springframework.social:spring-social-web:1.1.4.RELEASE")
+    
+    // Spring Security
+    //compile 'org.springframework.social:spring-social-security:1.1.4.RELEASE'
 
     // Testing framework
     testCompile 'org.springframework.boot:spring-boot-starter-test'

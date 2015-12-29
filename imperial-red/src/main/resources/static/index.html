@@ -133,11 +133,15 @@
 					</div>
 					</br>
 
-					<div class="input-group">
+					<div id="tw_div" class="input-group">
 						<!--<span class="input-group-addon addon-twitter">
 							<i class="fa fa-fw fa-2x fa-twitter fa-fw"></i>
 						</span>-->
-						<img src="https://g.twimg.com/dev/sites/default/files/images_documentation/sign-in-with-twitter-gray.png" alt="Sign in with Twitter">
+						<form id="tw_signin" action="/connect/twitter" method="POST">
+						  <button type="submit">
+						    <img src="https://g.twimg.com/dev/sites/default/files/images_documentation/sign-in-with-twitter-gray.png" alt="Sign in with Twitter">
+						  </button>
+						</form>						
 					</div>
 			</div>
 		</div>

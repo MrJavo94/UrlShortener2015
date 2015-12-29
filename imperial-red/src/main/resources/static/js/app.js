@@ -1,5 +1,29 @@
 $(document).ready(
     function() {
+	
+	$.ajax({
+		type : "GET",
+		url : "/connect/twitter/check",
+		success : function(msg) {
+			var custom = document.getElementsByName("custom");
+			if(msg.profileImageUrl!=null){
+				$("#tw_signin").hide();
+				$("#tw_div").html(
+						"<img src=\"" + msg.profileImageUrl + "\" alt=\"Image of Twitter\">"
+				);
+			}
+			else{
+
+			}
+			
+		},
+		error : function() {
+			$("#result").html(
+					"<div class='alert alert-danger lead'>ERROR</div>");
+		}
+	});
+
+	
     
     $(function () {
         $('.button-checkbox').each(
@@ -152,6 +176,45 @@ $(document).ready(
                     }
                 });
             });
+        /*
+        $("#tw_signin").submit(
+                function(event) {
+                    event.preventDefault();
+                    $.ajax({
+                        type : "POST",
+                        url : "/connect/twitter",
+                        success : function(msg) {
+                            var custom = document.getElementsByName("custom");
+                            if(msg.profileImageUrl!=null){
+                                $("#result").html(
+                                    "<h3>Aquí tiene su enlace acortado</h3>"
+                                    + "<div class='alert alert-success lead'><a target='_blank' href='"
+                                    + msg.uri
+                                    + "'>"
+                                    + msg.uri
+                                    + "</a></div></br><h3>Token: <h3>"
+                                    + " <div class='alert alert-success lead'>?token="
+                                    + msg.owner
+                                    + "</div>");
+                            }
+                            else{
+                                $("#result").html(
+                                    "<h3>Aquí tiene su enlace acortado</h3>"
+                                    + "<div class='alert alert-success lead'><a target='_blank' href='"
+                                    + msg.uri
+                                    + "'>"
+                                    + msg.uri
+                                    + "</a></div>");
+                            }
+                            
+                        },
+                        error : function() {
+                            $("#result").html(
+                                    "<div class='alert alert-danger lead'>ERROR</div>");
+                        }
+                    });
+                });*/
+        
     });
     
     

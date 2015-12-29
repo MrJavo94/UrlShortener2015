@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.social.connect.UsersConnectionRepository;
 
 import urlshortener2015.imperialred.objects.User;
 
