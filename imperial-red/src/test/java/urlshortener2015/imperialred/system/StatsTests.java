@@ -34,7 +34,7 @@ public class StatsTests {
 		parts.add("from", null);
 		parts.add("to", null);
 		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/f684a3c4+",
-				String.class, parts);
+				String.class);
 		assertThat(entity.getStatusCode(), is(HttpStatus.OK));
 
 	}
@@ -44,7 +44,7 @@ public class StatsTests {
 		parts.add("from", null);
 		parts.add("to", null);
 		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/4+",
-				String.class, parts);
+				String.class);
 		assertThat(entity.getStatusCode(), is(HttpStatus.NOT_FOUND));
 
 	}

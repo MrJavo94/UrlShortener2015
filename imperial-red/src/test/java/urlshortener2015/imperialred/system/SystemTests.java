@@ -113,7 +113,7 @@ public class SystemTests {
 		parts.add("token", null);
 		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/f684a3c4",
 				String.class, parts);
-		assertThat(entity.getStatusCode(), is(HttpStatus.NOT_FOUND));
+		assertThat(entity.getStatusCode(), is(HttpStatus.BAD_REQUEST));
 	}
 
 	@Test
@@ -132,7 +132,7 @@ public class SystemTests {
 		postLink("http://example.com/", null, null, "true");
 		ResponseEntity<?> entity = new TestRestTemplate()
 				.getForEntity("http://localhost:" + this.port + "/f684a3c4?token=1", String.class);
-		assertThat(entity.getStatusCode(), is(HttpStatus.NOT_FOUND));
+		assertThat(entity.getStatusCode(), is(HttpStatus.BAD_REQUEST));
 
 	}
 
