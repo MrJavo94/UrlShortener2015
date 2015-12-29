@@ -24,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -35,6 +37,7 @@ import com.google.common.hash.Hashing;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
+import com.mongodb.DBObject;
 
 import urlshortener2015.imperialred.exception.CustomException;
 import urlshortener2015.imperialred.objects.Click;
@@ -108,6 +111,7 @@ public class UrlShortenerControllerWithLogs {
 				}
 				else {
 					createAndSaveClick(id, request);
+					updateMapStats();
 					return createSuccessfulRedirectToResponse(l);
 				}
 			}
@@ -316,6 +320,18 @@ public class UrlShortenerControllerWithLogs {
 		h.setLocation(URI.create(l.getTarget()));
 		System.out.println(l.getMode());
 		return new ResponseEntity<>(l,h, HttpStatus.valueOf(l.getMode()));
+	}
+	
+	/**
+	 * When called, sends the updated stats in an appropriate format
+	 * for the Google Charts map.
+	 * TODO: Implement it
+	 */
+	@MessageMapping("/hello")
+	@SendTo("/topic/greetings")
+	private String updateMapStats() {
+		logger.info("Updating stats");
+		return "[[\"Country\",\"Clicks\"]]";
 	}
 
 }

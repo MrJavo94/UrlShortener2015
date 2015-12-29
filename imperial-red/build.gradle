@@ -53,12 +53,16 @@ dependencies {
     compile 'org.springframework.data:spring-data-mongodb:1.8.1.RELEASE'
     compile 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:1.50.0'
 
-    //Redis for caching
+    // Redis for caching
     compile "org.springframework.data:spring-data-redis:1.4.1.RELEASE"
 	compile "redis.clients:jedis:2.6.1"
 
-	//Google Sign-in
+	// Google Sign-in
 	compile 'com.google.api-client:google-api-client:1.21.0'
+	
+	// WebSocket
+	compile 'org.springframework.boot:spring-boot-starter-websocket'
+	compile 'org.springframework:spring-messaging'
 
     // Testing framework
     testCompile 'junit:junit:4.12'
