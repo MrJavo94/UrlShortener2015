@@ -30,7 +30,7 @@ public class StatsTests {
 	@Test
 	public void redirectionToStats() {
 		postLink("http://example.com/");
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>(); 
 		parts.add("from", null);
 		parts.add("to", null);
 		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/f684a3c4+",
