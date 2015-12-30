@@ -134,7 +134,7 @@ function() {
                                 + " <div class='alert alert-success lead'>?token="
                                 + msg.owner
                                 + "</div>"
-                                + "<h3>Código QR:<h3><img src=\"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+msg.uri+"?token="+msg.owner+"\">");
+                                + "<h3>Código QR:<h3><img src=\"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+createQRData(msg.uri)+"?token="+msg.owner+"\">");
                         }
                         else{
                             $("#result").html(
@@ -144,7 +144,7 @@ function() {
                                 + "'>"
                                 + msg.uri
                                 + "</a></div>"
-                                + "<h3>Código QR:<h3><img src=\"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+msg.uri+"\">");
+                                + "<h3>Código QR:</h3><img src=\"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+createQRData(msg.uri)+"\">");
                         }
                         
                     },
@@ -154,6 +154,15 @@ function() {
                     }
                 });
             });
+        
+        $(".vc").click(function() {
+        	if ($(this).attr("value")=="option1") {
+        		$(".vcard").hide();
+        	}
+        	if ($(this).attr("value")=="option2") {
+        		$(".vcard").show();
+        	}
+        });
 });
 
 // Function for adding email input
@@ -209,5 +218,23 @@ function onSignIn(googleUser) {
 	  console.log('Signed in as: ' + xhr.responseText);
 	};
 	xhr.send('idtoken=' + id_token);
+}
+
+//Creates the data inside the QR
+function createQRData(uri) {
+	var optionQR = document.getElementsByName("optionQR");
+	if (optionQR[0].checked) {
+		//If 1st option checked, only uri in QR
+		return encodeURIComponent(uri);
+	} else if (optionQR[1].checked) {
+		//If 2nd option checked, creates vcard in QR
+		var name = document.getElementsByName("name")[0].value;
+		var phone = document.getElementsByName("phone")[0].value;
+		var data = "BEGIN:VCARD\nVERSION:2.1\nFN:" + name + "\nN:;" + name + "\nTEL;HOME;VOICE:"
+			+ phone + "\nURL:" + uri + "\nEND:VCARD\n";
+		return encodeURIComponent(data);
+	} else {
+		console.log('Entered unexpected state in QR option function');
+	}
 }
 

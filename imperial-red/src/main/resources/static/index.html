@@ -28,132 +28,147 @@
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
 	<div class="container-full">
-		<div class="row">
-			<div class="col-lg-offset-3 col-lg-6 text-center">
-
-				<h1>URL Shortener</h1>
-				<p class="lead">A front-end example page for the project</p>
-				<br>
-				<form class="col-lg-12" role="form" id="shortener" action="">
-					<div class="row">
-						<div class="input-group input-group-lg col-sm-offset-2 col-sm-8">
-							<input type="text" class="center-block form-control input-lg"
-								title="Enter a URL" placeholder="Enter a URL" name="url">
-							<!--	
-							<span class="input-group-btn"><button
-									class="btn btn-lg btn-primary" type="submit">Short me!</button></span>
-							-->
+		<div class="col-lg-offset-3 col-lg-6 text-center">
+			<h1>URL Shortener</h1>
+			<p class="lead">A front-end example page for the project</p>
+			<br>
+			<form class="col-lg-12" role="form" id="shortener" action="">
+				<div class="row">
+					<div class="input-group input-group-lg col-sm-offset-2 col-sm-8">
+						<input type="text" class="center-block form-control input-lg"
+							title="Enter a URL" placeholder="Enter a URL" name="url">
+						<!--	
+						<span class="input-group-btn"><button
+								class="btn btn-lg btn-primary" type="submit">Short me!</button></span>
+						-->
+					</div>
+				</div>
+				<div class="row">
+					<div class="checkbox col-lg-offset-2 col-lg-8 text-center  bg-info">
+						<label>
+							<input type="checkbox" name="hasToken" value="true">
+							Check if you want to secure your URL
+						</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-8"></div>
+					<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
+					<h3>If you want a custom URL, write it here:</h3>
+						<div id="validation" class="right-inner-addon">								
+							<input type="text" id="personal" class="center-block form-control input-lg"
+							title = "Custom URL" placeholder="Your custom name here" name="custom">
+							<img id="loading" style="display:none;" src="/image/ripple.svg">
+							<img id="yes" style="display:none;" src="/image/yes.svg">
+							<img id="no" style="display:none;" src="/image/no.svg">
 						</div>
 					</div>
-					<div class="row">
-						<div class="checkbox col-lg-offset-2 col-lg-8 text-center  bg-info">
+				</div>
+				<div class="row">
+					<div class="col-lg-12 text-center">
+						<div class="col-sm-offset-2 col-sm-8 text-center">
+							<div id="anunc"></div>
+							<br />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-lg-12 text-center">
+						<div class="col-sm-offset-2 col-sm-8 text-center">
+							<div id="recom"></div>
+							<br />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
+						<h3>Select an expire date (or leave it blank)</h3>
+						<input type="date" class="center-block form-control input-lg"
+							title="Expire Date" name="expire">
+					</div>
+				</div>
+				<div class="row" style="margin-top: 15px">
+					<h3>Private link? Insert emails allowed to open it</h3>
+					<p class="lead"><small>If no emails are inserted, link will be public</small></p>
+					<div class="list_emails">
+						<div class="entry input-group col-lg-offset-2 col-lg-8" style="margin-bottom: 10px">
+							<input class="form-control" name="emails[]" type="text" placeholder="Insert an email address" />
+							<span class="input-group-btn">
+	                            <button class="btn btn-success btn-add" type="button">
+	                                <span class="glyphicon glyphicon-plus"></span>
+	                            </button>
+	                        </span>
+						</div>
+					</div>
+				</div>
+				<div class="row" style="margin-top: 15px">
+					<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
+						<h3>Need a QR code to access the link?</h3>
+						<div class="radio">
 							<label>
-								<input type="checkbox" name="hasToken" value="true">
-								Check if you want to secure your URL
+							    <input type="radio" class="vc" name="optionQR" id="url_qr" value="option1" checked>
+							    Check this if you want a QR code with URL
+							</label>
+						</div>
+						<div class="radio">
+							<label>
+							    <input type="radio" class="vc" name="optionQR" id="vcard_qr" value="option2">
+							    Check this if you want a QR code with vCard
 							</label>
 						</div>
 					</div>
-					<div class="row">
-						<div class="col-sm-8"></div>
+				</div>
+				<div class="row">
+					<div class="vcard" style="display: none">
 						<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
-						<h3>If you want a custom URL, write it here:</h3>
-							<div id="validation" class="right-inner-addon">								
-								<input type="text" id="personal" class="center-block form-control input-lg"
-								title = "Custom URL" placeholder="Your custom name here" name="custom">
-								<img id="loading" style="display:none;" src="/image/ripple.svg">
-								<img id="yes" style="display:none;" src="/image/yes.svg">
-								<img id="no" style="display:none;" src="/image/no.svg">
-							</div>
+							<input type="text" class="center-block form-control input-lg"
+								title="Your name" placeholder="Your name" name="name">
+							<input type="tel" class="center-block form-control input-lg"
+								title="Your phone" placeholder="Your phone" name="phone">
 						</div>
-					</div>
-					<div class="row">
-						<div class="col-lg-12 text-center">
-							<div class="col-sm-offset-2 col-sm-8 text-center">
-								<div id="anunc" />
-								<br />
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-lg-12 text-center">
-							<div class="col-sm-offset-2 col-sm-8 text-center">
-								<div id="recom" />
-								<br />
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
-							<h3>Select an expire date (or leave it blank)</h3>
-							<input type="date" class="center-block form-control input-lg"
-								title="Expire Date" name="expire">
-						</div>
-					</div>
-					<div class="row" style="margin-top: 15px">
-						<h3>Private link? Insert emails allowed to open it</h3>
-						<p class="lead"><small>If no emails are inserted, link will be public</small></p>
-						<div class="list_emails">
-							<div class="entry input-group col-lg-offset-2 col-lg-8" style="margin-bottom: 10px">
-								<input class="form-control" name="emails[]" type="text" placeholder="Insert an email address" />
-								<span class="input-group-btn">
-		                            <button class="btn btn-success btn-add" type="button">
-		                                <span class="glyphicon glyphicon-plus"></span>
-		                            </button>
-		                        </span>
-							</div>
-						</div>
-					</div>
-					<div class="row" style="margin-top: 15px;">
-					</br>
-						<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
-							<button type="submit" class="btn btn-lg btn-primary">Short me!   
- 
-							</button>
-						</div>
-					</div>
-					</div>
-				</form>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-lg-offset-3 col-lg-6 text-center">
-				<div class="col-sm-offset-2 col-sm-8 text-center">
-					<br />
-					<div id="result" />
 					</div>
 				</div>
-			</div>
-			<div class=".col-lg-2">
-			<h2>Please Sign In</h2>
+				<div class="row" style="margin-top: 15px;">
 					<br>
-					<div class="input-group">
-
-						<!--<span class="input-group-addon addon-google">
-							<i class="fa fa-fw fa-2x fa-google fa-fw"></i>
-						</span>-->
-						<div class="g-signin2" data-onsuccess="onSignIn"></div>
+					<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
+						<button type="submit" class="btn btn-lg btn-primary">Short me!
+						</button>
 					</div>
-					</br>
-
-					<div class="input-group">
-						
-						<!--<span class="input-group-addon addon-facebook">
-							<i class="fa fa-fw fa-2x fa-facebook fa-fw"></i>
-						</span>-->
-						<div class="fb-login-button btn-" data-max-rows="1" data-size="large" data-show-faces="false" data-auto-logout-link="false">
-							Sign in with Facebook
+				</div>
+				<div class="row">
+						<div class="col-lg-offset-2 col-lg-8 text-center">
+							<br />
+							<div id="result"></div>
 						</div>
-					</div>
-					</br>
-
-					<div class="input-group">
-						<!--<span class="input-group-addon addon-twitter">
-							<i class="fa fa-fw fa-2x fa-twitter fa-fw"></i>
-						</span>-->
-						<img src="https://g.twimg.com/dev/sites/default/files/images_documentation/sign-in-with-twitter-gray.png" alt="Sign in with Twitter">
-					</div>
+				</div>
+			</form>
+		</div>	
+	</div>
+	<div class=".col-lg-2">
+		<h2>Please Sign In</h2>
+		<br>
+		<div class="input-group">
+			<!--<span class="input-group-addon addon-google">
+				<i class="fa fa-fw fa-2x fa-google fa-fw"></i>
+			</span>-->
+			<div class="g-signin2" data-onsuccess="onSignIn"></div>
+		</div>
+		<br>
+		<div class="input-group">		
+			<!--<span class="input-group-addon addon-facebook">
+				<i class="fa fa-fw fa-2x fa-facebook fa-fw"></i>
+			</span>-->
+			<div class="fb-login-button btn-" data-max-rows="1" data-size="large" data-show-faces="false" data-auto-logout-link="false">
+				Sign in with Facebook
 			</div>
 		</div>
-
+		<br>
+		<div class="input-group">
+			<!--<span class="input-group-addon addon-twitter">
+				<i class="fa fa-fw fa-2x fa-twitter fa-fw"></i>
+			</span>-->
+			<img src="https://g.twimg.com/dev/sites/default/files/images_documentation/sign-in-with-twitter-gray.png" alt="Sign in with Twitter">
+		</div>
+	</div>
 </body>
 </html>
