@@ -83,8 +83,11 @@ dependencies {
     compile 'org.springframework.social:spring-social-web:1.1.4.RELEASE'
     
     // Spring Security
-     compile 'org.springframework.security:spring-security-web:4.0.3.RELEASE'
-
+    compile 'org.springframework.security:spring-security-web:4.0.3.RELEASE'
+     
+    // Spring Security Config
+    compile 'org.springframework.security:spring-security-config:4.0.3.RELEASE'
+    
 	// WebSocket
 	compile 'org.springframework.boot:spring-boot-starter-websocket'
 	compile 'org.springframework:spring-messaging'
