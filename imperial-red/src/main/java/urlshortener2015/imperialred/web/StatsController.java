@@ -3,6 +3,7 @@ package urlshortener2015.imperialred.web;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,22 +37,17 @@ public class StatsController {
 	@Autowired
 	ShortURLRepository shortURLRepository;
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(StatsController.class);
+	private static final Logger logger = LoggerFactory.getLogger(StatsController.class);
 
-
-	@RequestMapping(value = "/{id:(?!link|index|stats).*}+", 
-			method = RequestMethod.GET, produces = "text/html")
+	@RequestMapping(value = "/{id:(?!link|index|stats).*}+", method = RequestMethod.GET, produces = "text/html")
 	public String redirectToStatistics(@PathVariable String id,
-			@RequestParam(value = "from", required = false) 
-				@DateTimeFormat(pattern="ddMMyyyy") Date from,
-			@RequestParam(value = "to", required = false) 
-				@DateTimeFormat(pattern="ddMMyyyy") Date to,
-			HttpServletRequest request, Model model) throws Exception {
+			@RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "ddMMyyyy") Date from,
+			@RequestParam(value = "to", required = false) @DateTimeFormat(pattern = "ddMMyyyy") Date to,
+			HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
 		logger.info("Requested redirection to statistics with hash " + id);
 		ShortURL l = shortURLRepository.findByHash(id);
-		logger.info("From: "+ from + ". To: " + to);
+		logger.info("From: " + from + ". To: " + to);
 
 		if (l != null) {
 			model.addAttribute("target", l.getTarget());
@@ -59,7 +55,7 @@ public class StatsController {
 			model.addAttribute("clicks", clickRepository.clicksByHash(l.getHash(), from, to));
 			model.addAttribute("from", from);
 			model.addAttribute("to", to);
-			
+
 			/* Adds JSON array for clicks by country */
 			DBObject groupObject = clickRepository.getClicksByCountry(id, from, to).getRawResults();
 			String list = groupObject.get("retval").toString();
@@ -67,18 +63,18 @@ public class StatsController {
 			String countryData = processCountryJSON(list);
 			logger.info("JSON data 2: " + countryData);
 			model.addAttribute("clicksByCountry", countryData);
+			response.setStatus(HttpStatus.OK.value());
 			return "stats";
 		} else {
+			response.setStatus(HttpStatus.NOT_FOUND.value());
 			throw new CustomException("404", "NOT_FOUND");
 		}
 	}
 
 	@RequestMapping(value = "/{id:(?!link|index).*}+", method = RequestMethod.GET, produces = "application/json")
 	public ResponseEntity<?> statsJSON(@PathVariable String id,
-			@RequestParam(value = "from", required = false) 
-				@DateTimeFormat(pattern="ddMMyyyy") Date from,
-			@RequestParam(value = "to", required = false) 
-				@DateTimeFormat(pattern="ddMMyyyy") Date to,
+			@RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "ddMMyyyy") Date from,
+			@RequestParam(value = "to", required = false) @DateTimeFormat(pattern = "ddMMyyyy") Date to,
 			HttpServletRequest request) {
 
 		logger.info("Requested json with hash " + id);
@@ -87,17 +83,16 @@ public class StatsController {
 				clickRepository.clicksByHash(l.getHash(), from, to), from, to);
 		return new ResponseEntity<>(stats, HttpStatus.OK);
 	}
-	
+
 	/**
-	 * Converts a ResultsByGroup JSON text into a text array of elements
-	 * in a format suitable for Google Charts API.
+	 * Converts a ResultsByGroup JSON text into a text array of elements in a
+	 * format suitable for Google Charts API.
 	 */
 	private String processCountryJSON(String text) {
 		String res = "[[\"Country\",\"Clicks\"]";
-		text = text.replace("[", "").replace("]", "").replace("{","")
-				.replace("}", "").replace(" ", "");
+		text = text.replace("[", "").replace("]", "").replace("{", "").replace("}", "").replace(" ", "");
 		String[] parts = text.split(",");
-		for (int i=0; i<parts.length; i++) {
+		for (int i = 0; i < parts.length; i++) {
 			res += ",";
 			String[] keyValue = parts[i].split(":");
 			if (keyValue[0].equals("\"country\"")) {
