@@ -140,9 +140,14 @@
 						<!--<span class="input-group-addon addon-facebook">
 							<i class="fa fa-fw fa-2x fa-facebook fa-fw"></i>
 						</span>-->
-						<div class="fb-login-button btn-" data-max-rows="1" data-size="large" data-show-faces="false" data-auto-logout-link="false">
-							Sign in with Facebook
-						</div>
+						<form id="fb_signin" action="/connect/facebook" method="POST">
+							<input type="hidden" name="scope" value="email"/>
+							<button type="submit">
+								<div class="" data-max-rows="1" data-size="large" data-show-faces="false" data-auto-logout-link="false">
+									Sign in with Facebook
+								</div>
+							</button>
+						</form>	
 					</div>
 					</br>
 

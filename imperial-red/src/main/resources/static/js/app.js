@@ -1,6 +1,6 @@
 $(document).ready(
 
-    function() {	
+    function() {
 		$.ajax({
 			type : "GET",
 			url : "/connect/twitter/check",
@@ -13,16 +13,16 @@ $(document).ready(
 					);
 				}
 				else{
-	
+
 				}
-				
+
 			},
 			error : function() {
 				$("#result").html(
 						"<div class='alert alert-danger lead'>ERROR</div>");
 			}
 	});
-    
+
     $(function () {
         $('.button-checkbox').each(
             function () {
@@ -119,9 +119,9 @@ $(document).ready(
 				              botones += "<button id='" + seg + "' onclick='refrescarSugerencia(this.id)' type='button' class='btn btn-link'>" + seg + " </button>";
 				        }
 				        $("#recom").show();
-				        $("#recom").html(botones);     
-				        $("#recom").addClass("alert alert-success lead");    
-			        }          
+				        $("#recom").html(botones);
+				        $("#recom").addClass("alert alert-success lead");
+			        }
                 }
 
             });
@@ -133,7 +133,7 @@ $(document).ready(
                 alert("Nick cannot be blank");
                 // Prevent form submission
                 event.preventDefault();
-            }    
+            }
         });
 
         $("#shortener").submit(
@@ -166,7 +166,7 @@ $(document).ready(
                                 + msg.uri
                                 + "</a></div>");
                         }
-                        
+
                     },
                     error : function() {
                         $("#result").html(
@@ -205,7 +205,7 @@ $(document).ready(
                                     + msg.uri
                                     + "</a></div>");
                             }
-                            
+
                         },
                         error : function() {
                             $("#result").html(
@@ -213,9 +213,8 @@ $(document).ready(
                         }
                     });
                 });*/
-        
-    });
 });
+
 
 // Function for adding email input
 $(function()
@@ -241,8 +240,8 @@ $(function()
 				return false;
 			});
 });
-    
-    
+
+
 function refrescarSugerencia(id) {
 	$("#personal").val(id);
 	 $("#personal").trigger("keyup");
@@ -258,7 +257,7 @@ function onSignIn(googleUser) {
 	// The ID token you need to pass to your backend:
 	var id_token = googleUser.getAuthResponse().id_token;
 	console.log("ID Token: " + id_token);
-	
+
 	var xhr = new XMLHttpRequest();
 	console.log('PROTOCOL: ' + window.location.protocol);
 	console.log('HOSTNAME: ' + window.location.hostname);
@@ -271,4 +270,3 @@ function onSignIn(googleUser) {
 	};
 	xhr.send('idtoken=' + id_token);
 }
-
