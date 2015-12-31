@@ -40,6 +40,19 @@
                 });
             });
             console.log('Ok');
+            
+            setFromToVisibility();
+		}
+		
+		function setFromToVisibility() {
+			var from = document.getElementById("show_from");
+			var to = document.getElementById("show_to");
+			if (from.innerHTML.length <= 5) {
+				from.style.display = 'none';
+			}
+			if (to.innerHTML.length <= 3) {
+				to.style.display = 'none';
+			}
 		}
 	</script>
 </head>
@@ -58,8 +71,8 @@
               <p>Target ${target}</p>
               <p>Created date ${date}</p>
               <p>Clicks ${clicks}</p>
-			  <div id="show_from">From ${from}</div>
-			  <div id="show_to">To ${to}</div>
+			  <div><p id="show_from">From ${from}</p></div>
+			  <div><p id="show_to">To ${to}</p></div>
             </div>
           </div>
 
