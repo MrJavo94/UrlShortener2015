@@ -41,8 +41,8 @@ public class StatsController {
 
 	@RequestMapping(value = "/{id:(?!link|index|stats).*}+", method = RequestMethod.GET, produces = "text/html")
 	public String redirectToStatistics(@PathVariable String id,
-			@RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "ddMMyyyy") Date from,
-			@RequestParam(value = "to", required = false) @DateTimeFormat(pattern = "ddMMyyyy") Date to,
+			@RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
+			@RequestParam(value = "to", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date to,
 			HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
 
 		logger.info("Requested redirection to statistics with hash " + id);
@@ -73,11 +73,13 @@ public class StatsController {
 
 	@RequestMapping(value = "/{id:(?!link|index).*}+", method = RequestMethod.GET, produces = "application/json")
 	public ResponseEntity<?> statsJSON(@PathVariable String id,
-			@RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "ddMMyyyy") Date from,
-			@RequestParam(value = "to", required = false) @DateTimeFormat(pattern = "ddMMyyyy") Date to,
+			@RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
+			@RequestParam(value = "to", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date to,
 			HttpServletRequest request) {
 
 		logger.info("Requested json with hash " + id);
+		logger.info("From: " + from);
+		logger.info("To: " + to);
 		ShortURL l = shortURLRepository.findByHash(id);
 		StatsURL stats = new StatsURL(l.getTarget(), l.getCreated().toString(),
 				clickRepository.clicksByHash(l.getHash(), from, to), from, to);

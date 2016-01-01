@@ -9,6 +9,7 @@
 	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 	<script type="text/javascript" src="js/sockjs-0.3.4.js"></script>
     <script type="text/javascript" src="js/stomp.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script type="text/javascript">
 		var stompClient = null;
 		google.load("visualization", "1", {packages:["geochart"]});
@@ -58,29 +59,38 @@
 </head>
 <body onload=init()>
 	<div class="container-full">
-			<h1>Statistics</h1>
-			<p class="lead">Statistics from the URL Shortener</p>
-			<br>
-		<div class="row">
-			<div class="col-sm-4 text-center">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h3 class="panel-title">Statistics</h3>
-            </div>
-            <div class="panel-body">
-              <p>Target ${target}</p>
-              <p>Created date ${date}</p>
-              <p>Clicks ${clicks}</p>
-			  <div><p id="show_from">From ${from}</p></div>
-			  <div><p id="show_to">To ${to}</p></div>
-            </div>
-          </div>
-
-      </div>
-			<div class="col-sm-4">
-				<div id="geo_chart" style="width: 900px; height: 500px;"></div>
+	<h1>Statistics</h1>
+	<p class="lead">Statistics from the URL Shortener</p>
+	<br>
+	<div class="row">
+		<div class="col-sm-4 text-center">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Statistics</h3>
+				</div>
+				<div class="panel-body">
+					<p>Target ${target}</p>
+					<p>Created date ${date}</p>
+					<p>Clicks ${clicks}</p>
+					<div><p id="show_from">From ${from}</p></div>
+					<div><p id="show_to">To ${to}</p></div>
+				</div>
 			</div>
+			<form>
+				<div class="form-group">
+					<label for="from">From...</label>
+					<input type="date" class="form-control" name="from">
+				</div>
+				<div class="form-group">
+					<label for="to">To...</label>
+					<input type="date" class="form-control" name="to">
+				</div>
+				<button type="submit" class="btn btn-default">Update</button>
+			</form>
 		</div>
-
+		<div class="col-sm-4">
+			<div id="geo_chart" style="width: 900px; height: 500px;"></div>
+		</div>
+	</div>
 </body>
 </html>
