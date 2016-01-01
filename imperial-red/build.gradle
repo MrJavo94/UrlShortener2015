@@ -2,9 +2,11 @@ buildscript {
   repositories {
 	mavenCentral()
 	maven { url 'http://repo.spring.io/release' }
+	//maven { url 'http://repo.grails.org/grails/plugins' }
   }
   dependencies {
     classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.2.6.RELEASE'
+   // ,     'org.grails:grails-bootstrap:2.2.3'
   }
 }
 
@@ -18,6 +20,12 @@ apply plugin: 'java'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
+
+repositories {
+  mavenCentral()
+  maven { url 'http://repo.spring.io/release' }
+  //maven { url 'http://repo.grails.org/grails/plugins' }
+}
 
 mainClassName = 'urlshortener2015.imperialred.Application'
 
@@ -39,9 +47,6 @@ dependencies {
 	compile 'org.apache.httpcomponents:httpmime:4.3.6'
 	compile 'org.apache.httpcomponents:httpasyncclient:4.0.2'
 
-	//security
-	//compile 'org.springframework.security:spring-security-web:4.0.3.RELEASE'
-	//compile 'org.springframework.security:spring-security-config:4.0.3.RELEASE'
 
 
     // Provides the production database
@@ -77,16 +82,23 @@ dependencies {
     
     // Facebook support
     compile 'org.springframework.social:spring-social-facebook:2.0.3.RELEASE'
+    
+    // Google support
+    compile 'org.springframework.social:spring-social-google:1.0.0.RELEASE'
+    
 
     
     // Social Web
     compile 'org.springframework.social:spring-social-web:1.1.4.RELEASE'
     
     // Spring Security
-    compile 'org.springframework.security:spring-security-web:4.0.3.RELEASE'
+    //compile 'org.springframework.security:spring-security-web:4.0.3.RELEASE'
      
     // Spring Security Config
-    compile 'org.springframework.security:spring-security-config:4.0.3.RELEASE'
+    //compile 'org.springframework.security:spring-security-config:4.0.3.RELEASE'
+    
+    // Spring Security REST plugin
+    //compile 'org.grails.plugins:spring-security-rest:1.5.0.M1'
     
 	// WebSocket
 	compile 'org.springframework.boot:spring-boot-starter-websocket'

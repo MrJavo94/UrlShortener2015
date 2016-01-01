@@ -13,6 +13,7 @@ import org.springframework.social.connect.ConnectionFactoryLocator;
 import org.springframework.social.connect.ConnectionRepository;
 import org.springframework.social.connect.web.ConnectController;
 import org.springframework.social.facebook.api.Facebook;
+import org.springframework.social.google.api.Google;
 import org.springframework.social.twitter.api.Twitter;
 import org.springframework.social.twitter.api.TwitterProfile;
 import org.springframework.stereotype.Controller;
@@ -34,6 +35,9 @@ public class CustomConnectController extends ConnectController {
 
 	@Autowired
 	private Facebook facebook;
+	
+	@Autowired
+	private Google google;
 
 	private String mail;
 
@@ -44,6 +48,7 @@ public class CustomConnectController extends ConnectController {
 			ConnectionRepository connectionRepository) {
 		super(connectionFactoryLocator, connectionRepository);
 		this.connectionRepository = connectionRepository;
+		//super.setApplicationUrl("http://ired.ml");
 	}
 
 	protected String connectedView(String providerId) {
@@ -57,9 +62,14 @@ public class CustomConnectController extends ConnectController {
 			twitter = (Twitter) connectionRepository.getPrimaryConnection(Twitter.class).getApi();
 			String twitterName = twitter.userOperations().getUserProfile().getScreenName();
 			/* GUARDADO EN LA BASE DE DATOS DEL PAR TWITTER-MAIL */
-
+			// TODO
 			/* HACER */
+		} else if (providerId.equals("google")){
+			google = (Google) connectionRepository.getPrimaryConnection(Google.class).getApi();
+			String mail = google.plusOperations().getGoogleProfile().getAccountEmail();
+			logger.info("Mail: " + google.plusOperations().getGoogleProfile().getAccountEmail());
 		}
+		
 		connectionRepository.removeConnections(providerId);
 		return "redirect:/";
 	}

@@ -92,6 +92,7 @@ $(document).ready(
       $("#personal").on('keyup change',
                 function(event) {
                 $("#recom").hide();
+                $("#anunc").hide();
                 $("#no").hide();
                 $("#yes").hide();
                 $("#loading").show();
@@ -111,6 +112,7 @@ $(document).ready(
                     $("#no").show();
                     $("#validation").removeClass("has-success").addClass("has-error");
                     if(msg.responseJSON.length>0){
+                      $("#anunc").show();
 	                    $("#anunc").html( "<h3>URL ya ocupada. Sugerencias :<h3>");
 	          			var botones = "";
 	           			for(var i = 0; i<msg.responseJSON.length; i++)
@@ -214,7 +216,7 @@ $(document).ready(
                         }
                     });
                 });*/
-        
+
         $(".vc").click(function() {
         	if ($(this).attr("value")=="option1") {
         		$(".vcard").hide();
