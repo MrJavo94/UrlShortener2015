@@ -1,6 +1,28 @@
 $(document).ready(
-function() {
-    
+
+    function() {
+		$.ajax({
+			type : "GET",
+			url : "/connect/twitter/check",
+			success : function(msg) {
+				var custom = document.getElementsByName("custom");
+				if(msg.profileImageUrl!=null){
+					$("#tw_signin").hide();
+					$("#tw_div").html(
+							"<img src=\"" + msg.profileImageUrl + "\" alt=\"Image of Twitter\">"
+					);
+				}
+				else{
+
+				}
+
+			},
+			error : function() {
+				$("#result").html(
+						"<div class='alert alert-danger lead'>ERROR</div>");
+			}
+	});
+
     $(function () {
         $('.button-checkbox').each(
             function () {
@@ -70,6 +92,7 @@ function() {
       $("#personal").on('keyup change',
                 function(event) {
                 $("#recom").hide();
+                $("#anunc").hide();
                 $("#no").hide();
                 $("#yes").hide();
                 $("#loading").show();
@@ -89,6 +112,7 @@ function() {
                     $("#no").show();
                     $("#validation").removeClass("has-success").addClass("has-error");
                     if(msg.responseJSON.length>0){
+                      $("#anunc").show();
 	                    $("#anunc").html( "<h3>URL ya ocupada. Sugerencias :<h3>");
 	          			var botones = "";
 	           			for(var i = 0; i<msg.responseJSON.length; i++)
@@ -97,9 +121,9 @@ function() {
 				              botones += "<button id='" + seg + "' onclick='refrescarSugerencia(this.id)' type='button' class='btn btn-link'>" + seg + " </button>";
 				        }
 				        $("#recom").show();
-				        $("#recom").html(botones);     
-				        $("#recom").addClass("alert alert-success lead");    
-			        }          
+				        $("#recom").html(botones);
+				        $("#recom").addClass("alert alert-success lead");
+			        }
                 }
 
             });
@@ -111,7 +135,7 @@ function() {
                 alert("Nick cannot be blank");
                 // Prevent form submission
                 event.preventDefault();
-            }    
+            }
         });
 
         $("#shortener").submit(
@@ -146,7 +170,7 @@ function() {
                                 + "</a></div>"
                                 + "<h3>Código QR:</h3><img src=\"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+createQRData(msg.uri)+"\">");
                         }
-                        
+
                     },
                     error : function() {
                         $("#result").html(
@@ -154,7 +178,45 @@ function() {
                     }
                 });
             });
-        
+        /*
+        $("#tw_signin").submit(
+                function(event) {
+                    event.preventDefault();
+                    $.ajax({
+                        type : "POST",
+                        url : "/connect/twitter",
+                        success : function(msg) {
+                            var custom = document.getElementsByName("custom");
+                            if(msg.profileImageUrl!=null){
+                                $("#result").html(
+                                    "<h3>Aquí tiene su enlace acortado</h3>"
+                                    + "<div class='alert alert-success lead'><a target='_blank' href='"
+                                    + msg.uri
+                                    + "'>"
+                                    + msg.uri
+                                    + "</a></div></br><h3>Token: <h3>"
+                                    + " <div class='alert alert-success lead'>?token="
+                                    + msg.owner
+                                    + "</div>");
+                            }
+                            else{
+                                $("#result").html(
+                                    "<h3>Aquí tiene su enlace acortado</h3>"
+                                    + "<div class='alert alert-success lead'><a target='_blank' href='"
+                                    + msg.uri
+                                    + "'>"
+                                    + msg.uri
+                                    + "</a></div>");
+                            }
+
+                        },
+                        error : function() {
+                            $("#result").html(
+                                    "<div class='alert alert-danger lead'>ERROR</div>");
+                        }
+                    });
+                });*/
+
         $(".vc").click(function() {
         	if ($(this).attr("value")=="option1") {
         		$(".vcard").hide();
@@ -163,7 +225,9 @@ function() {
         		$(".vcard").show();
         	}
         });
+
 });
+
 
 // Function for adding email input
 $(function()
@@ -189,8 +253,8 @@ $(function()
 				return false;
 			});
 });
-    
-    
+
+
 function refrescarSugerencia(id) {
 	$("#personal").val(id);
 	 $("#personal").trigger("keyup");
@@ -206,7 +270,7 @@ function onSignIn(googleUser) {
 	// The ID token you need to pass to your backend:
 	var id_token = googleUser.getAuthResponse().id_token;
 	console.log("ID Token: " + id_token);
-	
+
 	var xhr = new XMLHttpRequest();
 	console.log('PROTOCOL: ' + window.location.protocol);
 	console.log('HOSTNAME: ' + window.location.hostname);
@@ -219,7 +283,6 @@ function onSignIn(googleUser) {
 	};
 	xhr.send('idtoken=' + id_token);
 }
-
 //Creates the data inside the QR
 function createQRData(uri) {
 	var optionQR = document.getElementsByName("optionQR");
@@ -237,4 +300,3 @@ function createQRData(uri) {
 		console.log('Entered unexpected state in QR option function');
 	}
 }
-

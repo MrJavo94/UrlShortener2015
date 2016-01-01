@@ -86,6 +86,7 @@ public class UrlShortenerControllerWithLogs {
 
 		logger.info("Requested redirection with hash " + id);
 		ShortURL l = shortURLRepository.findByHash(id);
+		logger.info(l == null ? "null" : "not null");
 		if (l != null) {
 			/*
 			 * Check Token

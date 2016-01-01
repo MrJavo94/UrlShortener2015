@@ -29,7 +29,7 @@ import urlshortener2015.imperialred.repository.UserRepository;
 @RestController
 public class UsersController {
 	
-	@Autowired
+//	@Autowired
 	protected UserRepository userRepository;
 	
 	private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
