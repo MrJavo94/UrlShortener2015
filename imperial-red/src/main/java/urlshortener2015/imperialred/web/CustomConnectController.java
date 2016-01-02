@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.NativeWebRequest;
 
+import urlshortener2015.imperialred.objects.User;
+import urlshortener2015.imperialred.repository.UserRepository;
+
 @Controller
 @Scope("session")
 @RequestMapping("/connect")
@@ -38,6 +41,9 @@ public class CustomConnectController extends ConnectController {
 	
 	@Autowired
 	private Google google;
+	
+	@Autowired
+	protected UserRepository userRepository;
 
 	private String mail;
 
@@ -58,16 +64,39 @@ public class CustomConnectController extends ConnectController {
 			boolean sd = facebook.isAuthorized();
 			logger.info("AUTH: " + sd);
 			logger.info("mail: " + mail);
+			
+			/* Checks if user is new by looking in db. If new, inserts it */
+			User existing = userRepository.findByMail(mail);
+			if (existing == null) {
+				/* Nick, password and twitter account are unknown but irrelevant */
+				userRepository.save(new User(mail, null, null, null));
+			}
 		} else if (providerId.equals("twitter")) {
 			twitter = (Twitter) connectionRepository.getPrimaryConnection(Twitter.class).getApi();
 			String twitterName = twitter.userOperations().getUserProfile().getScreenName();
-			/* GUARDADO EN LA BASE DE DATOS DEL PAR TWITTER-MAIL */
-			// TODO
-			/* HACER */
+			String mail = ""; // TODO: Retrieve mail
+			
+			/* Checks if user is new in db. If new, inserts it */
+			User existing = userRepository.findByMail(mail);
+			if (existing == null) {
+				/* Nick and password are irrelevant */
+				userRepository.save(new User(mail, null, null, twitterName));
+			} else if (existing.getTwitter() == null) {
+				/* User may be signed-in by another means, so we add twitter account to it */
+				userRepository.save(new User(existing.getMail(), existing.getNick(),
+						existing.getPassword(), twitterName));
+			}
 		} else if (providerId.equals("google")){
 			google = (Google) connectionRepository.getPrimaryConnection(Google.class).getApi();
 			String mail = google.plusOperations().getGoogleProfile().getAccountEmail();
 			logger.info("Mail: " + mail);
+			
+			/* Checks if user is new by looking in db. If new, inserts it */
+			User existing = userRepository.findByMail(mail);
+			if (existing == null) {
+				/* Nick, password and twitter account are unknown but irrelevant */
+				userRepository.save(new User(mail, null, null, null));
+			}
 		}
 		
 		connectionRepository.removeConnections(providerId);
