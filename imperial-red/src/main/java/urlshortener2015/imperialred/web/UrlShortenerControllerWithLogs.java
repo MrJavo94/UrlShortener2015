@@ -45,6 +45,7 @@ import urlshortener2015.imperialred.objects.Ip;
 import urlshortener2015.imperialred.objects.ShortURL;
 import urlshortener2015.imperialred.objects.Synonym;
 import urlshortener2015.imperialred.objects.User;
+import urlshortener2015.imperialred.repository.AlertRepository;
 import urlshortener2015.imperialred.repository.ClickRepository;
 import urlshortener2015.imperialred.repository.IpRepository;
 import urlshortener2015.imperialred.repository.ShortURLRepository;
@@ -64,6 +65,9 @@ public class UrlShortenerControllerWithLogs {
 	
 	@Autowired
 	protected UserRepository userRepository;
+	
+	@Autowired
+	protected AlertRepository alertRepository;
 
 	/**
 	 * The HTTP {@code Referer} header field name.
@@ -135,10 +139,15 @@ public class UrlShortenerControllerWithLogs {
 			@RequestParam(value = "expire", required = false) String expireDate,
 			@RequestParam(value = "hasToken", required = false) String hasToken,
 			@RequestParam(value = "emails[]", required = false) String[] emails,
+			@RequestParam(value = "alert_email", required = false) String alertEmail,
+			@RequestParam(value = "days", required = false) String days,
 			HttpServletRequest request) throws Exception {
 		ShortURL su = createAndSaveIfValid(url, custom, hasToken, expireDate,
 				extractIP(request), emails);
 		if (su != null) {
+			if (expireDate != "") {
+				      /* TODO: calculate alert date and insert alert */
+			}
 			HttpHeaders h = new HttpHeaders();
 			h.setLocation(su.getUri());
 			return new ResponseEntity<>(su, h, HttpStatus.CREATED);
