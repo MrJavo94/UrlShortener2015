@@ -58,7 +58,7 @@ public class SystemTests {
 
 	@Test
 	public void testCreateLink() throws Exception {
-		ResponseEntity<String> entity = postLink("http://example.com/", null, null, null);
+		ResponseEntity<String> entity = postLink("http://example.com/", null, null, null, null);
 		assertThat(entity.getStatusCode(), is(HttpStatus.CREATED));
 		assertThat(entity.getHeaders().getLocation(), is(new URI("http://localhost:" + this.port + "/f684a3c4")));
 		assertThat(entity.getHeaders().getContentType(),
@@ -72,7 +72,7 @@ public class SystemTests {
 
 	@Test
 	public void testRedirection() throws Exception {
-		postLink("http://example.com/", null, null, null);
+		postLink("http://example.com/", null, null, null, null);
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
 		parts.add("token", null);
 		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/f684a3c4",
@@ -84,7 +84,7 @@ public class SystemTests {
 
 	@Test
 	public void testRedirectionCustom() throws Exception {
-		postLink("http://example.com/", "hola", null, null);
+		postLink("http://example.com/", "hola", null, null, null);
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
 		parts.add("token", null);
 		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/hola",
@@ -96,7 +96,7 @@ public class SystemTests {
 
 	@Test
 	public void testRedirectionExpireOK() throws Exception {
-		postLink("http://example.com/", null, "2500-05-05", null);
+		postLink("http://example.com/", null, "2500-05-05", null, null);
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
 		parts.add("token", null);
 		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/f684a3c4",
@@ -108,7 +108,7 @@ public class SystemTests {
 
 	@Test
 	public void testRedirectionExpireBAD() throws Exception {
-		postLink("http://example.com/", null, "2014-01-01", null);
+		postLink("http://example.com/", null, "2014-01-01", null, null);
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
 		parts.add("token", null);
 		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/f684a3c4",
@@ -118,7 +118,7 @@ public class SystemTests {
 
 	@Test
 	public void testRedirectionTokenOK() throws Exception {
-		ResponseEntity<String> entityPost = postLink("http://example.com/", null, null, "true");
+		ResponseEntity<String> entityPost = postLink("http://example.com/", null, null, "true", null);
 		ReadContext rc = JsonPath.parse(entityPost.getBody());
 		String token = rc.read("$.owner");
 		ResponseEntity<?> entity = new TestRestTemplate()
@@ -129,19 +129,21 @@ public class SystemTests {
 	}
 	@Test
 	public void testRedirectionTokenBAD() throws Exception {
-		postLink("http://example.com/", null, null, "true");
+		postLink("http://example.com/", null, null, "true", null);
 		ResponseEntity<?> entity = new TestRestTemplate()
 				.getForEntity("http://localhost:" + this.port + "/f684a3c4?token=1", String.class);
 		assertThat(entity.getStatusCode(), is(HttpStatus.BAD_REQUEST));
 
 	}
 
-	private ResponseEntity<String> postLink(String url, String custom, String expire, String token) {
+	private ResponseEntity<String> postLink(String url, String custom, String expire, String token,
+			String[] emails) {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
 		parts.add("url", url);
 		parts.add("custom", custom);
 		parts.add("expire", expire);
 		parts.add("hasToken", token);
+		parts.add("emails[]", emails);
 		ResponseEntity<String> entity = new TestRestTemplate().postForEntity("http://localhost:" + this.port + "/link",
 				parts, String.class);
 		return entity;

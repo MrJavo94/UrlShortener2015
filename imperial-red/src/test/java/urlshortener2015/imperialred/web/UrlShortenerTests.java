@@ -69,11 +69,11 @@ public class UrlShortenerTests {
 	@Test
 	public void thatShortenerCreatesARedirectIfTheURLisOK() throws Exception {
 		configureTransparentSave();
-
+		
 		mockMvc.perform(
 				post("/link").param("url", "http://example.com/")
 						.param("custom", "hola").param("expire", "8888-88-88")
-						.param("hasToken", "true")).andDo(print())
+						.param("hasToken", "true").param("emails[]", "")).andDo(print())
 				.andExpect(redirectedUrl("http://localhost/hola"))
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.hash", is("hola")))
