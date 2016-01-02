@@ -29,7 +29,7 @@ import urlshortener2015.imperialred.repository.UserRepository;
 @RestController
 public class UsersController {
 	
-//	@Autowired
+	@Autowired
 	protected UserRepository userRepository;
 	
 	private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
@@ -40,6 +40,7 @@ public class UsersController {
 	 * TODO: Handle exceptions properly
 	 * TODO: Change hard-coded values
 	 * TODO: Return response to XHR (js function in index.html)
+	 * XXX: CURRENTLY NOT USED
 	 */
 	@RequestMapping(value = "/google-login", method = RequestMethod.POST)
 	public void googleLogin(@RequestParam(value = "idtoken", required = true) String idTokenString) {
@@ -92,7 +93,7 @@ public class UsersController {
 		System.out.println(mail);
 		System.out.println(nick);
 		System.out.println(password);
-		User user = new User(mail, nick, password, null, null);
+		User user = new User(mail, nick, password, null);
 		return userRepository.save(user);
 	}
 	

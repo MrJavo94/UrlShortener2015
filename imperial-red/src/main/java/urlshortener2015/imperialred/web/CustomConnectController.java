@@ -67,7 +67,7 @@ public class CustomConnectController extends ConnectController {
 		} else if (providerId.equals("google")){
 			google = (Google) connectionRepository.getPrimaryConnection(Google.class).getApi();
 			String mail = google.plusOperations().getGoogleProfile().getAccountEmail();
-			logger.info("Mail: " + google.plusOperations().getGoogleProfile().getAccountEmail());
+			logger.info("Mail: " + mail);
 		}
 		
 		connectionRepository.removeConnections(providerId);
