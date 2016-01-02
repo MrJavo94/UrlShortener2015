@@ -33,6 +33,7 @@
 			<p class="lead">A front-end example page for the project</p>
 			<br>
 			<form class="col-lg-12" role="form" id="shortener" action="">
+				<!-- URL -->
 				<div class="row">
 					<div class="input-group input-group-lg col-sm-offset-2 col-sm-8">
 						<input type="text" class="center-block form-control input-lg"
@@ -43,6 +44,7 @@
 						-->
 					</div>
 				</div>
+				<!-- Token Checkbox -->
 				<div class="row">
 					<div class="checkbox col-lg-offset-2 col-lg-8 text-center  bg-info">
 						<label>
@@ -51,6 +53,7 @@
 						</label>
 					</div>
 				</div>
+				<!-- Custom URL -->
 				<div class="row">
 					<div class="col-sm-8"></div>
 					<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
@@ -72,6 +75,7 @@
 						</div>
 					</div>
 				</div>
+				<!-- Recommendations (hidden) -->
 				<div class="row">
 					<div class="col-lg-12 text-center">
 						<div class="col-sm-offset-2 col-sm-8 text-center">
@@ -80,13 +84,36 @@
 						</div>
 					</div>
 				</div>
+				<!-- Expire Date -->
 				<div class="row">
 					<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
 						<h3>Select an expire date (or leave it blank)</h3>
 						<input type="date" class="center-block form-control input-lg"
-							title="Expire Date" name="expire">
+							title="Expire Date" name="expire">		
 					</div>
 				</div>
+				<!-- Alert Email -->
+				<div class="row" style="margin-top: 15px">
+					<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
+						<p class="lead"><small>We will alert you to the following address when your link is about to expire</small></p>
+						<input type="text" class="center-block form-control input-lg"
+							title="Alert Email" placeholder="Enter the email where you want to receive the alert" name="alert_email">
+					</div>		
+				</div>
+				<!-- Days Before Expiring -->
+				<!-- I have no idea what im doing with bootstrap in this part -->
+				<div class="row" style="margin-top: 15px">
+					<label class="col-lg-offset-3 col-lg-3">Days before expiring</label>
+					<div class="col-lg-3">
+						<select class="form-control">
+							<option>1</option>
+							<option>7</option>
+							<option>15</option>
+							<option>30</option>
+						</select>
+					</div>						
+				</div>
+				<!-- Emails for Private Links -->
 				<div class="row" style="margin-top: 15px">
 					<h3>Private link? Insert emails allowed to open it</h3>
 					<p class="lead"><small>If no emails are inserted, link will be public</small></p>
@@ -101,7 +128,8 @@
 						</div>
 					</div>
 				</div>
-								<div class="row" style="margin-top: 15px">
+				<!-- QR Code -->
+				<div class="row" style="margin-top: 15px">
 					<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
 						<h3>Need a QR code to access the link?</h3>
 						<div class="radio">
@@ -118,6 +146,7 @@
 						</div>
 					</div>
 				</div>
+				<!-- vCard Options (hidden) -->
 				<div class="row">
 					<div class="vcard" style="display: none">
 						<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
@@ -128,6 +157,7 @@
 						</div>
 					</div>
 				</div>
+				<!-- Submit Button -->
 				<div class="row" style="margin-top: 15px;">
 					<br>
 					<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
@@ -135,11 +165,12 @@
 						</button>
 					</div>
 				</div>
+				<!-- Resulting URL and QR (hidden) -->
 				<div class="row">
-						<div class="col-lg-offset-2 col-lg-8 text-center">
-							<br />
-							<div id="result"></div>
-						</div>
+					<div class="col-lg-offset-2 col-lg-8 text-center">
+						<br />
+						<div id="result"></div>
+					</div>
 				</div>
 			</form>
 		</div>	
