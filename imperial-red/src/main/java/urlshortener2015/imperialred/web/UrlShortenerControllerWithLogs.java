@@ -44,9 +44,11 @@ import urlshortener2015.imperialred.objects.Click;
 import urlshortener2015.imperialred.objects.Ip;
 import urlshortener2015.imperialred.objects.ShortURL;
 import urlshortener2015.imperialred.objects.Synonym;
+import urlshortener2015.imperialred.objects.User;
 import urlshortener2015.imperialred.repository.ClickRepository;
 import urlshortener2015.imperialred.repository.IpRepository;
 import urlshortener2015.imperialred.repository.ShortURLRepository;
+import urlshortener2015.imperialred.repository.UserRepository;
 
 @RestController
 public class UrlShortenerControllerWithLogs {
@@ -59,6 +61,9 @@ public class UrlShortenerControllerWithLogs {
 
 	@Autowired
 	protected IpRepository ipRepository;
+	
+	@Autowired
+	protected UserRepository userRepository;
 
 	/**
 	 * The HTTP {@code Referer} header field name.
@@ -129,9 +134,10 @@ public class UrlShortenerControllerWithLogs {
 			@RequestParam(value = "custom", required = false) String custom,
 			@RequestParam(value = "expire", required = false) String expireDate,
 			@RequestParam(value = "hasToken", required = false) String hasToken,
+			@RequestParam(value = "emails[]", required = false) String[] emails,
 			HttpServletRequest request) throws Exception {
 		ShortURL su = createAndSaveIfValid(url, custom, hasToken, expireDate,
-				extractIP(request));
+				extractIP(request), emails);
 		if (su != null) {
 			HttpHeaders h = new HttpHeaders();
 			h.setLocation(su.getUri());
@@ -238,10 +244,12 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	/**
-	 * Creacion y guardado de la URL
+	 * If shortURL is valid, creates it and saves it
+	 * XXX: at the moment, it just ignores unknown emails, with no
+	 * feedback for users.
 	 */
 	protected ShortURL createAndSaveIfValid(String url, String custom,
-			String hasToken, String expireDate, String ip) {
+			String hasToken, String expireDate, String ip, String[] emails) {
 
 		UrlValidator urlValidator = new UrlValidator(new String[] { "http",
 				"https" });
@@ -260,11 +268,6 @@ public class UrlShortenerControllerWithLogs {
 			else {
 				id = custom;
 			}
-
-			/*
-			 * If exists, it isnt created
-			 */
-			// if (shortURLRepository.findByHash(id) == null) {
 
 			/*
 			 * Has Token
@@ -288,24 +291,45 @@ public class UrlShortenerControllerWithLogs {
 					logger.info("Fecha mal introducida");
 				}
 			}
+			
+			/*
+			 * Checks every mail inserted by the user, and maintains a
+			 * list with those corresponding to registered users.
+			 */
+			List<String> trueEmails = new ArrayList<String>();
+			for (int i=0; i<emails.length; i++) {
+				if (!emails[i].equals("")) {
+					User foundUser = userRepository.findByMail(emails[i]);
+					if (foundUser != null) {
+						trueEmails.add(foundUser.getMail());
+					}
+				}
+			}
+			
+			/*
+			 * If no valid emails are introduced, link will be public and
+			 * it wont have an email list.
+			 */
+			boolean isPrivate = false;
+			if (trueEmails.size() > 0) {
+				isPrivate = true;
+			} else {
+				trueEmails = null;
+			}
 
 			/*
-			 * Creacion del objeto ShortURL
+			 * Creates ShortURL object
 			 */
-
 			ShortURL su = new ShortURL(id, url, linkTo(
 					methodOn(UrlShortenerControllerWithLogs.class).redirectTo(
 							id, null, null,null)).toUri(), new Date(
 					System.currentTimeMillis()), expire, owner,
-					HttpStatus.TEMPORARY_REDIRECT.value(), ip, null);
+					HttpStatus.TEMPORARY_REDIRECT.value(), ip, null, isPrivate, trueEmails);
+			
 			/*
 			 * Insert to DB
 			 */
 			return shortURLRepository.save(su);
-
-			/*
-			 * } else { return null; }
-			 */
 		}
 		else {
 			return null;
