@@ -1,5 +1,9 @@
 package urlshortener2015.imperialred.mail;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Properties;
@@ -16,6 +20,8 @@ import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 
 import urlshortener2015.imperialred.objects.Alert;
 
@@ -28,8 +34,8 @@ public class MailSender {
 			"\nThis is your shortened link: ";
 	private final String MSG_2 = "\n\nThanks for using Imperial Red's URL Shortener.";
 	
-	private final String USERNAME = "mailingalerts.imperialred@gmail.com";
-	private final String PASSWORD = "camposfabratardos";
+	private String username;	
+	private String password;
 	
 	private String mail;
 	private String url;
@@ -39,6 +45,19 @@ public class MailSender {
 		mail = a.getMail();
 		url = a.getUrl();	
 		msgBody = MSG_1 + url + MSG_2;
+		
+		Properties p = new Properties();
+		try {
+			InputStream input = new FileInputStream("src/main/resources/application.properties");
+			p.load(input);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		username = p.getProperty("mail.user");
+		password = p.getProperty("mail.password");
 	}
 	
 	/**
@@ -57,14 +76,14 @@ public class MailSender {
         Session session = Session.getDefaultInstance(props, 
         		new Authenticator() {
         			protected PasswordAuthentication getPasswordAuthentication() {
-        				return new PasswordAuthentication(USERNAME, PASSWORD);
+        				return new PasswordAuthentication(username, password);
         			}
         });
-        
+        logger.info("test " + username + " " + password);
         try {
         	/* Creates the message sets its data */
         	Message msg = new MimeMessage(session);
-        	msg.setFrom(new InternetAddress("ired@gmail.com", "Imperial Red Admin"));
+        	msg.setFrom(new InternetAddress(username, "Imperial Red Admin"));
         	msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
         			mail, "Dear User"));
         	msg.setSubject("Your shortened link is about to expire");
