@@ -22,11 +22,11 @@ public class MailingScheduler {
 	
 	
 	/**
-	 * Every 10 seconds, a new thread is created. It looks for the oldest alert
+	 * Every <fixedRate> ms, a new thread is created. It looks for the oldest alert
 	 * in the database and, if older than today, sends a mail to the creator.
 	 */
 	@Async
-	@Scheduled(initialDelay=10000, fixedRate=10000)
+	@Scheduled(initialDelay=10000, fixedRate=60000)
 	public void checkForAlerts() {
 		Alert firstAlert = alertRepository.findFirstByOrderByDate();
 		Date firstDate = firstAlert.getDate();
@@ -40,7 +40,17 @@ public class MailingScheduler {
 			 * TODO: this interaction should be SOAP
 			 */
 			MailSender ms = new MailSender(firstAlert);
-			ms.send();
+			boolean sent = ms.send();
+			
+			/*
+			 * Only deletes alert if sent
+			 * XXX: This may be dangerous if, for some reason, a mail is not sent
+			 */
+			if (sent) {
+				alertRepository.delete(firstAlert);
+			} else {
+				logger.info("Mail could not be sent");
+			}
 		}
 	}
 	

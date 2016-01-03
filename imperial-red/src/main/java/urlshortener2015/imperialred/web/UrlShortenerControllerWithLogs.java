@@ -152,9 +152,9 @@ public class UrlShortenerControllerWithLogs {
 			/* If there is an expire date, it sets an alert */
 			if (!expireDate.equals("")) {
 				Date alertDate = processAlertDate(expireDate, days);
-				logger.info("Alert date: " + alertDate);
+				logger.info("New alert date: " + alertDate);
 				
-				Alert alert = new Alert(alertEmail, url, alertDate);
+				Alert alert = new Alert(alertEmail, su.getUri().toString(), alertDate);
 				alertRepository.save(alert);
 			}
 			HttpHeaders h = new HttpHeaders();

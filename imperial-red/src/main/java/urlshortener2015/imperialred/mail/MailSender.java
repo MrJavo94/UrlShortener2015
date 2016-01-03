@@ -4,8 +4,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Properties;
 
+import javax.mail.Authenticator;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
@@ -26,6 +28,9 @@ public class MailSender {
 			"\nThis is your shortened link: ";
 	private final String MSG_2 = "\n\nThanks for using Imperial Red's URL Shortener.";
 	
+	private final String USERNAME = "mailingalerts.imperialred@gmail.com";
+	private final String PASSWORD = "camposfabratardos";
+	
 	private String mail;
 	private String url;
 	private String msgBody;
@@ -40,10 +45,21 @@ public class MailSender {
 	 * Given the url in the alert and the mail introduced by the user, it
 	 * sends an email to that address informing of the near expiration.
 	 */
-	public void send() {
-		/* Message needs a session object. This configures it by default */
+	public boolean send() {
+		/* Configures Gmail properties */
 		Properties props = new Properties();
-        Session session = Session.getDefaultInstance(props, null);
+		props.put("mail.smtp.port", "587");
+		props.put("mail.smtp.auth", "true");
+		props.put("mail.smtp.starttls.enable", "true");
+		props.put("mail.smtp.host", "smtp.gmail.com");
+		
+		/* Sets an authenticator for opening session in Gmail account */
+        Session session = Session.getDefaultInstance(props, 
+        		new Authenticator() {
+        			protected PasswordAuthentication getPasswordAuthentication() {
+        				return new PasswordAuthentication(USERNAME, PASSWORD);
+        			}
+        });
         
         try {
         	/* Creates the message sets its data */
@@ -56,12 +72,18 @@ public class MailSender {
         	
         	/* Sends the message */
         	Transport.send(msg);
+        	logger.info("Mail sent to " + mail);
+        	return true;
         } catch (AddressException e) {
         	logger.info("AddressException when sending mail");
+        	e.printStackTrace();
         } catch (MessagingException e) {
         	logger.info("MessagingException when sending mail");
+        	e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
         	logger.info("UnsupportedEncodingException when sending mail");
+        	e.printStackTrace();
 		}
+        return false;
 	}
 }

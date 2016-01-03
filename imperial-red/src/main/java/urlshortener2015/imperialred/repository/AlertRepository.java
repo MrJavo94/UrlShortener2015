@@ -12,4 +12,6 @@ public interface AlertRepository extends MongoRepository<Alert, BigInteger> {
 	
 	Alert findFirstByOrderByDate();
 	
+	void delete(Alert a);
+	
 }
