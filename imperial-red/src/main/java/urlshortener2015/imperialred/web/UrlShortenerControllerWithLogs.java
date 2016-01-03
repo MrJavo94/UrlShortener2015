@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +43,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mongodb.DBObject;
 
 import urlshortener2015.imperialred.exception.CustomException;
+import urlshortener2015.imperialred.objects.Alert;
 import urlshortener2015.imperialred.objects.Click;
 import urlshortener2015.imperialred.objects.Ip;
 import urlshortener2015.imperialred.objects.ShortURL;
@@ -145,8 +149,13 @@ public class UrlShortenerControllerWithLogs {
 		ShortURL su = createAndSaveIfValid(url, custom, hasToken, expireDate,
 				extractIP(request), emails);
 		if (su != null) {
-			if (expireDate != "") {
-				      /* TODO: calculate alert date and insert alert */
+			/* If there is an expire date, it sets an alert */
+			if (!expireDate.equals("")) {
+				Date alertDate = processAlertDate(expireDate, days);
+				logger.info("Alert date: " + alertDate);
+				
+				Alert alert = new Alert(alertEmail, url, alertDate);
+				alertRepository.save(alert);
 			}
 			HttpHeaders h = new HttpHeaders();
 			h.setLocation(su.getUri());
@@ -155,6 +164,18 @@ public class UrlShortenerControllerWithLogs {
 		else {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
+	}
+
+	/**
+	 * Given an expire date for a link and the previous days for the
+	 * alert to be sent, calculates the date in which the alert will be sent.
+	 * Since the user does not specify a time, it is set to 00:00.
+	 */
+	private Date processAlertDate(String expireDate, String days) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		LocalDate expireLocal = LocalDate.parse(expireDate, formatter);
+		LocalDate alertLocal = expireLocal.minusDays(Long.parseLong(days));
+		return Date.from(alertLocal.atStartOfDay(ZoneId.systemDefault()).toInstant());
 	}
 
 	@RequestMapping(value = "/rec/rec", method = RequestMethod.GET)
