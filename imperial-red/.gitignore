@@ -5,3 +5,4 @@
 /.project
 /.DS_Store
 /src/main/resources/application.properties
+/src/main/resources/auth.properties
