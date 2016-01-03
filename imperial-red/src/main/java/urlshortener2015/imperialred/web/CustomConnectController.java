@@ -55,6 +55,9 @@ import org.springframework.web.util.WebUtils;
 import urlshortener2015.imperialred.config.SocialConfig;
 import urlshortener2015.imperialred.objects.ShortURL;
 
+import urlshortener2015.imperialred.objects.User;
+import urlshortener2015.imperialred.repository.UserRepository;
+
 @Controller
 @Scope("session")
 @RequestMapping("/connect")
@@ -70,6 +73,9 @@ public class CustomConnectController extends ConnectController {
 	
 	@Autowired
 	private Google google;
+	
+	@Autowired
+	protected UserRepository userRepository;
 
 	private String mail;
 
@@ -216,8 +222,7 @@ public class CustomConnectController extends ConnectController {
 //			String mail = google.plusOperations().getGoogleProfile().getAccountEmail();
 //			logger.info("Mail: " + google.plusOperations().getGoogleProfile().getAccountEmail());
 //		}
-		
-		//connectionRepository.removeConnections(providerId);
+//		connectionRepository.removeConnections(providerId);
 		
 		if(deleting){
 			return "";

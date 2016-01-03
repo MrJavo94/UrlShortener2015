@@ -109,6 +109,10 @@ dependencies {
 	// WebSocket
 	compile 'org.springframework.boot:spring-boot-starter-websocket'
 	compile 'org.springframework:spring-messaging'
+	
+	// Java Mail (requires API + implementation separated for some reason)
+	compile 'javax.mail:javax.mail-api:1.5.4'
+	compile 'com.sun.mail:javax.mail:1.5.4'
 
     // Testing framework
     testCompile 'junit:junit:4.12'
