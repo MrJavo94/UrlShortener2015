@@ -26,9 +26,9 @@ public class MailingScheduler {
 	 * in the database and, if older than today, sends a mail to the creator.
 	 */
 	@Async
-	@Scheduled(fixedRate=10000)
+	@Scheduled(initialDelay=10000, fixedRate=10000)
 	public void checkForAlerts() {
-		Alert firstAlert = alertRepository.findOneOrderByDate();
+		Alert firstAlert = alertRepository.findFirstByOrderByDate();
 		Date firstDate = firstAlert.getDate();
 		Date now = new Date();
 		
