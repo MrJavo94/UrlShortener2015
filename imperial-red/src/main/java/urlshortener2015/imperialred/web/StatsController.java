@@ -36,6 +36,7 @@ public class StatsController {
 
 	@Autowired
 	ShortURLRepository shortURLRepository;
+	
 
 	private static final Logger logger = LoggerFactory.getLogger(StatsController.class);
 
@@ -52,7 +53,8 @@ public class StatsController {
 		if (l != null) {
 			model.addAttribute("target", l.getTarget());
 			model.addAttribute("date", l.getCreated());
-			model.addAttribute("clicks", clickRepository.clicksByHash(l.getHash(), from, to));
+			long click=clickRepository.clicksByHash(l.getHash(), from, to);
+			model.addAttribute("clicks", click);
 			model.addAttribute("from", from);
 			model.addAttribute("to", to);
 
@@ -88,7 +90,7 @@ public class StatsController {
 	 * Converts a ResultsByGroup JSON text into a text array of elements in a
 	 * format suitable for Google Charts API.
 	 */
-	private String processCountryJSON(String text) {
+	public static String processCountryJSON(String text) {
 		String res = "[[\"Country\",\"Clicks\"]";
 		text = text.replace("[", "").replace("]", "").replace("{", "").replace("}", "").replace(" ", "");
 		String[] parts = text.split(",");

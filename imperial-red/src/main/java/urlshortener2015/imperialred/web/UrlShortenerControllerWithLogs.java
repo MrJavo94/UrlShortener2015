@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -44,6 +45,7 @@ import urlshortener2015.imperialred.objects.Click;
 import urlshortener2015.imperialred.objects.Ip;
 import urlshortener2015.imperialred.objects.ShortURL;
 import urlshortener2015.imperialred.objects.Synonym;
+import urlshortener2015.imperialred.objects.WebSocketsData;
 import urlshortener2015.imperialred.repository.ClickRepository;
 import urlshortener2015.imperialred.repository.IpRepository;
 import urlshortener2015.imperialred.repository.ShortURLRepository;
@@ -59,6 +61,9 @@ public class UrlShortenerControllerWithLogs {
 
 	@Autowired
 	protected IpRepository ipRepository;
+	
+	@Autowired
+	private SimpMessagingTemplate template;
 
 	/**
 	 * The HTTP {@code Referer} header field name.
@@ -112,6 +117,12 @@ public class UrlShortenerControllerWithLogs {
 				else {
 					createAndSaveClick(id, request);
 					updateMapStats();
+					long click=clickRepository.clicksByHash(l.getHash(), null, null);
+					DBObject groupObject = clickRepository.getClicksByCountry(id, null, null).getRawResults();
+					String list = groupObject.get("retval").toString();
+					String countryData = StatsController.processCountryJSON(list);
+					WebSocketsData wb=new WebSocketsData(click, countryData);
+					this.template.convertAndSend("/topic/"+id, wb);
 					return createSuccessfulRedirectToResponse(l);
 				}
 			}

@@ -15,28 +15,42 @@
 		google.setOnLoadCallback(drawRegionsMap);
 
 		function drawRegionsMap() {
+			console.log(${clicksByCountry});
 			var data = google.visualization.arrayToDataTable(${clicksByCountry});
 			var options = {};
 			var chart = new google.visualization.GeoChart(document.getElementById('geo_chart'));
 			chart.draw(data, options);
 		}
 		
-		function drawRegionsMap2(newdata) {
+		function drawRegionsMap2(jander) {
 			console.log('Updating in client');
-			var data = google.visualization.arrayToDataTable(newdata);
+			console.log(jander);
+			var data = google.visualization.arrayToDataTable(jander);
 			var options = {};
 			var chart = new google.visualization.GeoChart(document.getElementById('geo_chart'));
 			chart.draw(data, options);
 		}
-		
+		function showStats(message) {
+            var clicks=document.createTextNode("Clicks " + message);
+            var old=document.getElementById('clicks');
+            old.replaceChild(clicks, old.childNodes[0]);
+        }
+
 		function init() {
-			var socket = new SockJS('/hello');
+			var socket = new SockJS('/stats');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function(frame) {
-                console.log('Connected: ' + frame);
-                stompClient.subscribe('/topic/greetings', function(newdata){
+            	var urlActual= document.URL.split("/");
+			    var idActual=urlActual[3].substring(0, urlActual[3].length-1);
+			    var subscripcion='/topic/'+idActual;
+			    console.log(idActual);
+                console.log('Connected to: ' + frame);
+                stompClient.subscribe(subscripcion, function(newdata){
                 	console.log('message arrived');
-                    drawRegionsMap2(newdata);
+                	var clicks=JSON.parse(newdata.body).clicks;
+                	var clicksBy=JSON.parse(newdata.body).clicksByCountry;
+                    showStats(clicks);
+                    drawRegionsMap2(clicksBy);
                 });
             });
             console.log('Ok');
@@ -55,9 +69,9 @@
               <h3 class="panel-title">Statistics</h3>
             </div>
             <div class="panel-body">
-              <p>Target ${target}</p>
-              <p>Created date ${date}</p>
-              <p>Clicks ${clicks}</p>
+              <div id="target">Target ${target}</div>
+              <div id="date">Created date ${date}</div>
+              <div id="clicks">Clicks ${clicks}</div>
 			  <div id="show_from">From ${from}</div>
 			  <div id="show_to">To ${to}</div>
             </div>
