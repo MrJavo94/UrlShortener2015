@@ -132,11 +132,12 @@ public class MongoConnectionRepository implements ConnectionRepository {
     public <A> Connection<A> getPrimaryConnection(final Class<A> apiType) {
         final String providerId = getProviderId(apiType);
         final Connection<A> connection = (Connection<A>) findPrimaryConnection(providerId);
-        if (connection == null) {
+/*        if (connection == null) {
             throw new NotConnectedException(providerId);
         } else {
             return connection;
-        }
+        }*/
+        return connection;
     }
 
     @Override

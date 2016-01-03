@@ -141,6 +141,8 @@ public class UrlShortenerControllerWithLogs {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	
 
 	@RequestMapping(value = "/rec/rec", method = RequestMethod.GET)
 	public ResponseEntity<ArrayList<String>> recomendaciones(

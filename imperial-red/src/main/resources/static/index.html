@@ -6,8 +6,10 @@
 		<meta name="google-signin-scope" content="profile email">
 		<meta name="google-signin-client_id" content="152937226054-ajhhaao7c41md0p7mrti9pgrcaag6nf7.apps.googleusercontent.com">
 		<script src="https://apis.google.com/js/platform.js" async defer></script>
-		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/3.3.5/css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="webjars/bootstrap/3.3.5/css/bootstrap.css" />
+		<link rel="stylesheet" type="text/css" href="/css/font-awesome.css" />
 		<link rel="stylesheet" type="text/css" href="/css/estilos.css" />
+		<link rel="stylesheet" type="text/css" href="/css/bootstrap-social.css" />
 		<script type="text/javascript" src="webjars/jquery/2.1.4/jquery.min.js"></script>
 		<script type="text/javascript" src="webjars/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="js/app.js"></script>
@@ -144,7 +146,8 @@
 
 		<!-- ZONA DE JORGE   -->
 				<div class=".col-lg-2">
-					<h2>Please Sign In</h2>
+					<div id="sign-in-buttons" class=".col-lg-2"></div>
+					<h2 id="sign-in-message">Please Sign In</h2>
 
 					<!--<div class="input-group">
 						<!--<span class="input-group-addon addon-google">
@@ -160,9 +163,11 @@
 							<i class="fa fa-fw fa-2x fa-google fa-fw"></i>
 						</span>-->
 						<form id="gl_signin" action="/connect/google" method="POST">
-							<button type="submit">
-						    	<img src="http://ucollect.biz/wp-content/uploads/2015/03/Red-signin_Long_base_44dp.png" alt="Sign in with Google" style="width: 150px;">
-						  	</button>
+							<button class="social-button" type="submit">
+								<a class="btn btn-block btn-social btn-google">
+									<span class="fa fa-google"></span> Sign in with Google
+								</a>
+							</button>
 						</form>
 					</div>
 
@@ -174,31 +179,27 @@
 						</span>-->
 						<form id="fb_signin" action="/connect/facebook" method="POST">
 							<input type="hidden" name="scope" value="email"/>
-							<button type="submit">
-								<div class="" data-max-rows="1" data-size="large" data-show-faces="false" data-auto-logout-link="false">
-									Sign in with Facebook
-								</div>
+							<button class="social-button" type="submit">
+								<a class="btn btn-block btn-social btn-facebook">
+									<span class="fa fa-facebook"></span> Sign in with Facebook
+								</a>
 							</button>
 						</form>
 					</div>
 
 					<br>
 
-					<a class="btn btn-block btn-social btn-twitter">
-						<span class="fa fa-twitter"></span> Sign in with Twitter
-					</a>
-
 					<div id="tw_div" class="input-group">
 						<!--<span class="input-group-addon addon-twitter">
 							<i class="fa fa-fw fa-2x fa-twitter fa-fw"></i>
 						</span>-->
 						<form id="tw_signin" action="/connect/twitter" method="POST">
-							<input type="hidden"
-		       					name="${_csrf.parameterName}"
-		        				value="${_csrf.token}"/>
-						  	<button type="submit">
-						    	<img src="https://g.twimg.com/dev/sites/default/files/images_documentation/sign-in-with-twitter-gray.png" alt="Sign in with Twitter">
-						  	</button>
+										<button class="social-button" type="submit">
+											<a class="btn btn-block btn-social btn-twitter">
+												<span class="fa fa-twitter"></span> Sign in with Twitter
+											</a>
+								    	<!--<img src="https://g.twimg.com/dev/sites/default/files/images_documentation/sign-in-with-twitter-gray.png" alt="Sign in with Twitter">-->
+								  	</button>
 						</form>
 					</div>
 				</div>
