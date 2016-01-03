@@ -91,11 +91,17 @@ dependencies {
     // Social Web
     compile 'org.springframework.social:spring-social-web:1.1.4.RELEASE'
     
+    // Social Security
+    compile "org.springframework.social:spring-social-security:1.1.4.RELEASE"
+    
+    // Social Configurer
+    compile "org.springframework.social:spring-social-config:1.1.4.RELEASE"
+    
     // Spring Security
-    //compile 'org.springframework.security:spring-security-web:4.0.3.RELEASE'
+    compile 'org.springframework.security:spring-security-web:4.0.3.RELEASE'
      
     // Spring Security Config
-    //compile 'org.springframework.security:spring-security-config:4.0.3.RELEASE'
+    compile 'org.springframework.security:spring-security-config:4.0.3.RELEASE'
     
     // Spring Security REST plugin
     //compile 'org.grails.plugins:spring-security-rest:1.5.0.M1'

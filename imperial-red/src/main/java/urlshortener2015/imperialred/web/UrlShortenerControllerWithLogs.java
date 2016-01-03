@@ -177,6 +177,8 @@ public class UrlShortenerControllerWithLogs {
 		LocalDate alertLocal = expireLocal.minusDays(Long.parseLong(days));
 		return Date.from(alertLocal.atStartOfDay(ZoneId.systemDefault()).toInstant());
 	}
+	
+	
 
 	@RequestMapping(value = "/rec/rec", method = RequestMethod.GET)
 	public ResponseEntity<ArrayList<String>> recomendaciones(
