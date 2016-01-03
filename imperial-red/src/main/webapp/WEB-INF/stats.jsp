@@ -9,6 +9,7 @@
 	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 	<script type="text/javascript" src="js/sockjs-0.3.4.js"></script>
     <script type="text/javascript" src="js/stomp.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script type="text/javascript">
 		var stompClient = null;
 		google.load("visualization", "1", {packages:["geochart"]});
@@ -54,6 +55,19 @@
                 });
             });
             console.log('Ok');
+            
+            setFromToVisibility();
+		}
+		
+		function setFromToVisibility() {
+			var from = document.getElementById("show_from");
+			var to = document.getElementById("show_to");
+			if (from.innerHTML.length <= 5) {
+				from.style.display = 'none';
+			}
+			if (to.innerHTML.length <= 3) {
+				to.style.display = 'none';
+			}
 		}
 	</script>
 </head>
@@ -81,7 +95,21 @@
 			<div class="col-sm-4">
 				<div id="geo_chart" style="width: 900px; height: 500px;"></div>
 			</div>
+			<form>
+				<div class="form-group">
+					<label for="from">From...</label>
+					<input type="date" class="form-control" name="from">
+				</div>
+				<div class="form-group">
+					<label for="to">To...</label>
+					<input type="date" class="form-control" name="to">
+				</div>
+				<button type="submit" class="btn btn-default">Update</button>
+			</form>
 		</div>
-
+		<div class="col-sm-4">
+			<div id="geo_chart" style="width: 900px; height: 500px;"></div>
+		</div>
+	</div>
 </body>
 </html>

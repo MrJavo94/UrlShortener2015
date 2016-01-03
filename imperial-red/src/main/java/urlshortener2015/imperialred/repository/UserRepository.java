@@ -13,6 +13,8 @@ public interface UserRepository extends MongoRepository<User, BigInteger>  {
 	
 	User findByNick(String nick);
 	
+	User findByTwitter(String twitter);
+	
 	User save(User u);
 	
 	void deleteById(BigInteger id);

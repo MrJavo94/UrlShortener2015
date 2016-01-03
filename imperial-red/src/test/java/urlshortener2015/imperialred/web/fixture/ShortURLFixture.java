@@ -9,6 +9,6 @@ public class ShortURLFixture {
 
 	public static ShortURL someUrl() {
 		return new ShortURL("someKey", "http://example.com/", null, new Date(), null,
-				null, 307, "52.29.234.196", null);
+				null, 307, "52.29.234.196", null, false, null);
 	}
 }

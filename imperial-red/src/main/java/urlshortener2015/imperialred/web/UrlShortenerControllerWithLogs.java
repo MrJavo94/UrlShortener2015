@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,14 +44,18 @@ import com.mashape.unirest.http.Unirest;
 import com.mongodb.DBObject;
 
 import urlshortener2015.imperialred.exception.CustomException;
+import urlshortener2015.imperialred.objects.Alert;
 import urlshortener2015.imperialred.objects.Click;
 import urlshortener2015.imperialred.objects.Ip;
 import urlshortener2015.imperialred.objects.ShortURL;
 import urlshortener2015.imperialred.objects.Synonym;
 import urlshortener2015.imperialred.objects.WebSocketsData;
+import urlshortener2015.imperialred.objects.User;
+import urlshortener2015.imperialred.repository.AlertRepository;
 import urlshortener2015.imperialred.repository.ClickRepository;
 import urlshortener2015.imperialred.repository.IpRepository;
 import urlshortener2015.imperialred.repository.ShortURLRepository;
+import urlshortener2015.imperialred.repository.UserRepository;
 
 @RestController
 public class UrlShortenerControllerWithLogs {
@@ -64,6 +71,12 @@ public class UrlShortenerControllerWithLogs {
 	
 	@Autowired
 	private SimpMessagingTemplate template;
+
+	protected UserRepository userRepository;
+	
+	@Autowired
+	protected AlertRepository alertRepository;
+
 
 	/**
 	 * The HTTP {@code Referer} header field name.
@@ -91,6 +104,7 @@ public class UrlShortenerControllerWithLogs {
 
 		logger.info("Requested redirection with hash " + id);
 		ShortURL l = shortURLRepository.findByHash(id);
+		logger.info(l == null ? "null" : "not null");
 		if (l != null) {
 			/*
 			 * Check Token
@@ -139,10 +153,21 @@ public class UrlShortenerControllerWithLogs {
 			@RequestParam(value = "custom", required = false) String custom,
 			@RequestParam(value = "expire", required = false) String expireDate,
 			@RequestParam(value = "hasToken", required = false) String hasToken,
+			@RequestParam(value = "emails[]", required = false) String[] emails,
+			@RequestParam(value = "alert_email", required = false) String alertEmail,
+			@RequestParam(value = "days", required = false) String days,
 			HttpServletRequest request) throws Exception {
 		ShortURL su = createAndSaveIfValid(url, custom, hasToken, expireDate,
-				extractIP(request));
+				extractIP(request), emails);
 		if (su != null) {
+			/* If there is an expire date, it sets an alert */
+			if (!expireDate.equals("")) {
+				Date alertDate = processAlertDate(expireDate, days);
+				logger.info("New alert date: " + alertDate);
+				
+				Alert alert = new Alert(alertEmail, su.getUri().toString(), alertDate);
+				alertRepository.save(alert);
+			}
 			HttpHeaders h = new HttpHeaders();
 			h.setLocation(su.getUri());
 			return new ResponseEntity<>(su, h, HttpStatus.CREATED);
@@ -151,6 +176,20 @@ public class UrlShortenerControllerWithLogs {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
+
+	/**
+	 * Given an expire date for a link and the previous days for the
+	 * alert to be sent, calculates the date in which the alert will be sent.
+	 * Since the user does not specify a time, it is set to 00:00.
+	 */
+	private Date processAlertDate(String expireDate, String days) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		LocalDate expireLocal = LocalDate.parse(expireDate, formatter);
+		LocalDate alertLocal = expireLocal.minusDays(Long.parseLong(days));
+		return Date.from(alertLocal.atStartOfDay(ZoneId.systemDefault()).toInstant());
+	}
+	
+	
 
 	@RequestMapping(value = "/rec/rec", method = RequestMethod.GET)
 	public ResponseEntity<ArrayList<String>> recomendaciones(
@@ -248,10 +287,12 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	/**
-	 * Creacion y guardado de la URL
+	 * If shortURL is valid, creates it and saves it
+	 * XXX: at the moment, it just ignores unknown emails, with no
+	 * feedback for users.
 	 */
 	protected ShortURL createAndSaveIfValid(String url, String custom,
-			String hasToken, String expireDate, String ip) {
+			String hasToken, String expireDate, String ip, String[] emails) {
 
 		UrlValidator urlValidator = new UrlValidator(new String[] { "http",
 				"https" });
@@ -270,11 +311,6 @@ public class UrlShortenerControllerWithLogs {
 			else {
 				id = custom;
 			}
-
-			/*
-			 * If exists, it isnt created
-			 */
-			// if (shortURLRepository.findByHash(id) == null) {
 
 			/*
 			 * Has Token
@@ -298,24 +334,45 @@ public class UrlShortenerControllerWithLogs {
 					logger.info("Fecha mal introducida");
 				}
 			}
+			
+			/*
+			 * Checks every mail inserted by the user, and maintains a
+			 * list with those corresponding to registered users.
+			 */
+			List<String> trueEmails = new ArrayList<String>();
+			for (int i=0; i<emails.length; i++) {
+				if (!emails[i].equals("")) {
+					User foundUser = userRepository.findByMail(emails[i]);
+					if (foundUser != null) {
+						trueEmails.add(foundUser.getMail());
+					}
+				}
+			}
+			
+			/*
+			 * If no valid emails are introduced, link will be public and
+			 * it wont have an email list.
+			 */
+			boolean isPrivate = false;
+			if (trueEmails.size() > 0) {
+				isPrivate = true;
+			} else {
+				trueEmails = null;
+			}
 
 			/*
-			 * Creacion del objeto ShortURL
+			 * Creates ShortURL object
 			 */
-
 			ShortURL su = new ShortURL(id, url, linkTo(
 					methodOn(UrlShortenerControllerWithLogs.class).redirectTo(
 							id, null, null,null)).toUri(), new Date(
 					System.currentTimeMillis()), expire, owner,
-					HttpStatus.TEMPORARY_REDIRECT.value(), ip, null);
+					HttpStatus.TEMPORARY_REDIRECT.value(), ip, null, isPrivate, trueEmails);
+			
 			/*
 			 * Insert to DB
 			 */
 			return shortURLRepository.save(su);
-
-			/*
-			 * } else { return null; }
-			 */
 		}
 		else {
 			return null;

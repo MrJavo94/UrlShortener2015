@@ -2,6 +2,7 @@ package urlshortener2015.imperialred.objects;
 
 import java.net.URI;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 
@@ -17,9 +18,12 @@ public class ShortURL {
 	private Integer mode;
 	private String ip;
 	private String country;
+	private boolean isPrivate;
+	private List<String> allowedUsers;
 
 	public ShortURL(String hash, String target, URI uri, Date created,
-			Date expire, String owner, Integer mode, String ip, String country) {
+			Date expire, String owner, Integer mode, String ip, String country,
+			boolean isPrivate, List<String> allowedUsers) {
 		this.hash = hash;
 		this.target = target;
 		this.uri = uri;
@@ -29,6 +33,9 @@ public class ShortURL {
 		this.mode = mode;
 		this.ip = ip;
 		this.country = country;
+		this.isPrivate = isPrivate;
+		this.allowedUsers = allowedUsers;
+		
 	}
 
 	public ShortURL() {
@@ -68,6 +75,14 @@ public class ShortURL {
 
 	public String getCountry() {
 		return country;
+	}
+	
+	public boolean isPrivate() {
+		return isPrivate;
+	}
+
+	public List<String> getAllowedUsers() {
+		return allowedUsers;
 	}
 
 }

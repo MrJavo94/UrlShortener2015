@@ -1,7 +1,6 @@
 package urlshortener2015.imperialred.objects;
 
 import java.math.BigInteger;
-import java.util.List;
 
 import org.springframework.data.annotation.Id;
 
@@ -12,16 +11,13 @@ public class User {
 	private String mail;
 	private String nick;
 	private String password;
-	private List<ShortURL> createdLinks;
-	private List<ShortURL> availableLinks;
+	private String twitter;
 	
-	public User(String mail, String nick, String password, 
-			List<ShortURL> createdLinks, List<ShortURL> availableLinks) {
+	public User(String mail, String nick, String password, String twitter) {
 		this.mail = mail;
 		this.nick = nick;
 		this.password = password;
-		this.createdLinks = createdLinks;
-		this.availableLinks = availableLinks;
+		this.twitter = twitter;
 	}
 	
 	public BigInteger getId() {
@@ -40,13 +36,10 @@ public class User {
 		return password;
 	}
 	
-	public List<ShortURL> getCreatedLinks() {
-		return createdLinks;
+	public String getTwitter() {
+		return twitter;
 	}
-	
-	public List<ShortURL> getAvailableLinks() {
-		return availableLinks;
-	}
+
 
 	public void setId(BigInteger id) {
 		this.id = id;
@@ -63,19 +56,15 @@ public class User {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
-	public void setCreatedLinks(List<ShortURL> createdLinks) {
-		this.createdLinks = createdLinks;
-	}
-
-	public void setAvailableLinks(List<ShortURL> availableLinks) {
-		this.availableLinks = availableLinks;
+	
+	public void setTwitter(String twitter) {
+		this.twitter = twitter;
 	}
 
 	@Override
 	public String toString() {
 		return "User[id=" + id + ", mail='" + mail + "', nick='" + nick + "', password='" + password 
-				+ "', createdLinks=" + createdLinks + ", availableLinks=" + availableLinks + "]";
+				+ "', twitter='" + twitter + "]";
 	}
 	
 }
