@@ -79,7 +79,7 @@ public class MailSender {
         				return new PasswordAuthentication(username, password);
         			}
         });
-        logger.info("test " + username + " " + password);
+        
         try {
         	/* Creates the message sets its data */
         	Message msg = new MimeMessage(session);
