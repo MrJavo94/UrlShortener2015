@@ -5,13 +5,18 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -72,52 +77,56 @@ public class UsersController {
 	}
 	
 	/**
-	 * Returns the user identified by {nick} in a JSON representation
+	 * Returns the user identified by {mail} in a JSON representation
 	 */
 	@Cacheable("users")
-	@RequestMapping(value = "/users/{nick}", method = RequestMethod.GET, produces = "application/json")
-	public User getUser(@PathVariable String nick) {
-		logger.info("Getting user " + nick + " from db");
-		return userRepository.findByNick(nick);
+	@RequestMapping(value = "/users/{mail}", method = RequestMethod.GET, produces = "application/json")
+	public User getUser(@PathVariable String mail) {
+		logger.info("Getting user " + mail + " from db");
+		return userRepository.findByMail(mail);
 	}
 	
 	/**
-	 * Creates a new user with the specified mail, nick and password.
-	 * XXX: It's using POST, should it use PUT?
-	 * XXX: JSON empty lists are being passed with null, is that correct?
+	 * Returns a view with the list of links of a user
+	 */
+	@RequestMapping(value = "/users/{mail}", method = RequestMethod.GET, produces = "text/html")
+	public String getUserLinks(@PathVariable String mail, HttpServletRequest request,
+			HttpServletResponse response, Model model) {
+		logger.info("Loading links page for user " + mail);
+		
+		return "links";
+	}
+	
+	/**
+	 * Creates a new user from a JSON object.
 	 */
 	@RequestMapping(value = "/users", method = RequestMethod.POST, produces = "application/json")
-	public User addUser(@RequestParam(value = "mail", required = true) String mail,
-			@RequestParam(value = "nick", required = true) String nick,
-			@RequestParam(value = "password", required = true) String password) {
-		System.out.println(mail);
-		System.out.println(nick);
-		System.out.println(password);
-		User user = new User(mail, nick, password, null);
+	public User addUser(@RequestBody User user) {
+		logger.info("New user: " + user.getMail() + " " + user.getNick() + " " + 
+				user.getPassword() + " " + user.getTwitter());
 		return userRepository.save(user);
 	}
 	
 	/**
-	 * Modifies the password of the user identified by {nick}
-	 * XXX: NOT WORKING (error 405: JSPs only permit GET POST or HEAD)
+	 * Modifies the password of the user identified by {mail}
 	 */
 	@CachePut("users")
-	@RequestMapping(value = "/users/{nick}", method = RequestMethod.PUT, produces = "application/json")
-	public User modifyUser(@PathVariable String nick,
-			@RequestParam(value = "password", required = true) String password) {
-		User user = userRepository.findByNick(nick);
+	@RequestMapping(value = "/users/{mail}", method = RequestMethod.POST, produces = "application/json")
+	public User modifyUser(@PathVariable String mail,
+			@RequestBody String password) {
+		User user = userRepository.findByMail(mail);
 		user.setPassword(password);
 		return userRepository.save(user);
 	}
 	
 	/**
-	 * Deletes the user identified by {nick}
+	 * Deletes the user identified by {mail}
 	 * XXX: I don't know what should be returned here
 	 */
 	@CacheEvict("users")
-	@RequestMapping(value = "/users/{nick}", method = RequestMethod.DELETE, produces = "application/json")
-	public List<User> deleteUser(@PathVariable String nick) {
-		userRepository.deleteByNick(nick);
+	@RequestMapping(value = "/users/{mail}", method = RequestMethod.DELETE, produces = "application/json")
+	public List<User> deleteUser(@PathVariable String mail) {
+		userRepository.deleteByMail(mail);
 		return userRepository.findAll();
 	}
 	

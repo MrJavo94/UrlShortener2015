@@ -104,8 +104,8 @@ public class UrlShortenerControllerWithLogs {
 			/*
 			 * Check Token
 			 */
-			if (l.getOwner() != null
-					&& (token == null || !l.getOwner().equals(token))) {
+			if (l.getToken() != null
+					&& (token == null || !l.getToken().equals(token))) {
 				/*
 				 * Wrong Token
 				 */
@@ -304,9 +304,9 @@ public class UrlShortenerControllerWithLogs {
 			/*
 			 * Has Token
 			 */
-			String owner = null;
+			String token = null;
 			if (hasToken != null && !hasToken.equals("")) {
-				owner = UUID.randomUUID().toString();
+				token = UUID.randomUUID().toString();
 			}
 			/*
 			 * Expire date
@@ -355,7 +355,7 @@ public class UrlShortenerControllerWithLogs {
 			ShortURL su = new ShortURL(id, url, linkTo(
 					methodOn(UrlShortenerControllerWithLogs.class).redirectTo(
 							id, null, null,null)).toUri(), new Date(
-					System.currentTimeMillis()), expire, owner,
+					System.currentTimeMillis()), expire, null, token,
 					HttpStatus.TEMPORARY_REDIRECT.value(), ip, null, isPrivate, trueEmails);
 			
 			/*
