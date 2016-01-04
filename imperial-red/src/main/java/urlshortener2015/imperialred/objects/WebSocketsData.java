@@ -4,11 +4,28 @@ public class WebSocketsData {
 
 	private long clicks;
 	private String clicksByCountry;
+	private boolean filter;
 	
-	
-	public WebSocketsData(long clicks, String clicksByCountry) {
+	public WebSocketsData(boolean filter, long clicks, String clicksByCountry) {
+		this.filter=filter;
 		this.clicks=clicks;
 		this.clicksByCountry=clicksByCountry;
+	}
+
+
+	/**
+	 * @return the filter
+	 */
+	public boolean isFilter() {
+		return filter;
+	}
+
+
+	/**
+	 * @param filter the filter to set
+	 */
+	public void setFilter(boolean filter) {
+		this.filter = filter;
 	}
 
 

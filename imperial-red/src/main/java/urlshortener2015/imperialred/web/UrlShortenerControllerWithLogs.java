@@ -101,7 +101,7 @@ public class UrlShortenerControllerWithLogs {
 	public ResponseEntity<?> redirectTo(@PathVariable String id,
 			@RequestParam(value = "token", required = false) String token,HttpServletResponse response,
 			HttpServletRequest request) {
-
+	
 		logger.info("Requested redirection with hash " + id);
 		ShortURL l = shortURLRepository.findByHash(id);
 		logger.info(l == null ? "null" : "not null");
@@ -135,7 +135,7 @@ public class UrlShortenerControllerWithLogs {
 					DBObject groupObject = clickRepository.getClicksByCountry(id, null, null).getRawResults();
 					String list = groupObject.get("retval").toString();
 					String countryData = StatsController.processCountryJSON(list);
-					WebSocketsData wb=new WebSocketsData(click, countryData);
+					WebSocketsData wb=new WebSocketsData(false,click, countryData);
 					this.template.convertAndSend("/topic/"+id, wb);
 					return createSuccessfulRedirectToResponse(l);
 				}

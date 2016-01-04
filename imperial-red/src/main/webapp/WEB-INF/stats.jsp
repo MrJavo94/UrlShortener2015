@@ -47,64 +47,109 @@
 			    console.log(idActual);
                 console.log('Connected to: ' + frame);
                 stompClient.subscribe(subscripcion, function(newdata){
-                	console.log('message arrived');
-                	var clicks=JSON.parse(newdata.body).clicks;
-                	var clicksBy=JSON.parse(newdata.body).clicksByCountry;
-                    showStats(clicks);
-                    drawRegionsMap2(clicksBy);
+	                console.log(JSON.parse(newdata.body).filter);
+	                if(JSON.parse(newdata.body).filter==false){
+	                	if(document.getElementById("from").value.localeCompare('')==0 &&
+	                			document.getElementById("to").value.localeCompare('')==0){
+	                		console.log('message arrived, no filter');
+		                	var clicks=JSON.parse(newdata.body).clicks;
+		                	var clicksBy=JSON.parse(newdata.body).clicksByCountry;
+		                    showStats(clicks);
+		                    setFromToVisibility();
+		                    drawRegionsMap2(clicksBy);
+	                	}
+	                	else{
+	                		filterStats(idActual);
+	                	}
+	                }
+	                else{
+	                	console.log('message arrived, filter');
+		                	var clicks=JSON.parse(newdata.body).clicks;
+		                	var clicksBy=JSON.parse(newdata.body).clicksByCountry;
+		                    showStats(clicks);
+		                    setFromToVisibility();
+		                    drawRegionsMap2(clicksBy);
+	                }	
                 });
             });
             console.log('Ok');
             
             setFromToVisibility();
 		}
+
+		function filterStats(){
+			var urlActual= document.URL.split("/");
+			var idActual=urlActual[3].substring(0, urlActual[3].length-1);
+			console.log("peticion filter");
+    		console.log(idActual+".."+document.getElementById("from").value+".."+document.getElementById("to").value)
+    		$.get( "/stats/filter/",
+			{ id: idActual,
+			from: document.getElementById("from").value,
+			to: document.getElementById("to").value } )
+		    /*.done(function(data) {
+				console.log("ajax bien");
+				console.log(data.clicks);
+				showStats(data.clicks);
+				setFromToVisibility();
+            	drawRegionsMap2(data.clicksByCountry);
+            	
+		    })
+		    	.fail(function(data) {
+			    console.log("ajax mal");
+
+		    });*/
+			
+		}
 		
 		function setFromToVisibility() {
-			var from = document.getElementById("show_from");
-			var to = document.getElementById("show_to");
-			if (from.innerHTML.length <= 5) {
-				from.style.display = 'none';
+			var from = document.getElementById("from");
+			var to = document.getElementById("to");
+			if (document.getElementById("from").value.localeCompare('')==0) {
+				$("#show_from").hide();
 			}
-			if (to.innerHTML.length <= 3) {
-				to.style.display = 'none';
+			else{
+				$("#show_from").text("From " + document.getElementById("from").value);
+				$("#show_from").show();
+			}
+			if (document.getElementById("to").value.localeCompare('')==0) {
+				$("#show_to").hide();
+			}
+			else{
+				$("#show_to").text("To " + document.getElementById("to").value);
+				$("#show_to").show();
 			}
 		}
 	</script>
 </head>
 <body onload=init()>
 	<div class="container-full">
-			<h1>Statistics</h1>
-			<p class="lead">Statistics from the URL Shortener</p>
-			<br>
-		<div class="row">
-			<div class="col-sm-4 text-center">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h3 class="panel-title">Statistics</h3>
-            </div>
-            <div class="panel-body">
-              <div id="target">Target ${target}</div>
-              <div id="date">Created date ${date}</div>
-              <div id="clicks">Clicks ${clicks}</div>
-			  <div id="show_from">From ${from}</div>
-			  <div id="show_to">To ${to}</div>
-            </div>
-          </div>
-
-      </div>
-			<div class="col-sm-4">
-				<div id="geo_chart" style="width: 900px; height: 500px;"></div>
+	<h1>Statistics</h1>
+	<p class="lead">Statistics from the URL Shortener</p>
+	<br>
+	<div class="row">
+		<div class="col-sm-4 text-center">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Statistics</h3>
+				</div>
+				<div class="panel-body">
+					<div id="target">Target ${target}</div>
+					<div id="date">Created date ${date}</div>
+					<div id ="clicks">Clicks ${clicks}</div>
+					<div><p id="show_from">From ${from}</p></div>
+					<div><p id="show_to">To ${to}</p></div>
+				</div>
 			</div>
 			<form>
 				<div class="form-group">
 					<label for="from">From...</label>
-					<input type="date" class="form-control" name="from">
+					<input type="date" class="form-control" name="from" id="from">
 				</div>
 				<div class="form-group">
 					<label for="to">To...</label>
-					<input type="date" class="form-control" name="to">
+					<input type="date" class="form-control" name="to" id="to">
 				</div>
-				<button type="submit" class="btn btn-default">Update</button>
+				<button type="button" class="btn btn-default" onclick='filterStats()'>Update</button>
 			</form>
 		</div>
 		<div class="col-sm-4">
