@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +29,10 @@ import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 
+import urlshortener2015.imperialred.exception.CustomException;
+import urlshortener2015.imperialred.objects.ShortURL;
 import urlshortener2015.imperialred.objects.User;
+import urlshortener2015.imperialred.repository.ShortURLRepository;
 import urlshortener2015.imperialred.repository.UserRepository;
 
 @RestController
@@ -36,6 +40,9 @@ public class UsersController {
 	
 	@Autowired
 	protected UserRepository userRepository;
+	
+	@Autowired
+	protected ShortURLRepository shortURLRepository;
 	
 	private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
 	
@@ -93,8 +100,19 @@ public class UsersController {
 	public String getUserLinks(@PathVariable String mail, HttpServletRequest request,
 			HttpServletResponse response, Model model) {
 		logger.info("Loading links page for user " + mail);
+		User user = userRepository.findByMail(mail);
 		
-		return "links";
+		/* If user exists, retrieves its shortURLs */
+		if (user != null) {
+			List<ShortURL> links = shortURLRepository.findByOwner(mail);
+			model.addAttribute("links", links);
+			model.addAttribute("user", user);
+			return "links";
+		} else {
+			/* Throws 404 if user does not exist */
+			response.setStatus(HttpStatus.NOT_FOUND.value());
+			throw new CustomException("404", "NOT_FOUND");
+		}
 	}
 	
 	/**

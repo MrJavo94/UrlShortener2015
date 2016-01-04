@@ -11,6 +11,8 @@ public interface ShortURLRepository extends MongoRepository<ShortURL, String>, S
 	ShortURL findByHash(String id);
 
 	List<ShortURL> findByTarget(String target);
+	
+	List<ShortURL> findByOwner(String owner);
 
 	ShortURL save(ShortURL su);
 
