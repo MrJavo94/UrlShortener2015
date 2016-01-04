@@ -1,5 +1,6 @@
 package urlshortener2015.imperialred.web;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.springframework.social.connect.web.HttpSessionSessionStrategy;
 import org.springframework.social.connect.web.SessionStrategy;
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.google.api.Google;
+import org.springframework.social.security.SocialAuthenticationToken;
 import org.springframework.social.twitter.api.Twitter;
 import org.springframework.social.twitter.api.TwitterProfile;
 import org.springframework.stereotype.Controller;
@@ -120,21 +122,26 @@ public class CustomConnectController extends ConnectController {
 			OAuth2ConnectionFactory<?> connectionFactory = (OAuth2ConnectionFactory<?>) connectionFactoryLocator.getConnectionFactory(providerId);
 			Connection<?> connection = connectSupport.completeConnection(connectionFactory, request);
 			String uniqueId = "";
+			Serializable userProfile = null;
 			switch(providerId){
 			case("google"):
 				google = (Google) connection.getApi();
-				uniqueId = google.plusOperations().getGoogleProfile().getAccountEmail();
+				//uniqueId = google.plusOperations().getGoogleProfile().getAccountEmail();
+				userProfile = google.plusOperations().getGoogleProfile().toString();
 				break;
 			case("facebook"):
 				facebook = (Facebook) connection.getApi();
-				uniqueId = facebook.userOperations().getUserProfile().getEmail();
+				userProfile = facebook.userOperations().getUserProfile();
+				//uniqueId = facebook.userOperations().getUserProfile().getEmail();
 				break;
 			case("twitter"):
 				twitter = (Twitter) connection.getApi();
-				uniqueId = twitter.userOperations().getUserProfile().getScreenName();
+				userProfile = twitter.userOperations().getUserProfile();
+				//uniqueId = twitter.userOperations().getUserProfile().getScreenName();
 				break;
 			}
-			SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(uniqueId, null, null));			
+			SecurityContextHolder.getContext().setAuthentication(new SocialAuthenticationToken(connection, userProfile, null, null));			
+			//SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(uniqueId, null, null));			
 			addConnection(connection, connectionFactory, request);
 		} catch (Exception e) {
 			sessionStrategy.setAttribute(request, PROVIDER_ERROR_ATTRIBUTE, e);
