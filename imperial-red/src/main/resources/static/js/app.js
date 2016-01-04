@@ -116,7 +116,7 @@ $(document).ready(function(){
       data : $(this).serialize(),
       success : function(msg) {
           var custom = document.getElementsByName("custom");
-          if(msg.owner!=null){
+          if(msg.token!=null){
               $("#result").html(
                   "<h3>Aquí tiene su enlace acortado</h3>"
                   + "<div class='alert alert-success lead'><a target='_blank' href='"
@@ -125,9 +125,9 @@ $(document).ready(function(){
                   + msg.uri
                   + "</a></div></br><h3>Token: <h3>"
                   + " <div class='alert alert-success lead'>?token="
-                  + msg.owner
+                  + msg.token
                   + "</div>"
-                  + "<h3>Código QR:<h3><img src=\"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+createQRData(msg.uri)+"?token="+msg.owner+"\">");
+                  + "<h3>Código QR:<h3><img src=\"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+createQRData(msg.uri)+"?token="+msg.token+"\">");
           }
           else{
               $("#result").html(
