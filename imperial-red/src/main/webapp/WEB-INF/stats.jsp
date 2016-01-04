@@ -86,19 +86,6 @@
 			{ id: idActual,
 			from: document.getElementById("from").value,
 			to: document.getElementById("to").value } )
-		    /*.done(function(data) {
-				console.log("ajax bien");
-				console.log(data.clicks);
-				showStats(data.clicks);
-				setFromToVisibility();
-            	drawRegionsMap2(data.clicksByCountry);
-            	
-		    })
-		    	.fail(function(data) {
-			    console.log("ajax mal");
-
-		    });*/
-			
 		}
 		
 		function setFromToVisibility() {
