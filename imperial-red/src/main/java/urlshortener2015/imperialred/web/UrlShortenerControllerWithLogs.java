@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -48,6 +49,7 @@ import urlshortener2015.imperialred.objects.Click;
 import urlshortener2015.imperialred.objects.Ip;
 import urlshortener2015.imperialred.objects.ShortURL;
 import urlshortener2015.imperialred.objects.Synonym;
+import urlshortener2015.imperialred.objects.WebSocketsData;
 import urlshortener2015.imperialred.objects.User;
 import urlshortener2015.imperialred.repository.AlertRepository;
 import urlshortener2015.imperialred.repository.ClickRepository;
@@ -68,10 +70,13 @@ public class UrlShortenerControllerWithLogs {
 	protected IpRepository ipRepository;
 	
 	@Autowired
+	private SimpMessagingTemplate template;
+
 	protected UserRepository userRepository;
 	
 	@Autowired
 	protected AlertRepository alertRepository;
+
 
 	/**
 	 * The HTTP {@code Referer} header field name.
@@ -96,7 +101,7 @@ public class UrlShortenerControllerWithLogs {
 	public ResponseEntity<?> redirectTo(@PathVariable String id,
 			@RequestParam(value = "token", required = false) String token,HttpServletResponse response,
 			HttpServletRequest request) {
-
+	
 		logger.info("Requested redirection with hash " + id);
 		ShortURL l = shortURLRepository.findByHash(id);
 		logger.info(l == null ? "null" : "not null");
@@ -126,6 +131,12 @@ public class UrlShortenerControllerWithLogs {
 				else {
 					createAndSaveClick(id, request);
 					updateMapStats();
+					long click=clickRepository.clicksByHash(l.getHash(), null, null);
+					DBObject groupObject = clickRepository.getClicksByCountry(id, null, null).getRawResults();
+					String list = groupObject.get("retval").toString();
+					String countryData = StatsController.processCountryJSON(list);
+					WebSocketsData wb=new WebSocketsData(false,click, countryData);
+					this.template.convertAndSend("/topic/"+id, wb);
 					return createSuccessfulRedirectToResponse(l);
 				}
 			}
