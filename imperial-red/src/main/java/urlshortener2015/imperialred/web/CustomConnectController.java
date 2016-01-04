@@ -140,8 +140,7 @@ public class CustomConnectController extends ConnectController {
 				//uniqueId = twitter.userOperations().getUserProfile().getScreenName();
 				break;
 			}
-			SecurityContextHolder.getContext().setAuthentication(new SocialAuthenticationToken(connection, userProfile, null, null));	
-			
+			SecurityContextHolder.getContext().setAuthentication(new SocialAuthenticationToken(connection, userProfile, null, null));				
 			//SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(uniqueId, null, null));			
 			addConnection(connection, connectionFactory, request);
 		} catch (Exception e) {
