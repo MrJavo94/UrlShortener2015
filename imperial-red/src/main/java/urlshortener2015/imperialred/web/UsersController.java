@@ -2,6 +2,7 @@ package urlshortener2015.imperialred.web;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,40 +49,22 @@ public class UsersController {
 	private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
 	
 	/**
-	 * Handles POST requests from clients authenticated with Google.
-	 * TODO: Do something with the recovered email (database, etc)
-	 * TODO: Handle exceptions properly
-	 * TODO: Change hard-coded values
-	 * TODO: Return response to XHR (js function in index.html)
-	 * XXX: CURRENTLY NOT USED
+	 * Returns a view with the list of links of a user
 	 */
-	@RequestMapping(value = "/google-login", method = RequestMethod.POST)
-	public void googleLogin(@RequestParam(value = "idtoken", required = true) String idTokenString) {
-		/* Created token verifier */
-		HttpTransport transport = new ApacheHttpTransport();
-		JsonFactory jsonFactory = new JacksonFactory();
-		GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-				.setAudience(Arrays.asList("152937226054-ajhhaao7c41md0p7mrti9pgrcaag6nf7.apps.googleusercontent.com")).build();
-		logger.info("Verifier created");
-
-		/* Verifies if the sent token is ok */
-		GoogleIdToken idToken = null;
-		try {
-			idToken = verifier.verify(idTokenString);
-			logger.info("Verified");
-		} catch (IOException e) {
-			logger.info("Error retrieving ID token.");
-		} catch (GeneralSecurityException e) {
-			logger.info("General security exception.");
-		}
+	@RequestMapping(value = "/userlinks", method = RequestMethod.GET, produces = "text/html")
+	public ResponseEntity<List<ShortURL>> getUserLinks(HttpServletRequest request) {
+		String mail = UrlShortenerControllerWithLogs.getOwnerMail();
+		logger.info("Getting links made by " + mail);
+		User user = userRepository.findByMail(mail);
 		
-		if (idToken != null) {
-			String email = idToken.getPayload().getEmail();
-			//Do insertions, etc
+		/* If user exists, retrieves its shortURLs */
+		if (user != null) {
+			List<ShortURL> links = shortURLRepository.findByOwner(mail);
+			return new ResponseEntity<>(links, HttpStatus.CREATED);
 		} else {
-			logger.info("Invalid ID token.");
+			/* Throws 404 if user does not exist */
+			throw new CustomException("404", "NOT_FOUND");
 		}
-		
 	}
 	
 	/**
@@ -91,28 +75,6 @@ public class UsersController {
 	public User getUser(@PathVariable String mail) {
 		logger.info("Getting user " + mail + " from db");
 		return userRepository.findByMail(mail);
-	}
-	
-	/**
-	 * Returns a view with the list of links of a user
-	 */
-	@RequestMapping(value = "/users/{mail}", method = RequestMethod.GET, produces = "text/html")
-	public String getUserLinks(@PathVariable String mail, HttpServletRequest request,
-			HttpServletResponse response, Model model) {
-		logger.info("Loading links page for user " + mail);
-		User user = userRepository.findByMail(mail);
-		
-		/* If user exists, retrieves its shortURLs */
-		if (user != null) {
-			List<ShortURL> links = shortURLRepository.findByOwner(mail);
-			model.addAttribute("links", links);
-			model.addAttribute("user", user);
-			return "links";
-		} else {
-			/* Throws 404 if user does not exist */
-			response.setStatus(HttpStatus.NOT_FOUND.value());
-			throw new CustomException("404", "NOT_FOUND");
-		}
 	}
 	
 	/**

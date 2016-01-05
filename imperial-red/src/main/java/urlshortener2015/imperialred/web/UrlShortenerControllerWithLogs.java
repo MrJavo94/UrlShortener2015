@@ -421,7 +421,7 @@ public class UrlShortenerControllerWithLogs {
 		return "[[\"Country\",\"Clicks\"]]";
 	}
 	
-	private String getOwnerMail() {
+	protected static String getOwnerMail() {
 		SocialAuthenticationToken authentication = (SocialAuthenticationToken) 
 				SecurityContextHolder.getContext().getAuthentication();
 		String providerId = authentication.getProviderId();
