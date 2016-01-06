@@ -49,63 +49,111 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		tokenAuthenticationService = new TokenAuthenticationService("jamarro", userService);
 	}
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-
-		// F filter = postProcess(authFilter);
-		// http.addFilter(filter);
-		
-		ArrayList<AuthenticationProvider> authenticationProviders = new ArrayList();
-		authenticationProviders.add(new CustomAuthenticationProvider(userRepository));
-		
-		ProviderManager providerManager = new ProviderManager(authenticationProviders);
-		providerManager.setEraseCredentialsAfterAuthentication(false);
-
-		http
-			.authenticationProvider(new CustomAuthenticationProvider(userRepository)).exceptionHandling()
-			.and()
-				.anonymous()
-			.and()
-				.servletApi()
-			.and()
-				.authorizeRequests()
-				.antMatchers("user/profile").permitAll()
-				.anyRequest().permitAll()
-			.and()
-				.formLogin()
-				.loginPage("/login/login").permitAll()
-			.and()
-				.logout().permitAll();
-		
-		CustomAuthenticationFilter authFilter = new CustomAuthenticationFilter(tokenAuthenticationService);
-		
-		authFilter.setAuthenticationManager(providerManager);
-		authFilter.setAuthenticationSuccessHandler(successHandler);
-		authFilter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler("/login/login?error"));
-		SessionAuthenticationStrategy sessionAuthenticationStrategy = http
-				.getSharedObject(SessionAuthenticationStrategy.class);
-		if (sessionAuthenticationStrategy != null) {
-			authFilter.setSessionAuthenticationStrategy(sessionAuthenticationStrategy);
-		}
-		RememberMeServices rememberMeServices = http.getSharedObject(RememberMeServices.class);
-		if (rememberMeServices != null) {
-			authFilter.setRememberMeServices(rememberMeServices);
-		}
-		
-		http
-			.apply(new SpringSocialConfigurer())
-			.and()
-				.addFilterAfter(authFilter,
-						AbstractPreAuthenticatedProcessingFilter.class)
-				.addFilterAfter(new StatelessAuthenticationFilter(tokenAuthenticationService),
-						CustomAuthenticationFilter.class)
-
-				// .addFilterBefore(new
-				// StatelessAuthenticationFilter(tokenAuthenticationService),
-				// new CustomAuthenticationFilter(tokenAuthenticationService))
-				.csrf().disable()
-				.headers().cacheControl();
-	}
+	
+	
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+            .authorizeRequests()
+                	.antMatchers("/**,/**/**", "/home").permitAll()
+            .and()
+            	.formLogin()
+                .loginPage("/login")
+                .permitAll()
+            .and()
+                .logout()
+                	.permitAll()
+            .and()
+            	.apply(new SpringSocialConfigurer())
+            .and()
+                .csrf()
+                	.disable();
+    }
+	
+	
+//	@Override
+//	protected void configure(HttpSecurity http) throws Exception {
+//	    http
+//	        .formLogin()
+//	            .loginPage("/login/login")
+//	            //.loginProcessingUrl("/signin/authenticate")
+//	            //.failureUrl("/signin?param.error=bad_credentials")
+//	        .and()
+//	            .logout()
+//	                .logoutUrl("/signout")
+//	                .deleteCookies("JSESSIONID")
+//	        .and()
+//	            .authorizeRequests()
+//	                .antMatchers("/**", "/**/**", "/favicon.ico").permitAll()
+//	                .anyRequest().permitAll()
+//	        .and()
+//	            .rememberMe()
+//	        .and()
+//	        	.anonymous();
+//	        .and()
+//	            .apply(new SpringSocialConfigurer());
+//	}
+	
+	
+	
+	
+//	@Override
+//	protected void configure(HttpSecurity http) throws Exception {
+//
+//		// F filter = postProcess(authFilter);
+//		// http.addFilter(filter);
+//		
+//		ArrayList<AuthenticationProvider> authenticationProviders = new ArrayList();
+//		authenticationProviders.add(new CustomAuthenticationProvider(userRepository));
+//		
+//		ProviderManager providerManager = new ProviderManager(authenticationProviders);
+//		providerManager.setEraseCredentialsAfterAuthentication(false);
+//
+//		http
+//			.authenticationProvider(new CustomAuthenticationProvider(userRepository)).exceptionHandling()
+//			.and()
+//				.anonymous()
+//			.and()
+//				.servletApi()
+//			.and()
+//				.authorizeRequests()
+//				.antMatchers("user/profile").permitAll()
+//				.anyRequest().permitAll()
+//			.and()
+//				.formLogin()
+//				.loginPage("/login/login").permitAll()
+//			.and()
+//				.logout().permitAll();
+//		
+//		CustomAuthenticationFilter authFilter = new CustomAuthenticationFilter(tokenAuthenticationService);
+//		
+//		authFilter.setAuthenticationManager(providerManager);
+//		authFilter.setAuthenticationSuccessHandler(successHandler);
+//		authFilter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler("/login/login?error"));
+//		SessionAuthenticationStrategy sessionAuthenticationStrategy = http
+//				.getSharedObject(SessionAuthenticationStrategy.class);
+//		if (sessionAuthenticationStrategy != null) {
+//			authFilter.setSessionAuthenticationStrategy(sessionAuthenticationStrategy);
+//		}
+//		RememberMeServices rememberMeServices = http.getSharedObject(RememberMeServices.class);
+//		if (rememberMeServices != null) {
+//			authFilter.setRememberMeServices(rememberMeServices);
+//		}
+//		
+//		http
+//			.apply(new SpringSocialConfigurer())
+//			.and()
+//				.addFilterAfter(authFilter,
+//						AbstractPreAuthenticatedProcessingFilter.class)
+//				.addFilterAfter(new StatelessAuthenticationFilter(tokenAuthenticationService),
+//						CustomAuthenticationFilter.class)
+//
+//				// .addFilterBefore(new
+//				// StatelessAuthenticationFilter(tokenAuthenticationService),
+//				// new CustomAuthenticationFilter(tokenAuthenticationService))
+//				.csrf().disable()
+//				.headers().cacheControl();
+//	}
 
 	// @Autowired
 	// public void configureGlobal(AuthenticationManagerBuilder auth) throws

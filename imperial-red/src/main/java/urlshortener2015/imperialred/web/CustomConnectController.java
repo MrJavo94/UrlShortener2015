@@ -2,11 +2,13 @@ package urlshortener2015.imperialred.web;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +109,14 @@ public class CustomConnectController extends ConnectController {
 		// super.setApplicationUrl("http://ired.ml");
 	}
 
+	@Override
+	@RequestMapping(value="/{providerId}", method=RequestMethod.POST)
+	public RedirectView connect(@PathVariable String providerId, NativeWebRequest request) {
+		Authentication a = SecurityContextHolder.getContext().getAuthentication();
+		logger.info("a null? "+(a == null));
+		return super.connect(providerId, request);
+	}
+	
 	/**
 	 * Process the authorization callback from an OAuth 2 service provider.
 	 * Called after the user authorizes the connection, generally done by having
@@ -123,6 +133,19 @@ public class CustomConnectController extends ConnectController {
 	@Override
 	@RequestMapping(value = "/{providerId}", method = RequestMethod.GET, params = "code")
 	public RedirectView oauth2Callback(@PathVariable String providerId, NativeWebRequest request) {
+
+		
+		logger.info("PRINCIPIO");
+		HttpServletRequest req = request.getNativeRequest(HttpServletRequest.class);
+		logger.info("BEFORE SESS");
+		Enumeration<String> sess = req.getSession().getAttributeNames();
+		logger.info("SESS NULL? " + (sess == null));
+		while(sess.hasMoreElements()){
+			String param = sess.nextElement();
+			logger.info("PARAM: " + param + "; VALUE: "+req.getSession().getAttribute(param));
+		}
+		
+		
 		connectSupport = new ConnectSupport(sessionStrategy);
 		try {
 			OAuth2ConnectionFactory<?> connectionFactory = (OAuth2ConnectionFactory<?>) connectionFactoryLocator
@@ -181,6 +204,17 @@ public class CustomConnectController extends ConnectController {
 	@Override
 	@RequestMapping(value = "/{providerId}", method = RequestMethod.GET, params = "oauth_token")
 	public RedirectView oauth1Callback(@PathVariable String providerId, NativeWebRequest request) {
+
+		logger.info("PRINCIPIO");
+		HttpServletRequest req = request.getNativeResponse(HttpServletRequest.class);
+		logger.info("BEFORE SESS");
+		Enumeration<String> sess = req.getSession().getAttributeNames();
+		while(sess.hasMoreElements()){
+			String param = sess.nextElement();
+			logger.info("PARAM: " + param + "; VALUE: "+req.getSession().getAttribute(param));
+		}
+		
+		
 		connectSupport = new ConnectSupport(sessionStrategy);
 		try {
 			OAuth1ConnectionFactory<?> connectionFactory = (OAuth1ConnectionFactory<?>) connectionFactoryLocator
