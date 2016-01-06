@@ -59,7 +59,7 @@ public class StatsController {
 		logger.info("Requested redirection to statistics with hash " + id);
 		ShortURL l = shortURLRepository.findByHash(id);
 		logger.info("From: " + from + ". To: " + to);
-
+		
 		if (l != null) {
 			model.addAttribute("target", l.getTarget());
 			model.addAttribute("date", l.getCreated());
@@ -67,7 +67,11 @@ public class StatsController {
 			model.addAttribute("clicks", click);
 			model.addAttribute("from", from);
 			model.addAttribute("to", to);
-
+			/* Adds JSON array for clicks by city */
+			DBObject groupObjectCity=clickRepository.getClicksByCity(id, from, to).getRawResults();
+			String listCities = groupObjectCity.get("retval").toString();
+			String cityData=processCityJSON(listCities);
+			model.addAttribute("clicksByCity", cityData);
 			/* Adds JSON array for clicks by country */
 			DBObject groupObject = clickRepository
 					.getClicksByCountry(id, from, to).getRawResults();
@@ -101,6 +105,30 @@ public class StatsController {
 		return new ResponseEntity<>(stats, HttpStatus.OK);
 	}
 
+	/**
+	 * Converts a ResultsByGroup JSON text into a text array of elements in a
+	 * format suitable for Google Charts API.
+	 */
+	public static String processCityJSON(String text) {
+		String res = "[['City','Clicks','Area']";
+		text = text.replace("[", "").replace("]", "").replace("{", "")
+				.replace("}", "").replace(" ", "");
+		String[] parts = text.split(",");
+		for (int i = 0; i < parts.length; i++) {
+			res += ",";
+			String[] keyValue = parts[i].split(":");
+			if (keyValue[0].equals("\"country\"")) {
+				res += "[" + keyValue[1];
+			}
+			else if (keyValue[0].equals("\"count\"")) {
+				res += keyValue[1] + "]";
+			}
+		}
+		res += "]";
+		return res;
+	}
+	
+	
 	/**
 	 * Converts a ResultsByGroup JSON text into a text array of elements in a
 	 * format suitable for Google Charts API.

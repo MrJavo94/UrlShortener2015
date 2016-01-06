@@ -10,11 +10,41 @@
 	<script type="text/javascript" src="js/sockjs-0.3.4.js"></script>
     <script type="text/javascript" src="js/stomp.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script type='text/javascript' src="https://www.gstatic.com/charts/loader.js"></script>
+	
 	<script type="text/javascript">
 		var stompClient = null;
 		google.load("visualization", "1", {packages:["geochart"]});
 		google.setOnLoadCallback(drawRegionsMap);
+		google.setOnLoadCallback(drawMarkersMap);
 
+		<!-- marks-->
+		function drawMarkersMap() {
+	      var data = google.visualization.arrayToDataTable([
+	        ['City',   'Population', 'Area'],
+	        ['Rome',      2761477,    1285.31],
+	        ['Milan',     1324110,    181.76],
+	        ['Naples',    959574,     117.27],
+	        ['Turin',     907563,     130.17],
+	        ['Palermo',   655875,     158.9],
+	        ['Genoa',     607906,     243.60],
+	        ['Bologna',   380181,     140.7],
+	        ['Florence',  371282,     102.41],
+	        ['Fiumicino', 67370,      213.44],
+	        ['Anzio',     52192,      43.43],
+	        ['Ciampino',  38262,      11],
+	        ['Zaragoza',  5555555, 	   500]
+	      ]);
+	      
+	      var options = {
+	        displayMode: 'markers',
+	        colorAxis: {colors: ['green', 'blue', 'red']}
+	      };
+
+	      var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
+	      chart.draw(data, options);
+	    };
+	    <!-- marks-->
 		function drawRegionsMap() {
 			console.log(${clicksByCountry});
 			var data = google.visualization.arrayToDataTable(${clicksByCountry});
@@ -139,9 +169,15 @@
 				<button type="button" class="btn btn-default" onclick='filterStats()'>Update</button>
 			</form>
 		</div>
-		<div class="col-sm-4">
-			<div id="geo_chart" style="width: 900px; height: 500px;"></div>
-		</div>
+		
 	</div>
+	<div class="row">
+			<div class="col-sm-6">
+				<div id="geo_chart" style="width: 900px; height: 500px;"></div>
+			</div>
+			<div class="col-sm-6">
+				<div id="chart_div" style="width: 900px; height: 500px;"></div>
+			</div>
+		</div>
 </body>
 </html>

@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.validator.routines.UrlValidator;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,7 @@ import com.google.common.hash.Hashing;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mongodb.DBObject;
 
 import urlshortener2015.imperialred.exception.CustomException;
@@ -149,7 +151,6 @@ public class UrlShortenerControllerWithLogs {
 						}
 					}
 					createAndSaveClick(id, request);
-					updateMapStats();
 					long click = clickRepository.clicksByHash(l.getHash(), null,
 							null);
 					DBObject groupObject = clickRepository
@@ -336,15 +337,19 @@ public class UrlShortenerControllerWithLogs {
 	protected void createAndSaveClick(String hash, HttpServletRequest request) {
 		/* Gets the IP from the request, and looks in the db for its country */
 		String dirIp = extractIP(request);
-		if (dirIp.equals("127.0.0.1")) dirIp = "52.29.234.196";
 		BigInteger valueIp = getIpValue(dirIp);
 		Ip subnet = ipRepository.findSubnet(valueIp);
 		String country = (subnet != null) ? (subnet.getCountry()) : ("");
 
 		request.getHeader(USER_AGENT);
+		JSONObject jn = getFreegeoip(request);
+		String city = jn.getString("city");
+		Float latitude = new Float(jn.getDouble("latitude"));
+		Float longitude = new Float(jn.getDouble("longitude"));
 		Click cl = new Click(null, hash, new Date(System.currentTimeMillis()),
 				request.getHeader(REFERER), request.getHeader(USER_AGENT),
-				request.getHeader(USER_AGENT), dirIp, country);
+				request.getHeader(USER_AGENT), dirIp, country, city, longitude,
+				latitude);
 		cl = clickRepository.save(cl);
 		logger.info(
 				cl != null ? "[" + hash + "] saved with id [" + cl.getId() + "]"
@@ -467,7 +472,13 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	protected String extractIP(HttpServletRequest request) {
-		return request.getRemoteAddr();
+		
+		String dirIp=request.getRemoteAddr();
+		if (dirIp.equals("0:0:0:0:0:0:0:1") || dirIp.equals("127.0.0.1")) {
+			dirIp = "85.251.34.199";
+		}
+		return dirIp;
+		
 	}
 
 	protected ResponseEntity<?> createSuccessfulRedirectToResponse(ShortURL l) {
@@ -477,15 +488,19 @@ public class UrlShortenerControllerWithLogs {
 		return new ResponseEntity<>(l, h, HttpStatus.valueOf(l.getMode()));
 	}
 
-	/**
-	 * When called, sends the updated stats in an appropriate format for the
-	 * Google Charts map. TODO: Implement it
-	 */
-	@MessageMapping("/hello")
-	@SendTo("/topic/greetings")
-	private String updateMapStats() {
-		logger.info("Updating stats");
-		return "[[\"Country\",\"Clicks\"]]";
+	private JSONObject getFreegeoip(HttpServletRequest request) {
+		try {
+			String dirIp = extractIP(request);
+			
+			HttpResponse<JsonNode> response = Unirest
+					.get("http://freegeoip.net/json/" + dirIp).asJson();
+			return response.getBody().getObject();
+
+		}
+		catch (UnirestException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 }

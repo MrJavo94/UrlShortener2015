@@ -17,5 +17,9 @@ public interface ClickRepositoryCustom {
 	List<Click> list(BigInteger limit, BigInteger offset);
 	
 	GroupByResults<Click> getClicksByCountry(String url, Date from, Date to);
+	
+	long clicksByCity(String city, Date from, Date to);
+	
+	GroupByResults<Click> getClicksByCity(String city, Date from, Date to);
 }
 

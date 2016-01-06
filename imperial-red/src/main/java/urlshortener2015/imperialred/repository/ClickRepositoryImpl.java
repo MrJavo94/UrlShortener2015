@@ -76,5 +76,49 @@ public class ClickRepositoryImpl implements ClickRepositoryCustom{
 				GroupBy.key("country").initialDocument("{ count: 0}")
 				.reduceFunction("function(doc, prev) { prev.count += 1}"), Click.class);		
 	}
+	
+	@Override
+	public GroupByResults<Click> getClicksByCity(String url, Date from, Date to) {
+		/* Chooses a constraint for the query */
+		Criteria criteria;
+		if (from == null && to == null) {
+			criteria = Criteria.where("hash").is(url);
+		} else if (from == null) {
+			criteria = Criteria.where("hash").is(url)
+					.andOperator(Criteria.where("created").lt(to));
+		} else if (to == null) {
+			criteria = Criteria.where("hash").is(url)
+					.andOperator(Criteria.where("created").gte(from));
+		} else {
+			criteria = Criteria.where("hash").is(url)
+					.andOperator(Criteria.where("created").lt(to),
+							Criteria.where("created").gte(from));
+		}
+		/* Returns the aggregation */
+		return mongoTemplate.group(criteria,"click", 
+				GroupBy.key("city").initialDocument("{ count: 0}")
+				.reduceFunction("function(doc, prev) { prev.count += 1}"), Click.class);
+	}
+	
+	@Override
+	public long clicksByCity(String city, Date from, Date to){
+		/* Chooses a constraint for the query */
+		Criteria criteria;
+		if (from == null && to == null) {
+			criteria = Criteria.where("city").is(city);
+		} else if (from == null) {
+			criteria = Criteria.where("city").is(city)
+					.andOperator(Criteria.where("created").lt(to));
+		} else if (to == null) {
+			criteria = Criteria.where("city").is(city)
+					.andOperator(Criteria.where("created").gte(from));
+		} else {
+			criteria = Criteria.where("city").is(city)
+					.andOperator(Criteria.where("created").lt(to),
+							Criteria.where("created").gte(from));
+		}
+		/* Returns count of clicks */
+		return mongoTemplate.count(Query.query(criteria), Click.class);
+	}
 
 }
