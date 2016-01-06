@@ -2,13 +2,11 @@ package urlshortener2015.imperialred.web;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,17 +16,12 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.social.config.annotation.SocialConfiguration;
-import org.springframework.social.config.annotation.SocialConfigurer;
 import org.springframework.social.connect.Connection;
 import org.springframework.social.connect.ConnectionFactory;
 import org.springframework.social.connect.ConnectionFactoryLocator;
 import org.springframework.social.connect.ConnectionRepository;
 import org.springframework.social.connect.DuplicateConnectionException;
-import org.springframework.social.connect.NotConnectedException;
 import org.springframework.social.connect.support.OAuth1ConnectionFactory;
 import org.springframework.social.connect.support.OAuth2ConnectionFactory;
 import org.springframework.social.connect.web.ConnectController;
@@ -57,10 +50,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
-import urlshortener2015.imperialred.config.SocialConfig;
-import urlshortener2015.imperialred.objects.ShortURL;
-
-import urlshortener2015.imperialred.objects.User;
 import urlshortener2015.imperialred.repository.UserRepository;
 
 @Controller
@@ -108,14 +97,6 @@ public class CustomConnectController extends ConnectController {
 		this.connectionFactoryLocator = connectionFactoryLocator;
 		// super.setApplicationUrl("http://ired.ml");
 	}
-
-	@Override
-	@RequestMapping(value="/{providerId}", method=RequestMethod.POST)
-	public RedirectView connect(@PathVariable String providerId, NativeWebRequest request) {
-		Authentication a = SecurityContextHolder.getContext().getAuthentication();
-		logger.info("a null? "+(a == null));
-		return super.connect(providerId, request);
-	}
 	
 	/**
 	 * Process the authorization callback from an OAuth 2 service provider.
@@ -133,25 +114,11 @@ public class CustomConnectController extends ConnectController {
 	@Override
 	@RequestMapping(value = "/{providerId}", method = RequestMethod.GET, params = "code")
 	public RedirectView oauth2Callback(@PathVariable String providerId, NativeWebRequest request) {
-
-		
-		logger.info("PRINCIPIO");
-		HttpServletRequest req = request.getNativeRequest(HttpServletRequest.class);
-		logger.info("BEFORE SESS");
-		Enumeration<String> sess = req.getSession().getAttributeNames();
-		logger.info("SESS NULL? " + (sess == null));
-		while(sess.hasMoreElements()){
-			String param = sess.nextElement();
-			logger.info("PARAM: " + param + "; VALUE: "+req.getSession().getAttribute(param));
-		}
-		
-		
 		connectSupport = new ConnectSupport(sessionStrategy);
 		try {
 			OAuth2ConnectionFactory<?> connectionFactory = (OAuth2ConnectionFactory<?>) connectionFactoryLocator
 					.getConnectionFactory(providerId);
 			Connection<?> connection = connectSupport.completeConnection(connectionFactory, request);
-			String uniqueId = "";
 			Serializable userProfile = null;
 			switch (providerId) {
 			case ("google"):
@@ -204,23 +171,11 @@ public class CustomConnectController extends ConnectController {
 	@Override
 	@RequestMapping(value = "/{providerId}", method = RequestMethod.GET, params = "oauth_token")
 	public RedirectView oauth1Callback(@PathVariable String providerId, NativeWebRequest request) {
-
-		logger.info("PRINCIPIO");
-		HttpServletRequest req = request.getNativeResponse(HttpServletRequest.class);
-		logger.info("BEFORE SESS");
-		Enumeration<String> sess = req.getSession().getAttributeNames();
-		while(sess.hasMoreElements()){
-			String param = sess.nextElement();
-			logger.info("PARAM: " + param + "; VALUE: "+req.getSession().getAttribute(param));
-		}
-		
-		
 		connectSupport = new ConnectSupport(sessionStrategy);
 		try {
 			OAuth1ConnectionFactory<?> connectionFactory = (OAuth1ConnectionFactory<?>) connectionFactoryLocator
 					.getConnectionFactory(providerId);
 			Connection<?> connection = connectSupport.completeConnection(connectionFactory, request);
-			String uniqueId = "";
 			Serializable userProfile = null;
 			switch (providerId) {
 			case ("google"):
@@ -242,10 +197,7 @@ public class CustomConnectController extends ConnectController {
 				// twitter.userOperations().getUserProfile().getScreenName();
 				break;
 			}
-			SecurityContextHolder.getContext()
-					.setAuthentication(new SocialAuthenticationToken(connection, userProfile, null, null));
-			//SecurityContextHolder.getContext()
-			//		.setAuthentication(new UsernamePasswordAuthenticationToken(uniqueId, null, null));
+			SecurityContextHolder.getContext().setAuthentication(new SocialAuthenticationToken(connection, userProfile, null, null));
 			addConnection(connection, connectionFactory, request);
 		} catch (Exception e) {
 			sessionStrategy.setAttribute(request, PROVIDER_ERROR_ATTRIBUTE, e);

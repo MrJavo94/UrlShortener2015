@@ -66,5 +66,4 @@ public class User {
 		return "User[id=" + id + ", mail='" + mail + "', nick='" + nick + "', password='" + password 
 				+ "', twitter='" + twitter + "]";
 	}
-	
 }

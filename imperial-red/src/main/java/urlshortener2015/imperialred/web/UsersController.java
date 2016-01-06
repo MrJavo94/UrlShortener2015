@@ -93,7 +93,7 @@ public class UsersController {
 		System.out.println(mail);
 		System.out.println(nick);
 		System.out.println(password);
-		User user = new User(mail, nick, password, null);
+		User user = new User(mail, nick, Hash.makeHash(password), null);
 		return userRepository.save(user);
 	}
 	
