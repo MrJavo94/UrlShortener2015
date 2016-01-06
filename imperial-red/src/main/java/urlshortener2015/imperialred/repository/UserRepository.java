@@ -4,24 +4,16 @@ import java.math.BigInteger;
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.security.core.userdetails.User;
 
-import urlshortener2015.imperialred.objects.User;
 
 public interface UserRepository extends MongoRepository<User, BigInteger>  {
 	
-	User findByMail(String mail);
-	
-	User findByNick(String nick);
-	
-	User findByTwitter(String twitter);
+	User findByUsername(String username);
 	
 	User save(User u);
 	
-	void deleteById(BigInteger id);
-	
-	void deleteByMail(String mail);
-	
-	void deleteByNick(String nick);
+	void deleteByUsername(BigInteger id);
 	
 	List<User> findAll();
 	
