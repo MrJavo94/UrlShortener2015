@@ -52,15 +52,24 @@ public class UsersController {
 	 * Returns a view with the list of links of a user
 	 */
 	@RequestMapping(value = "/userlinks", method = RequestMethod.GET, produces = "text/html")
-	public ResponseEntity<List<ShortURL>> getUserLinks(HttpServletRequest request) {
-		String mail = UrlShortenerControllerWithLogs.getOwnerMail();
+	public ResponseEntity<String> getUserLinks(HttpServletRequest request) {
+		//String mail = UrlShortenerControllerWithLogs.getOwnerMail();
+		// TODO: get real email when that part is fixed. Until then, always test@expire
+		String mail = "test@expire";
 		logger.info("Getting links made by " + mail);
 		User user = userRepository.findByMail(mail);
+		logger.info("User: " + user);
 		
 		/* If user exists, retrieves its shortURLs */
 		if (user != null) {
 			List<ShortURL> links = shortURLRepository.findByOwner(mail);
-			return new ResponseEntity<>(links, HttpStatus.CREATED);
+			String urls = "";
+			for (int i=0; i<links.size(); i++) {
+				logger.info("ShortURL: " + links.get(i));
+				logger.info(">" + links.get(i).getTarget());
+				urls += links.get(i).getTarget() + " ";
+			}
+			return new ResponseEntity<>(urls, HttpStatus.CREATED);
 		} else {
 			/* Throws 404 if user does not exist */
 			throw new CustomException("404", "NOT_FOUND");

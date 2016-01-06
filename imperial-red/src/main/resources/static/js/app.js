@@ -414,9 +414,14 @@ $(document).ready(function() {
 	      success : function(links) {
 	    	  console.log('2');
 	    	  console.log(links);
-	          $("#links_list").html(
-	        		  "<p>Hola kio</p>"
-	          );
+	    	  var content = "";
+	    	  var urls = links.split(" ");
+	    	  for (var i=0; i<links.length; i++) {
+	    		  if (urls[i] != undefined) {
+	    			  content += "<p><a href=\"" + urls[i] + "\">"+urls[i]+"</p><br>";
+	    		  }
+	    	  }
+	          $("#links_list").html(content);
 	      }
 	    });
    });
