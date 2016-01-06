@@ -20,21 +20,8 @@
 
 		<!-- marks-->
 		function drawMarkersMap() {
-	      var data = google.visualization.arrayToDataTable([
-	        ['City',   'Population', 'Area'],
-	        ['Rome',      2761477,    1285.31],
-	        ['Milan',     1324110,    181.76],
-	        ['Naples',    959574,     117.27],
-	        ['Turin',     907563,     130.17],
-	        ['Palermo',   655875,     158.9],
-	        ['Genoa',     607906,     243.60],
-	        ['Bologna',   380181,     140.7],
-	        ['Florence',  371282,     102.41],
-	        ['Fiumicino', 67370,      213.44],
-	        ['Anzio',     52192,      43.43],
-	        ['Ciampino',  38262,      11],
-	        ['Zaragoza',  5555555, 	   500]
-	      ]);
+			console.log(${clicksByCity});
+	      var data = google.visualization.arrayToDataTable(${clicksByCity});
 	      
 	      var options = {
 	        displayMode: 'markers',
@@ -44,6 +31,19 @@
 	      var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
 	      chart.draw(data, options);
 	    };
+
+	    function drawMarkersMap2(map) {
+	    	console.log(map);
+			var data = google.visualization.arrayToDataTable(map);
+
+			var options = {
+				displayMode: 'markers',
+				colorAxis: {colors: ['green', 'blue', 'red']}
+			};
+
+			var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
+			chart.draw(data, options);
+		};
 	    <!-- marks-->
 		function drawRegionsMap() {
 			console.log(${clicksByCountry});
@@ -53,10 +53,9 @@
 			chart.draw(data, options);
 		}
 		
-		function drawRegionsMap2(jander) {
-			console.log('Updating in client');
+		function drawRegionsMap2(map) {
 			console.log(jander);
-			var data = google.visualization.arrayToDataTable(jander);
+			var data = google.visualization.arrayToDataTable(map);
 			var options = {};
 			var chart = new google.visualization.GeoChart(document.getElementById('geo_chart'));
 			chart.draw(data, options);
@@ -83,10 +82,14 @@
 	                			document.getElementById("to").value.localeCompare('')==0){
 	                		console.log('message arrived, no filter');
 		                	var clicks=JSON.parse(newdata.body).clicks;
-		                	var clicksBy=JSON.parse(newdata.body).clicksByCountry;
+		                	var clicksByCountry=JSON.parse(newdata.body).clicksByCountry;
+		                	var clicksByCity=JSON.parse(newdata.body).clicksByCity;
+		                	console.log(clicksByCity);
 		                    showStats(clicks);
 		                    setFromToVisibility();
-		                    drawRegionsMap2(clicksBy);
+		                    drawMarkersMap2(clicksByCity);
+		                    drawRegionsMap2(clicksByCountry);
+		                    
 	                	}
 	                	else{
 	                		filterStats(idActual);
@@ -95,10 +98,13 @@
 	                else{
 	                	console.log('message arrived, filter');
 		                	var clicks=JSON.parse(newdata.body).clicks;
-		                	var clicksBy=JSON.parse(newdata.body).clicksByCountry;
+		                	var clicksByCountry=JSON.parse(newdata.body).clicksByCountry;
+		                	var clicksByCity=JSON.parse(newdata.body).clicksByCity;
 		                    showStats(clicks);
 		                    setFromToVisibility();
-		                    drawRegionsMap2(clicksBy);
+		                    drawMarkersMap2(clicksByCity);
+		                    drawRegionsMap2(clicksByCountry);
+		                    
 	                }	
                 });
             });
@@ -115,8 +121,14 @@
     		$.get( "/stats/filter/",
 			{ id: idActual,
 			from: document.getElementById("from").value,
-			to: document.getElementById("to").value } )
+			to: document.getElementById("to").value,
+			min_latitude: document.getElementById("min_latitude").value,
+			min_longitude: document.getElementById("min_longitude").value,
+			max_latitude: document.getElementById("min_latitude").value,
+			max_longitude: document.getElementById("min_longitude").value } )
 		}
+
+		
 		
 		function setFromToVisibility() {
 			var from = document.getElementById("from");
@@ -157,19 +169,42 @@
 					<div><p id="show_to">To ${to}</p></div>
 				</div>
 			</div>
-			<form>
-				<div class="form-group">
-					<label for="from">From...</label>
-					<input type="date" class="form-control" name="from" id="from">
-				</div>
-				<div class="form-group">
-					<label for="to">To...</label>
-					<input type="date" class="form-control" name="to" id="to">
-				</div>
-				<button type="button" class="btn btn-default" onclick='filterStats()'>Update</button>
-			</form>
+					<form>
+						<div class="col-lg-12">
+							<div class="form-group">
+								<label for="from">From...</label>
+								<input type="date" class="form-control" name="from" id="from">
+							</div>
+							<div class="form-group">
+								<label for="to">To...</label>
+								<input type="date" class="form-control" name="to" id="to">
+							</div>
+						</div>
+						<div class="col-lg-6">
+							<div class="form-group">
+								<label for="min_latitude">Min Latitude</label>
+								<input type="number" class="form-control" id="min_latitude">
+							</div>
+							<div class="form-group">
+								<label for="min_longitude">Min Longitude</label>
+								<input type="number" class="form-control"  id="min_longitude">
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label for="max_latitude">Max Latitude</label>
+								<input type="number" class="form-control" id="max_latitude">
+							</div>
+							<div class="form-group">
+								<label for="max_longitude">Max Longitude</label>
+								<input type="number" class="form-control"  id="max_longitude">
+							</div>
+						</div>	
+							
+						<button type="button" class="btn btn-default" onclick='filterStats()'>Update</button>
+					</form>
+			</br>
 		</div>
-		
 	</div>
 	<div class="row">
 			<div class="col-sm-6">

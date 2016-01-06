@@ -153,13 +153,23 @@ public class UrlShortenerControllerWithLogs {
 					createAndSaveClick(id, request);
 					long click = clickRepository.clicksByHash(l.getHash(), null,
 							null);
+					// countryData
 					DBObject groupObject = clickRepository
 							.getClicksByCountry(id, null, null).getRawResults();
 					String list = groupObject.get("retval").toString();
 					String countryData = StatsController
 							.processCountryJSON(list);
+					// dityData
+					DBObject groupObjectCity = clickRepository
+							.getClicksByCity(id, null, null, null, null, null,
+									null)
+							.getRawResults();
+					String listCities = groupObjectCity.get("retval")
+							.toString();
+					String cityData = StatsController
+							.processCityJSON(listCities);
 					WebSocketsData wb = new WebSocketsData(false, click,
-							countryData);
+							countryData, cityData);
 					this.template.convertAndSend("/topic/" + id, wb);
 					return createSuccessfulRedirectToResponse(l);
 				}
@@ -472,13 +482,13 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	protected String extractIP(HttpServletRequest request) {
-		
-		String dirIp=request.getRemoteAddr();
+
+		String dirIp = request.getRemoteAddr();
 		if (dirIp.equals("0:0:0:0:0:0:0:1") || dirIp.equals("127.0.0.1")) {
 			dirIp = "85.251.34.199";
 		}
 		return dirIp;
-		
+
 	}
 
 	protected ResponseEntity<?> createSuccessfulRedirectToResponse(ShortURL l) {
@@ -491,7 +501,7 @@ public class UrlShortenerControllerWithLogs {
 	private JSONObject getFreegeoip(HttpServletRequest request) {
 		try {
 			String dirIp = extractIP(request);
-			
+
 			HttpResponse<JsonNode> response = Unirest
 					.get("http://freegeoip.net/json/" + dirIp).asJson();
 			return response.getBody().getObject();

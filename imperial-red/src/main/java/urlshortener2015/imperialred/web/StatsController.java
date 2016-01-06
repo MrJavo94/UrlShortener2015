@@ -59,7 +59,7 @@ public class StatsController {
 		logger.info("Requested redirection to statistics with hash " + id);
 		ShortURL l = shortURLRepository.findByHash(id);
 		logger.info("From: " + from + ". To: " + to);
-		
+
 		if (l != null) {
 			model.addAttribute("target", l.getTarget());
 			model.addAttribute("date", l.getCreated());
@@ -68,9 +68,11 @@ public class StatsController {
 			model.addAttribute("from", from);
 			model.addAttribute("to", to);
 			/* Adds JSON array for clicks by city */
-			DBObject groupObjectCity=clickRepository.getClicksByCity(id, from, to).getRawResults();
+			DBObject groupObjectCity = clickRepository
+					.getClicksByCity(id, from, to, null, null, null, null)
+					.getRawResults();
 			String listCities = groupObjectCity.get("retval").toString();
-			String cityData=processCityJSON(listCities);
+			String cityData = processCityJSON(listCities);
 			model.addAttribute("clicksByCity", cityData);
 			/* Adds JSON array for clicks by country */
 			DBObject groupObject = clickRepository
@@ -110,25 +112,24 @@ public class StatsController {
 	 * format suitable for Google Charts API.
 	 */
 	public static String processCityJSON(String text) {
-		String res = "[['City','Clicks','Area']";
+		String res = "[['City','Clicks']";
 		text = text.replace("[", "").replace("]", "").replace("{", "")
-				.replace("}", "").replace(" ", "");
+				.replace("}", "").replace(" ", "").replace("\"", "'");
 		String[] parts = text.split(",");
 		for (int i = 0; i < parts.length; i++) {
 			res += ",";
 			String[] keyValue = parts[i].split(":");
-			if (keyValue[0].equals("\"country\"")) {
+			if (keyValue[0].equals("'city'")) {
 				res += "[" + keyValue[1];
 			}
-			else if (keyValue[0].equals("\"count\"")) {
+			else if (keyValue[0].equals("'count'")) {
 				res += keyValue[1] + "]";
 			}
 		}
 		res += "]";
 		return res;
 	}
-	
-	
+
 	/**
 	 * Converts a ResultsByGroup JSON text into a text array of elements in a
 	 * format suitable for Google Charts API.
@@ -156,7 +157,11 @@ public class StatsController {
 	public ResponseEntity<?> filterStats(
 			@RequestParam(value = "id", required = true) String hash,
 			@RequestParam(value = "from", required = true) String from,
-			@RequestParam(value = "to", required = true) String to)
+			@RequestParam(value = "to", required = true) String to,
+			@RequestParam(value = "min_latitude", required = true) Float min_latitude,
+			@RequestParam(value = "min_longitude", required = true) Float min_longitude,
+			@RequestParam(value = "max_latitude", required = true) Float max_latitude,
+			@RequestParam(value = "max_longitude", required = true) Float max_longitude)
 					throws ParseException {
 		System.out.println(from + "entra");
 		Date dateF = null;
@@ -168,14 +173,23 @@ public class StatsController {
 			dateT = new SimpleDateFormat("yyyy-MM-dd").parse(to);
 		}
 		long clicks = clickRepository.clicksByHash(hash, dateF, dateT);
+		// countryData
 		DBObject groupObject = clickRepository
 				.getClicksByCountry(hash, dateF, dateT).getRawResults();
 		String list = groupObject.get("retval").toString();
 		String countryData = StatsController.processCountryJSON(list);
+		// cityData
+		DBObject groupObjectCity = clickRepository
+				.getClicksByCity(hash, dateF, dateT, min_latitude, min_longitude, max_latitude, max_longitude)
+				.getRawResults();
+		String listCities = groupObjectCity.get("retval").toString();
+		String cityData = processCityJSON(listCities);
 		System.out.println(clicks);
-		WebSocketsData wb = new WebSocketsData(true, clicks, countryData);
+		WebSocketsData wb = new WebSocketsData(true, clicks, countryData,
+				cityData);
 		this.template.convertAndSend("/topic/" + hash, wb);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
+
 
 }
