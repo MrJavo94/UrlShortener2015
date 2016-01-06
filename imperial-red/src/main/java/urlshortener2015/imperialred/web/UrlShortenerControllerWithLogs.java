@@ -188,20 +188,41 @@ public class UrlShortenerControllerWithLogs {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	/**
+	 * Changes the expire date and alert for the new specified
+	 */
+	@RequestMapping(value = "/changeExpire", method = RequestMethod.GET)
+	public ResponseEntity<?> changeExpireDate(HttpServletRequest request,
+			@RequestParam(value = "url", required = false) String url,
+			@RequestParam(value = "expire", required = false) String expire,
+			@RequestParam(value = "days", required = false) String days) {
+		Alert a = alertRepository.findByUrl(url);
+		Date alertDate = processAlertDate(expire, days);
+		if (a != null) {
+			/* If alert already exists, updates its alert date */
+			a.setDate(alertDate);
+			alertRepository.save(a);
+		} else {
+			//String mail = UrlShortenerControllerWithLogs.getOwnerMail();
+			// TODO: get real email when that part is fixed. Until then, always test@expire
+			String mail = "test@expire";
+			alertRepository.save(new Alert(mail, url, alertDate));
+		}
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 
 	/**
 	 * Given an expire date for a link and the previous days for the
 	 * alert to be sent, calculates the date in which the alert will be sent.
 	 * Since the user does not specify a time, it is set to 00:00.
 	 */
-	private Date processAlertDate(String expireDate, String days) {
+	protected Date processAlertDate(String expireDate, String days) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		LocalDate expireLocal = LocalDate.parse(expireDate, formatter);
 		LocalDate alertLocal = expireLocal.minusDays(Long.parseLong(days));
 		return Date.from(alertLocal.atStartOfDay(ZoneId.systemDefault()).toInstant());
 	}
-	
-	
 
 	@RequestMapping(value = "/rec/rec", method = RequestMethod.GET)
 	public ResponseEntity<ArrayList<String>> recomendaciones(

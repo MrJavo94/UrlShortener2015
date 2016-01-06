@@ -10,6 +10,8 @@ public interface AlertRepository extends MongoRepository<Alert, BigInteger> {
 	
 	Alert save(Alert a);
 	
+	Alert findByUrl(String url);
+	
 	Alert findFirstByOrderByDate();
 	
 	void delete(Alert a);
