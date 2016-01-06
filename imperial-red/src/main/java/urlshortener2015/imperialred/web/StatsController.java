@@ -149,5 +149,29 @@ public class StatsController {
 		this.template.convertAndSend("/topic/" + hash, wb);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
+	
+	/**
+	 * Given a request from a ShortURL stats page, returns true if
+	 * that url is owned by authenticated user, false otherwise.
+	 */
+	@RequestMapping(value = "/checkAuth", method = RequestMethod.GET)
+	public ResponseEntity<Boolean> checkIfOwner(
+			@RequestParam(value = "url", required = true) String hash) {
+		//String mail = UrlShortenerControllerWithLogs.getOwnerMail();
+		// TODO: get real email when that part is fixed. Until then, always test@expire
+		String mail = "test@expire";
+		
+		/* Retrieves owners' mail of link */
+		ShortURL su = shortURLRepository.findByHash(hash);
+		String owner = su.getOwner();
+		
+		/* Checks if authed user is owner of that link */
+		if (owner.equals(mail)) {
+			return new ResponseEntity<>(true, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(false, HttpStatus.OK);
+		}
+	}
+	
 
 }
