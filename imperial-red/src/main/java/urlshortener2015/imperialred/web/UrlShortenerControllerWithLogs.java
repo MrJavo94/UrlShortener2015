@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,6 +42,17 @@ import org.springframework.social.google.api.Google;
 import org.springframework.social.security.SocialAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.social.connect.Connection;
+import org.springframework.social.connect.UserProfile;
+import org.springframework.social.facebook.api.Facebook;
+import org.springframework.social.google.api.Google;
+import org.springframework.social.google.api.plus.Person;
+import org.springframework.social.security.SocialAuthenticationToken;
+import org.springframework.social.twitter.api.Twitter;
+import org.springframework.social.twitter.api.TwitterProfile;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -248,9 +260,9 @@ public class UrlShortenerControllerWithLogs {
 			@RequestParam(value = "emails[]", required = false) String[] emails,
 			@RequestParam(value = "alert_email", required = false) String alertEmail,
 			@RequestParam(value = "days", required = false) String days,
-			HttpServletRequest request) throws Exception {
+			HttpServletRequest request, Principal principal) throws Exception {
 		ShortURL su = createAndSaveIfValid(url, custom, hasToken, expireDate,
-				extractIP(request), emails);
+				extractIP(request), emails, principal);
 		if (su != null) {
 			/* If there is an expire date, it sets an alert */
 			if (!expireDate.equals("")) {
@@ -387,8 +399,9 @@ public class UrlShortenerControllerWithLogs {
 	 * If shortURL is valid, creates it and saves it XXX: at the moment, it just
 	 * ignores unknown emails, with no feedback for users.
 	 */
-	public ShortURL createAndSaveIfValid(String url, String custom,
-			String hasToken, String expireDate, String ip, String[] emails) {
+	protected ShortURL createAndSaveIfValid(String url, String custom,
+			String hasToken, String expireDate, String ip, String[] emails,
+			Principal principal) {
 
 		UrlValidator urlValidator = new UrlValidator(
 				new String[] { "http", "https" });
@@ -458,18 +471,23 @@ public class UrlShortenerControllerWithLogs {
 			else {
 				trueEmails = null;
 			}
+			
+			/*
+			 * Gets email
+			 */
+			String owner = getOwnerMail();
+			logger.info("Mail: " + owner);			
 
 			/*
 			 * Creates ShortURL object
 			 */
-			ShortURL su = new ShortURL(id, url,
-					linkTo(methodOn(UrlShortenerControllerWithLogs.class)
-							.redirectTo(id, null, null, null, null)).toUri(),
-					new Date(System.currentTimeMillis()), expire,
-					mailByAuthentication(), token,
-					HttpStatus.TEMPORARY_REDIRECT.value(), ip, null, isPrivate,
-					trueEmails);
 
+			ShortURL su = new ShortURL(id, url, linkTo(
+					methodOn(UrlShortenerControllerWithLogs.class).redirectTo(
+							id, null, null,null,null)).toUri(), new Date(
+					System.currentTimeMillis()), expire, owner, token,
+					HttpStatus.TEMPORARY_REDIRECT.value(), ip, null, isPrivate, trueEmails);
+			
 			/*
 			 * Insert to DB
 			 */
@@ -510,6 +528,35 @@ public class UrlShortenerControllerWithLogs {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	private String getOwnerMail() {
+		SocialAuthenticationToken authentication = (SocialAuthenticationToken) 
+				SecurityContextHolder.getContext().getAuthentication();
+		String providerId = authentication.getProviderId();
+		Connection connection = authentication.getConnection();
+		String owner = null;
+		switch(providerId){
+        case("google"):
+            Google google = (Google) connection.getApi();
+            Person p = google.plusOperations().getGoogleProfile();
+            owner = p.getAccountEmail();
+            break;
+        case("facebook"):
+            Facebook facebook = (Facebook) connection.getApi();
+        	org.springframework.social.facebook.api.User u = 
+        			facebook.userOperations().getUserProfile();
+        	owner = u.getEmail();
+            break;
+        case("twitter"):
+            Twitter twitter = (Twitter) connection.getApi();
+            TwitterProfile tp = twitter.userOperations().getUserProfile();
+            /*
+             * TODO: resolve Twitter mail
+             */
+            break;
+        }	
+		return owner;
 	}
 
 }
