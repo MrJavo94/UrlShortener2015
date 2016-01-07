@@ -216,15 +216,22 @@ public class StatsController {
 		//String mail = UrlShortenerControllerWithLogs.getOwnerMail();
 		// TODO: get real email when that part is fixed. Until then, always test@expire
 		String mail = "test@expire";
+		logger.info("Checking if user " + mail + " is owner of url");
 		
 		/* Retrieves owners' mail of link */
+		hash = hash.substring(1,hash.length()-1);
+		logger.info("hash: " + hash);
 		ShortURL su = shortURLRepository.findByHash(hash);
+		logger.info("shorturl: "+ su);
 		String owner = su.getOwner();
+		logger.info("owner: " + owner);
 		
 		/* Checks if authed user is owner of that link */
-		if (owner.equals(mail)) {
+		if (owner!= null && owner.equals(mail)) {
+			logger.info("equals");
 			return new ResponseEntity<>(true, HttpStatus.OK);
 		} else {
+			logger.info("not equals");
 			return new ResponseEntity<>(false, HttpStatus.OK);
 		}
 	}
