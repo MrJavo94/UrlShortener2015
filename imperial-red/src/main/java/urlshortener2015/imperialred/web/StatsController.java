@@ -63,7 +63,8 @@ public class StatsController {
 		if (l != null) {
 			model.addAttribute("target", l.getTarget());
 			model.addAttribute("date", l.getCreated());
-			long click = clickRepository.clicksByHash(l.getHash(), from, to);
+			long click = clickRepository.clicksByHash(l.getHash(), from, to,
+					null, null, null, null);
 			model.addAttribute("clicks", click);
 			model.addAttribute("from", from);
 			model.addAttribute("to", to);
@@ -103,7 +104,9 @@ public class StatsController {
 		logger.info("To: " + to);
 		ShortURL l = shortURLRepository.findByHash(id);
 		StatsURL stats = new StatsURL(l.getTarget(), l.getCreated().toString(),
-				clickRepository.clicksByHash(l.getHash(), from, to), from, to);
+				clickRepository.clicksByHash(l.getHash(), from, to, null, null,
+						null, null),
+				from, to);
 		return new ResponseEntity<>(stats, HttpStatus.OK);
 	}
 
@@ -116,14 +119,16 @@ public class StatsController {
 		text = text.replace("[", "").replace("]", "").replace("{", "")
 				.replace("}", "").replace(" ", "").replace("\"", "'");
 		String[] parts = text.split(",");
-		for (int i = 0; i < parts.length; i++) {
-			res += ",";
-			String[] keyValue = parts[i].split(":");
-			if (keyValue[0].equals("'city'")) {
-				res += "[" + keyValue[1];
-			}
-			else if (keyValue[0].equals("'count'")) {
-				res += keyValue[1] + "]";
+		if (!text.equals("")) {
+			for (int i = 0; i < parts.length; i++) {
+				res += ",";
+				String[] keyValue = parts[i].split(":");
+				if (keyValue[0].equals("'city'")) {
+					res += "[" + keyValue[1];
+				}
+				else if (keyValue[0].equals("'count'")) {
+					res += keyValue[1] + "]";
+				}
 			}
 		}
 		res += "]";
@@ -139,14 +144,16 @@ public class StatsController {
 		text = text.replace("[", "").replace("]", "").replace("{", "")
 				.replace("}", "").replace(" ", "");
 		String[] parts = text.split(",");
-		for (int i = 0; i < parts.length; i++) {
-			res += ",";
-			String[] keyValue = parts[i].split(":");
-			if (keyValue[0].equals("\"country\"")) {
-				res += "[" + keyValue[1];
-			}
-			else if (keyValue[0].equals("\"count\"")) {
-				res += keyValue[1] + "]";
+		if (!text.equals("")) {
+			for (int i = 0; i < parts.length; i++) {
+				res += ",";
+				String[] keyValue = parts[i].split(":");
+				if (keyValue[0].equals("\"country\"")) {
+					res += "[" + keyValue[1];
+				}
+				else if (keyValue[0].equals("\"count\"")) {
+					res += keyValue[1] + "]";
+				}
 			}
 		}
 		res += "]";
@@ -159,9 +166,9 @@ public class StatsController {
 			@RequestParam(value = "from", required = true) String from,
 			@RequestParam(value = "to", required = true) String to,
 			@RequestParam(value = "min_latitude", required = true) Float min_latitude,
-			@RequestParam(value = "min_longitude", required = true) Float min_longitude,
+			@RequestParam(value = "max_longitude", required = true) Float max_longitude,
 			@RequestParam(value = "max_latitude", required = true) Float max_latitude,
-			@RequestParam(value = "max_longitude", required = true) Float max_longitude)
+			@RequestParam(value = "min_longitude", required = true) Float min_longitude)
 					throws ParseException {
 		System.out.println(from + "entra");
 		Date dateF = null;
@@ -172,7 +179,8 @@ public class StatsController {
 		if (!to.equals("")) {
 			dateT = new SimpleDateFormat("yyyy-MM-dd").parse(to);
 		}
-		long clicks = clickRepository.clicksByHash(hash, dateF, dateT);
+		long clicks = clickRepository.clicksByHash(hash, dateF, dateT,
+				min_latitude, max_longitude, max_latitude, min_longitude);
 		// countryData
 		DBObject groupObject = clickRepository
 				.getClicksByCountry(hash, dateF, dateT).getRawResults();
@@ -180,7 +188,8 @@ public class StatsController {
 		String countryData = StatsController.processCountryJSON(list);
 		// cityData
 		DBObject groupObjectCity = clickRepository
-				.getClicksByCity(hash, dateF, dateT, min_latitude, min_longitude, max_latitude, max_longitude)
+				.getClicksByCity(hash, dateF, dateT, min_latitude,
+						max_longitude, max_latitude, min_longitude)
 				.getRawResults();
 		String listCities = groupObjectCity.get("retval").toString();
 		String cityData = processCityJSON(listCities);
@@ -190,6 +199,5 @@ public class StatsController {
 		this.template.convertAndSend("/topic/" + hash, wb);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
-
 
 }

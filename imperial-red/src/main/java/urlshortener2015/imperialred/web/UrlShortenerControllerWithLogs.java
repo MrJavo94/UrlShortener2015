@@ -152,7 +152,7 @@ public class UrlShortenerControllerWithLogs {
 					}
 					createAndSaveClick(id, request);
 					long click = clickRepository.clicksByHash(l.getHash(), null,
-							null);
+							null,null,null,null,null);
 					// countryData
 					DBObject groupObject = clickRepository
 							.getClicksByCountry(id, null, null).getRawResults();
@@ -161,8 +161,7 @@ public class UrlShortenerControllerWithLogs {
 							.processCountryJSON(list);
 					// dityData
 					DBObject groupObjectCity = clickRepository
-							.getClicksByCity(id, null, null, null, null, null,
-									null)
+							.getClicksByCity(id, null, null, null, null, null, null)
 							.getRawResults();
 					String listCities = groupObjectCity.get("retval")
 							.toString();
@@ -485,7 +484,7 @@ public class UrlShortenerControllerWithLogs {
 
 		String dirIp = request.getRemoteAddr();
 		if (dirIp.equals("0:0:0:0:0:0:0:1") || dirIp.equals("127.0.0.1")) {
-			dirIp = "85.251.34.199";
+			dirIp = "79.159.252.76";
 		}
 		return dirIp;
 

@@ -1,6 +1,8 @@
 package urlshortener2015.imperialred.repository;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -27,24 +29,43 @@ public class ClickRepositoryImpl implements ClickRepositoryCustom {
 	}
 
 	@Override
-	public long clicksByHash(String hash, Date from, Date to) {
+	public long clicksByHash(String hash, Date from, Date to,
+			Float min_latitude, Float max_longitude, Float max_latitude,
+			Float min_longitude) {
 		/* Chooses a constraint for the query */
 		Criteria criteria;
-		if (from == null && to == null) {
-			criteria = Criteria.where("hash").is(hash);
+		Collection<Criteria> array = new ArrayList<Criteria>();
+		if (from != null) {
+			criteria = Criteria.where("created").gte(from);
+			array.add(criteria);
 		}
-		else if (from == null) {
-			criteria = Criteria.where("hash").is(hash)
-					.andOperator(Criteria.where("created").lt(to));
+		if (to != null) {
+			criteria = Criteria.where("created").lte(to);
+			array.add(criteria);
 		}
-		else if (to == null) {
+		if (min_latitude != null) {
+			criteria = Criteria.where("latitude").gte(min_latitude);
+			array.add(criteria);
+		}
+		if (max_longitude != null) {
+			criteria = Criteria.where("longitude").lte(max_longitude);
+			array.add(criteria);
+		}
+		if (max_latitude != null) {
+			criteria = Criteria.where("latitude").lte(max_latitude);
+			array.add(criteria);
+		}
+		if (min_longitude != null) {
+			criteria = Criteria.where("longitude").gte(min_longitude);
+			array.add(criteria);
+		}
+		/* Returns the aggregation */
+		if (array.size() > 0) {
 			criteria = Criteria.where("hash").is(hash)
-					.andOperator(Criteria.where("created").gte(from));
+					.andOperator(array.toArray(new Criteria[array.size()]));
 		}
 		else {
-			criteria = Criteria.where("hash").is(hash).andOperator(
-					Criteria.where("created").lt(to),
-					Criteria.where("created").gte(from));
+			criteria = Criteria.where("hash").is(hash);
 		}
 		/* Returns count of clicks */
 		return mongoTemplate.count(Query.query(criteria), Click.class);
@@ -89,27 +110,43 @@ public class ClickRepositoryImpl implements ClickRepositoryCustom {
 
 	@Override
 	public GroupByResults<Click> getClicksByCity(String url, Date from, Date to,
-			Float min_longitude, Float min_latitude, Float max_longitud,
-			Float max_latitude) {
+			Float min_latitude, Float max_longitude, Float max_latitude,
+			Float min_longitude) {
 		/* Chooses a constraint for the query */
 		Criteria criteria;
-		if (from == null && to == null) {
-			criteria = Criteria.where("hash").is(url);
+		Collection<Criteria> array = new ArrayList<Criteria>();
+		if (from != null) {
+			criteria = Criteria.where("created").gte(from);
+			array.add(criteria);
 		}
-		else if (from == null) {
-			criteria = Criteria.where("hash").is(url)
-					.andOperator(Criteria.where("created").lt(to));
+		if (to != null) {
+			criteria = Criteria.where("created").lte(to);
+			array.add(criteria);
 		}
-		else if (to == null) {
-			criteria = Criteria.where("hash").is(url)
-					.andOperator(Criteria.where("created").gte(from));
+		if (min_latitude != null) {
+			criteria = Criteria.where("latitude").gte(min_latitude);
+			array.add(criteria);
 		}
-		else {
-			criteria = Criteria.where("hash").is(url).andOperator(
-					Criteria.where("created").lt(to),
-					Criteria.where("created").gte(from));
+		if (max_longitude != null) {
+			criteria = Criteria.where("longitude").lte(max_longitude);
+			array.add(criteria);
+		}
+		if (max_latitude != null) {
+			criteria = Criteria.where("latitude").lte(max_latitude);
+			array.add(criteria);
+		}
+		if (min_longitude != null) {
+			criteria = Criteria.where("longitude").gte(min_longitude);
+			array.add(criteria);
 		}
 		/* Returns the aggregation */
+		if (array.size() > 0) {
+			criteria = Criteria.where("hash").is(url)
+					.andOperator(array.toArray(new Criteria[array.size()]));
+		}
+		else {
+			criteria = Criteria.where("hash").is(url);
+		}
 		return mongoTemplate.group(criteria, "click",
 				GroupBy.key("city").initialDocument("{ count: 0}")
 						.reduceFunction(

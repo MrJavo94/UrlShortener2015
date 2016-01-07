@@ -14,7 +14,7 @@
 	
 	<script type="text/javascript">
 		var stompClient = null;
-		google.load("visualization", "1", {packages:["geochart"]});
+		google.load("visualization", "1", {packages:["map"]});
 		google.setOnLoadCallback(drawRegionsMap);
 		google.setOnLoadCallback(drawMarkersMap);
 
@@ -24,24 +24,34 @@
 	      var data = google.visualization.arrayToDataTable(${clicksByCity});
 	      
 	      var options = {
+	      	showTip: true,
+	      	zoomLevel: '2',
 	        displayMode: 'markers',
 	        colorAxis: {colors: ['green', 'blue', 'red']}
 	      };
 
-	      var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
+	      var chart = new google.visualization.Map(document.getElementById('chart_div'));
 	      chart.draw(data, options);
 	    };
 
 	    function drawMarkersMap2(map) {
-	    	console.log(map);
-			var data = google.visualization.arrayToDataTable(map);
+	    	console.log(map.substring(1, map.length-1));
+	    	console.log(map.length);
+	    	console.log(map[0]);
+	    	//var array=JSON.parse("["+ map.substring(1, map.length-1) +"];");
+	    	var array = (new Function("return [" + map.substring(1, map.length-1)+ "];")());
+	    	console.log(array);
+	    	console.log(array.length);
+			var data = google.visualization.arrayToDataTable(array);
 
 			var options = {
+				showTip: true,
+	      		zoomLevel: '2',
 				displayMode: 'markers',
 				colorAxis: {colors: ['green', 'blue', 'red']}
 			};
 
-			var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
+			var chart = new google.visualization.Map(document.getElementById('chart_div'));
 			chart.draw(data, options);
 		};
 	    <!-- marks-->
@@ -54,8 +64,9 @@
 		}
 		
 		function drawRegionsMap2(map) {
-			console.log(jander);
-			var data = google.visualization.arrayToDataTable(map);
+			var array = (new Function("return [" + map.substring(1, map.length-1)+ "];")());
+			console.log(array);
+			var data = google.visualization.arrayToDataTable(array);
 			var options = {};
 			var chart = new google.visualization.GeoChart(document.getElementById('geo_chart'));
 			chart.draw(data, options);
@@ -89,6 +100,7 @@
 		                    setFromToVisibility();
 		                    drawMarkersMap2(clicksByCity);
 		                    drawRegionsMap2(clicksByCountry);
+
 		                    
 	                	}
 	                	else{
@@ -109,7 +121,11 @@
                 });
             });
             console.log('Ok');
-            
+            $("#chart_div").hide();
+			$("#mnlg").hide();
+			$("#mxlg").hide();
+			$("#mnlt").hide();
+			$("#mxlt").hide();
             setFromToVisibility();
 		}
 
@@ -123,12 +139,40 @@
 			from: document.getElementById("from").value,
 			to: document.getElementById("to").value,
 			min_latitude: document.getElementById("min_latitude").value,
-			min_longitude: document.getElementById("min_longitude").value,
-			max_latitude: document.getElementById("min_latitude").value,
-			max_longitude: document.getElementById("min_longitude").value } )
+			max_longitude: document.getElementById("max_longitude").value,
+			max_latitude: document.getElementById("max_latitude").value,
+			min_longitude: document.getElementById("min_longitude").value } )
 		}
 
-		
+		function changeMap(){
+			if(document.getElementById("button_change").value==0){
+				//ocultar pais
+				document.getElementById("button_change").value=1;
+				$("#chart_div").show();
+				$("#geo_chart").hide();
+				filterStats();
+				$("#mnlg").show();
+				$("#mxlg").show();
+				$("#mnlt").show();
+				$("#mxlt").show();
+			}
+			else{
+				//ocultar ciudades
+				document.getElementById("button_change").value=0;
+				$("#chart_div").hide();
+				$("#geo_chart").show();
+				document.getElementById("min_latitude").value="";
+				document.getElementById("max_longitude").value="";
+				document.getElementById("max_latitude").value="";
+				document.getElementById("min_longitude").value="";
+				filterStats();
+				$("#mnlg").hide();
+				$("#mxlg").hide();
+				$("#mnlt").hide();
+				$("#mxlt").hide();
+				
+			}
+		}
 		
 		function setFromToVisibility() {
 			var from = document.getElementById("from");
@@ -169,50 +213,51 @@
 					<div><p id="show_to">To ${to}</p></div>
 				</div>
 			</div>
-					<form>
-						<div class="col-lg-12">
-							<div class="form-group">
-								<label for="from">From...</label>
-								<input type="date" class="form-control" name="from" id="from">
-							</div>
-							<div class="form-group">
-								<label for="to">To...</label>
-								<input type="date" class="form-control" name="to" id="to">
-							</div>
-						</div>
-						<div class="col-lg-6">
-							<div class="form-group">
-								<label for="min_latitude">Min Latitude</label>
-								<input type="number" class="form-control" id="min_latitude">
-							</div>
-							<div class="form-group">
-								<label for="min_longitude">Min Longitude</label>
-								<input type="number" class="form-control"  id="min_longitude">
-							</div>
-						</div>
-						<div class="col-sm-6">
-							<div class="form-group">
-								<label for="max_latitude">Max Latitude</label>
-								<input type="number" class="form-control" id="max_latitude">
-							</div>
-							<div class="form-group">
-								<label for="max_longitude">Max Longitude</label>
-								<input type="number" class="form-control"  id="max_longitude">
-							</div>
-						</div>	
-							
-						<button type="button" class="btn btn-default" onclick='filterStats()'>Update</button>
-					</form>
+			<form>
+				<div class="col-lg-12">
+					<div class="form-group">
+						<label for="from">From...</label>
+						<input type="date" class="form-control" name="from" id="from">
+					</div>
+					<div class="form-group">
+						<label for="to">To...</label>
+						<input type="date" class="form-control" name="to" id="to">
+					</div>
+				</div>
+				<div class="col-lg-6">
+					<div class="form-group" id="mxlg">
+						<label for="max_longitude">Max Longitude</label>
+						<input type="number" class="form-control" id="max_longitude">
+					</div>
+					<div class="form-group" id="mnlg">
+						<label for="min_longitude">Min Longitude</label>
+						<input type="number" class="form-control" id="min_longitude">
+					</div>
+				</div>
+				<div class="col-lg-6">
+					<div class="form-group" id="mxlt">
+						<label for="max_latitude">Max Latitude</label>
+						<input type="number" class="form-control"  id="max_latitude">
+					</div>
+
+					<div class="form-group" id="mnlt">
+						<label for="min_latitude">Min Latitude</label>
+						<input type="number" class="form-control"  id="min_latitude">
+					</div>
+				</div>
+				<button type="button" class="btn btn-default" onclick='filterStats()'>Update</button>
+			</form>
 			</br>
+			
+		</div>
+		<div class="col-sm-8">
+			<button type="button" id="button_change" class="btn btn-default" value='0' onclick='changeMap()'>Change View</button>
+			<div id="geo_chart" style="width: 900px; height: 500px;"></div>
+			<div id="chart_div" style="width: 900px; height: 500px;"></div>
 		</div>
 	</div>
 	<div class="row">
-			<div class="col-sm-6">
-				<div id="geo_chart" style="width: 900px; height: 500px;"></div>
-			</div>
-			<div class="col-sm-6">
-				<div id="chart_div" style="width: 900px; height: 500px;"></div>
-			</div>
+			
 		</div>
 </body>
 </html>
