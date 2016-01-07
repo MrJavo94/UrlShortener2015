@@ -148,7 +148,7 @@ public class ClickRepositoryImpl implements ClickRepositoryCustom {
 			criteria = Criteria.where("hash").is(url);
 		}
 		return mongoTemplate.group(criteria, "click",
-				GroupBy.key("city").initialDocument("{ count: 0}")
+				GroupBy.key("latitude","longitude","city").initialDocument("{ count: 0}")
 						.reduceFunction(
 								"function(doc, prev) { prev.count += 1}"),
 				Click.class);

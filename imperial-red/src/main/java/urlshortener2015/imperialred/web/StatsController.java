@@ -115,19 +115,25 @@ public class StatsController {
 	 * format suitable for Google Charts API.
 	 */
 	public static String processCityJSON(String text) {
-		String res = "[['City','Clicks']";
+		String res = "[['latitude','longitude','clicks','city']";
 		text = text.replace("[", "").replace("]", "").replace("{", "")
 				.replace("}", "").replace(" ", "").replace("\"", "'");
 		String[] parts = text.split(",");
+		String aux="";
 		if (!text.equals("")) {
 			for (int i = 0; i < parts.length; i++) {
-				res += ",";
 				String[] keyValue = parts[i].split(":");
-				if (keyValue[0].equals("'city'")) {
-					res += "[" + keyValue[1];
+				if (keyValue[0].equals("'latitude'")) { 
+					res += ",[" + keyValue[1];
+				}
+				else if (keyValue[0].equals("'longitude'")) {
+					res += ","+keyValue[1] ;
+				}
+				else if (keyValue[0].equals("'city'")) {
+					aux = ","+keyValue[1]+ "]";
 				}
 				else if (keyValue[0].equals("'count'")) {
-					res += keyValue[1] + "]";
+					res += ","+keyValue[1]+aux ;
 				}
 			}
 		}

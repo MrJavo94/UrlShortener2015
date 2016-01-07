@@ -35,9 +35,6 @@
 	    };
 
 	    function drawMarkersMap2(map) {
-	    	console.log(map.substring(1, map.length-1));
-	    	console.log(map.length);
-	    	console.log(map[0]);
 	    	//var array=JSON.parse("["+ map.substring(1, map.length-1) +"];");
 	    	var array = (new Function("return [" + map.substring(1, map.length-1)+ "];")());
 	    	console.log(array);
@@ -65,7 +62,6 @@
 		
 		function drawRegionsMap2(map) {
 			var array = (new Function("return [" + map.substring(1, map.length-1)+ "];")());
-			console.log(array);
 			var data = google.visualization.arrayToDataTable(array);
 			var options = {};
 			var chart = new google.visualization.GeoChart(document.getElementById('geo_chart'));
@@ -252,6 +248,7 @@
 		</div>
 		<div class="col-sm-8">
 			<button type="button" id="button_change" class="btn btn-default" value='0' onclick='changeMap()'>Change View</button>
+			</br></br>
 			<div id="geo_chart" style="width: 900px; height: 500px;"></div>
 			<div id="chart_div" style="width: 900px; height: 500px;"></div>
 		</div>
