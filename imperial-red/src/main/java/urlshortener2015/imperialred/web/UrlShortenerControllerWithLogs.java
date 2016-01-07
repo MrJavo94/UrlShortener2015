@@ -3,8 +3,10 @@ package urlshortener2015.imperialred.web;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.text.ParseException;
@@ -22,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.validator.routines.UrlValidator;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +34,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.social.facebook.api.Facebook;
+import org.springframework.social.google.api.Google;
+import org.springframework.social.security.SocialAuthenticationToken;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -53,6 +64,7 @@ import com.google.common.hash.Hashing;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mongodb.DBObject;
 
 import urlshortener2015.imperialred.exception.CustomException;
@@ -69,7 +81,7 @@ import urlshortener2015.imperialred.repository.IpRepository;
 import urlshortener2015.imperialred.repository.ShortURLRepository;
 import urlshortener2015.imperialred.repository.UserRepository;
 
-@RestController
+@Controller
 public class UrlShortenerControllerWithLogs {
 
 	@Autowired
@@ -80,15 +92,15 @@ public class UrlShortenerControllerWithLogs {
 
 	@Autowired
 	protected IpRepository ipRepository;
-	
+
 	@Autowired
 	private SimpMessagingTemplate template;
 
+	@Autowired
 	protected UserRepository userRepository;
-	
+
 	@Autowired
 	protected AlertRepository alertRepository;
-
 
 	/**
 	 * The HTTP {@code Referer} header field name.
@@ -110,10 +122,11 @@ public class UrlShortenerControllerWithLogs {
 			.getLogger(UrlShortenerControllerWithLogs.class);
 
 	@RequestMapping(value = "/{id:(?!link|index).*}", method = RequestMethod.GET)
-	public ResponseEntity<?> redirectTo(@PathVariable String id,
-			@RequestParam(value = "token", required = false) String token,HttpServletResponse response,
-			HttpServletRequest request) {
-	
+	public Object redirectTo(@PathVariable String id,
+			@RequestParam(value = "token", required = false) String token,
+			HttpServletResponse response, HttpServletRequest request,
+			Model model) {
+
 		logger.info("Requested redirection with hash " + id);
 		ShortURL l = shortURLRepository.findByHash(id);
 		logger.info(l == null ? "null" : "not null");
@@ -141,27 +154,106 @@ public class UrlShortenerControllerWithLogs {
 
 				}
 				else {
+
+					List<String> list_emails = l.getAllowedUsers();
+					if (list_emails != null && !list_emails.isEmpty()) {
+						if (!authentication(list_emails)) {
+							model.addAttribute("hash", id);
+							return "login_social";
+						}
+					}
 					createAndSaveClick(id, request);
-					updateMapStats();
-					long click=clickRepository.clicksByHash(l.getHash(), null, null);
-					DBObject groupObject = clickRepository.getClicksByCountry(id, null, null).getRawResults();
+					long click = clickRepository.clicksByHash(l.getHash(), null,
+							null,null,null,null,null);
+					// countryData
+					DBObject groupObject = clickRepository
+							.getClicksByCountry(id, null, null).getRawResults();
 					String list = groupObject.get("retval").toString();
-					String countryData = StatsController.processCountryJSON(list);
-					WebSocketsData wb=new WebSocketsData(false,click, countryData);
-					this.template.convertAndSend("/topic/"+id, wb);
+					String countryData = StatsController
+							.processCountryJSON(list);
+					// dityData
+					DBObject groupObjectCity = clickRepository
+							.getClicksByCity(id, null, null, null, null, null, null)
+							.getRawResults();
+					String listCities = groupObjectCity.get("retval")
+							.toString();
+					String cityData = StatsController
+							.processCityJSON(listCities);
+					WebSocketsData wb = new WebSocketsData(false, click,
+							countryData, cityData);
+					this.template.convertAndSend("/topic/" + id, wb);
 					return createSuccessfulRedirectToResponse(l);
 				}
 			}
 		}
 		else {
 			response.setStatus(HttpStatus.BAD_REQUEST.value());
-			throw new CustomException("400", "BAD_REQUEST");
+			throw new CustomException("400",
+					"BAD_REQUEST\nURL SHORTENED DOESN'T EXISTS");
 		}
 	}
 
+	private boolean authentication(List<String> list_emails) {
+		Authentication aux = SecurityContextHolder.getContext()
+				.getAuthentication();
+		if (aux instanceof SocialAuthenticationToken) {
+			SocialAuthenticationToken social = (SocialAuthenticationToken) aux;
+			// google or facebook
+			if (social.getProviderId().equals("google")) {
+				// google
+				Google google = (Google) social.getConnection().getApi();
+				String email = google.plusOperations().getGoogleProfile()
+						.getAccountEmail();
+				System.out.println(email);
+				if (list_emails != null && !list_emails.contains(email)) {
+					throw new CustomException("403", "NOT ALLOWED");
+				}
+			}
+			else if (social.getProviderId().equals("facebook")) {
+				// facebook
+				Facebook google = (Facebook) social.getConnection().getApi();
+				String email = google.userOperations().getUserProfile()
+						.getEmail();
+				System.out.println(email);
+				if (!list_emails.contains(email)) {
+					throw new CustomException("403", "NOT ALLOWED");
+				}
+			}
+		}
+		else if (aux instanceof AnonymousAuthenticationToken) {
+			// not authenticated
+			// redirect to login
+			return false;
+		}
+		return true;
+	}
+
+	private String mailByAuthentication() {
+		Authentication aux = SecurityContextHolder.getContext()
+				.getAuthentication();
+		if (aux instanceof SocialAuthenticationToken) {
+			SocialAuthenticationToken social = (SocialAuthenticationToken) aux;
+			// google or facebook
+			if (social.getProviderId().equals("google")) {
+				// google
+				Google google = (Google) social.getConnection().getApi();
+				return google.plusOperations().getGoogleProfile()
+						.getAccountEmail();
+			}
+			else if (social.getProviderId().equals("facebook")) {
+				// facebook
+				Facebook google = (Facebook) social.getConnection().getApi();
+				return google.userOperations().getUserProfile().getEmail();
+			}
+		}
+		else if (aux instanceof AnonymousAuthenticationToken) {
+			return "";
+		}
+		return "";
+	}
+
 	@RequestMapping(value = "/link", method = RequestMethod.POST)
-	public ResponseEntity<ShortURL> shortener(
-			@RequestParam("url") String url,
+	public ResponseEntity<?> shortener(@RequestParam("url") String url,
 			@RequestParam(value = "custom", required = false) String custom,
 			@RequestParam(value = "expire", required = false) String expireDate,
 			@RequestParam(value = "hasToken", required = false) String hasToken,
@@ -176,8 +268,9 @@ public class UrlShortenerControllerWithLogs {
 			if (!expireDate.equals("")) {
 				Date alertDate = processAlertDate(expireDate, days);
 				logger.info("New alert date: " + alertDate);
-				
-				Alert alert = new Alert(alertEmail, su.getUri().toString(), alertDate);
+
+				Alert alert = new Alert(alertEmail, su.getUri().toString(),
+						alertDate);
 				alertRepository.save(alert);
 			}
 			HttpHeaders h = new HttpHeaders();
@@ -213,15 +306,16 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	/**
-	 * Given an expire date for a link and the previous days for the
-	 * alert to be sent, calculates the date in which the alert will be sent.
-	 * Since the user does not specify a time, it is set to 00:00.
+	 * Given an expire date for a link and the previous days for the alert to be
+	 * sent, calculates the date in which the alert will be sent. Since the user
+	 * does not specify a time, it is set to 00:00.
 	 */
 	protected Date processAlertDate(String expireDate, String days) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		LocalDate expireLocal = LocalDate.parse(expireDate, formatter);
 		LocalDate alertLocal = expireLocal.minusDays(Long.parseLong(days));
-		return Date.from(alertLocal.atStartOfDay(ZoneId.systemDefault()).toInstant());
+		return Date.from(
+				alertLocal.atStartOfDay(ZoneId.systemDefault()).toInstant());
 	}
 
 	@RequestMapping(value = "/rec/rec", method = RequestMethod.GET)
@@ -232,8 +326,8 @@ public class UrlShortenerControllerWithLogs {
 			@RequestParam(value = "hasToken", required = false) String hasToken,
 			HttpServletRequest request) {
 
-		UrlValidator urlValidator = new UrlValidator(new String[] { "http",
-				"https" });
+		UrlValidator urlValidator = new UrlValidator(
+				new String[] { "http", "https" });
 		/*
 		 * Check if url comes through http or https
 		 */
@@ -260,8 +354,8 @@ public class UrlShortenerControllerWithLogs {
 										"VLzNEVr9zQmsh0gOlqs6wudMxDo1p1vCnjEjsnjNBhOCFeqLxr")
 								.header("Accept", "application/json").asJson();
 						ObjectMapper map = new ObjectMapper();
-						Synonym sin = map.readValue(response.getBody()
-								.toString(), Synonym.class);
+						Synonym sin = map.readValue(
+								response.getBody().toString(), Synonym.class);
 						return new ResponseEntity<>(sin.getSynonyms(),
 								HttpStatus.BAD_REQUEST);
 					}
@@ -287,18 +381,23 @@ public class UrlShortenerControllerWithLogs {
 	protected void createAndSaveClick(String hash, HttpServletRequest request) {
 		/* Gets the IP from the request, and looks in the db for its country */
 		String dirIp = extractIP(request);
-		if(dirIp.equals("127.0.0.1"))dirIp="52.29.234.196";
 		BigInteger valueIp = getIpValue(dirIp);
 		Ip subnet = ipRepository.findSubnet(valueIp);
 		String country = (subnet != null) ? (subnet.getCountry()) : ("");
 
 		request.getHeader(USER_AGENT);
+		JSONObject jn = getFreegeoip(request);
+		String city = jn.getString("city");
+		Float latitude = new Float(jn.getDouble("latitude"));
+		Float longitude = new Float(jn.getDouble("longitude"));
 		Click cl = new Click(null, hash, new Date(System.currentTimeMillis()),
 				request.getHeader(REFERER), request.getHeader(USER_AGENT),
-				request.getHeader(USER_AGENT), dirIp, country);
+				request.getHeader(USER_AGENT), dirIp, country, city, longitude,
+				latitude);
 		cl = clickRepository.save(cl);
-		logger.info(cl != null ? "[" + hash + "] saved with id [" + cl.getId()
-				+ "]" : "[" + hash + "] was not saved");
+		logger.info(
+				cl != null ? "[" + hash + "] saved with id [" + cl.getId() + "]"
+						: "[" + hash + "] was not saved");
 	}
 
 	/**
@@ -320,16 +419,15 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	/**
-	 * If shortURL is valid, creates it and saves it
-	 * XXX: at the moment, it just ignores unknown emails, with no
-	 * feedback for users.
+	 * If shortURL is valid, creates it and saves it XXX: at the moment, it just
+	 * ignores unknown emails, with no feedback for users.
 	 */
 	protected ShortURL createAndSaveIfValid(String url, String custom,
 			String hasToken, String expireDate, String ip, String[] emails,
 			Principal principal) {
 
-		UrlValidator urlValidator = new UrlValidator(new String[] { "http",
-				"https" });
+		UrlValidator urlValidator = new UrlValidator(
+				new String[] { "http", "https" });
 		/*
 		 * Check if url comes through http or https
 		 */
@@ -368,29 +466,32 @@ public class UrlShortenerControllerWithLogs {
 					logger.info("Fecha mal introducida");
 				}
 			}
-			
+
 			/*
-			 * Checks every mail inserted by the user, and maintains a
-			 * list with those corresponding to registered users.
+			 * Checks every mail inserted by the user, and maintains a list with
+			 * those corresponding to registered users.
 			 */
 			List<String> trueEmails = new ArrayList<String>();
-			for (int i=0; i<emails.length; i++) {
+			for (int i = 0; i < emails.length; i++) {
 				if (!emails[i].equals("")) {
-					User foundUser = userRepository.findByMail(emails[i]);
+					User foundUser = null;
+
+					foundUser = userRepository.findByMail(emails[i]);
 					if (foundUser != null) {
 						trueEmails.add(foundUser.getMail());
 					}
+
 				}
 			}
-			
 			/*
-			 * If no valid emails are introduced, link will be public and
-			 * it wont have an email list.
+			 * If no valid emails are introduced, link will be public and it
+			 * wont have an email list.
 			 */
 			boolean isPrivate = false;
 			if (trueEmails.size() > 0) {
 				isPrivate = true;
-			} else {
+			}
+			else {
 				trueEmails = null;
 			}
 			
@@ -403,9 +504,10 @@ public class UrlShortenerControllerWithLogs {
 			/*
 			 * Creates ShortURL object
 			 */
+
 			ShortURL su = new ShortURL(id, url, linkTo(
 					methodOn(UrlShortenerControllerWithLogs.class).redirectTo(
-							id, null, null,null)).toUri(), new Date(
+							id, null, null,null,null)).toUri(), new Date(
 					System.currentTimeMillis()), expire, owner, token,
 					HttpStatus.TEMPORARY_REDIRECT.value(), ip, null, isPrivate, trueEmails);
 			
@@ -420,26 +522,35 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	protected String extractIP(HttpServletRequest request) {
-		return request.getRemoteAddr();
+
+		String dirIp = request.getRemoteAddr();
+		if (dirIp.equals("0:0:0:0:0:0:0:1") || dirIp.equals("127.0.0.1")) {
+			dirIp = "79.159.252.76";
+		}
+		return dirIp;
+
 	}
 
 	protected ResponseEntity<?> createSuccessfulRedirectToResponse(ShortURL l) {
 		HttpHeaders h = new HttpHeaders();
 		h.setLocation(URI.create(l.getTarget()));
 		System.out.println(l.getMode());
-		return new ResponseEntity<>(l,h, HttpStatus.valueOf(l.getMode()));
+		return new ResponseEntity<>(l, h, HttpStatus.valueOf(l.getMode()));
 	}
-	
-	/**
-	 * When called, sends the updated stats in an appropriate format
-	 * for the Google Charts map.
-	 * TODO: Implement it
-	 */
-	@MessageMapping("/hello")
-	@SendTo("/topic/greetings")
-	private String updateMapStats() {
-		logger.info("Updating stats");
-		return "[[\"Country\",\"Clicks\"]]";
+
+	private JSONObject getFreegeoip(HttpServletRequest request) {
+		try {
+			String dirIp = extractIP(request);
+
+			HttpResponse<JsonNode> response = Unirest
+					.get("http://freegeoip.net/json/" + dirIp).asJson();
+			return response.getBody().getObject();
+
+		}
+		catch (UnirestException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	protected static String getOwnerMail() {
