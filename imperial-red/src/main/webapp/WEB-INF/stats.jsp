@@ -39,7 +39,16 @@
 	    	var array = (new Function("return [" + map.substring(1, map.length-1)+ "];")());
 	    	console.log(array);
 	    	console.log(array.length);
-			var data = google.visualization.arrayToDataTable(array);
+	    	if(map!=""){
+	    		var data = google.visualization.arrayToDataTable(array);
+	    	}
+	    	else{
+	    		var arr = [];
+	    		arr.push(['latitude','longitude','clicks','city']);
+	    		arr.push([23.4806685,-73.3643635, 42, 'Sara']);
+	    		var data=google.visualization.arrayToDataTable(arr);
+	    	}
+			
 
 			var options = {
 				showTip: true,

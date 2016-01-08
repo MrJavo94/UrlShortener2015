@@ -136,8 +136,12 @@ public class StatsController {
 					res += ","+keyValue[1]+aux ;
 				}
 			}
+			res += "]";
 		}
-		res += "]";
+		else{
+			res="";
+		}
+		
 		return res;
 	}
 
