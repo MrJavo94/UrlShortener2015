@@ -102,12 +102,15 @@ public class UsersController {
 	 */
 	@RequestMapping(value = "/users", method = RequestMethod.POST, produces = "application/json")
 	public User addUser(@RequestParam(value = "mail", required = true) String mail,
-			@RequestParam(value = "nick", required = true) String nick,
 			@RequestParam(value = "password", required = true) String password) {
-		System.out.println(mail);
-		System.out.println(nick);
-		System.out.println(password);
-		User user = new User(mail, nick, Hash.makeHash(password), null);
+		User prev = userRepository.findByMail(mail);
+		/*
+		 * Mail already used
+		 */
+		if(prev != null){
+			return null;
+		}
+		User user = new User(mail, Hash.makeHash(password));
 		return userRepository.save(user);
 	}
 	

@@ -1,12 +1,9 @@
 package urlshortener2015.imperialred.web;
 
 import java.io.Serializable;
-import java.net.URLEncoder;
-import java.security.Principal;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -135,7 +132,7 @@ public class CustomConnectController extends ConnectController {
 				userProfile = google.plusOperations().getGoogleProfile().toString();
 				User aux = userRepository.findByMail(uniqueId);
 				if (aux == null) {
-					User user = new User(uniqueId, userProfile.toString(), null, null);
+					User user = new User(uniqueId, userProfile.toString());
 					userRepository.save(user);
 				}
 				break;
@@ -146,8 +143,7 @@ public class CustomConnectController extends ConnectController {
 				uniqueId = facebook.userOperations().getUserProfile().getEmail();
 				aux = userRepository.findByMail(uniqueId);
 				if (aux == null) {
-					User userf = new User(uniqueId, facebook.userOperations().getUserProfile().getFirstName() + " "
-							+ facebook.userOperations().getUserProfile().getLastName(), null, null);
+					User userf = new User(uniqueId, facebook.userOperations().getUserProfile());
 					userRepository.save(userf);
 				}
 				break;
@@ -206,18 +202,18 @@ public class CustomConnectController extends ConnectController {
 				userProfile = google.plusOperations().getGoogleProfile().toString();
 				User aux = userRepository.findByMail(uniqueId);
 				if (aux == null) {
-					User user = new User(uniqueId, userProfile.toString(), null, null);
+					User user = new User(uniqueId, userProfile.toString());
 					userRepository.save(user);
 				}
 				break;
 			case ("facebook"):
 				facebook = (Facebook) connection.getApi();
 				userProfile = facebook.userOperations().getUserProfile();
+
 				uniqueId = facebook.userOperations().getUserProfile().getEmail();
 				aux = userRepository.findByMail(uniqueId);
 				if (aux == null) {
-					User userf = new User(uniqueId, facebook.userOperations().getUserProfile().getFirstName() + " "
-							+ facebook.userOperations().getUserProfile().getLastName(), null, null);
+					User userf = new User(uniqueId, facebook.userOperations().getUserProfile());
 					userRepository.save(userf);
 				}
 				break;

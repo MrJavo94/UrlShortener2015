@@ -34,6 +34,11 @@ public class Application extends SpringBootServletInitializer {
 		URLProtection linkURL = new URLProtection("/link.*");
 		linkURL.setAllMethods();
 		authenticationFilter.addUrlToProtect(linkURL);
+		
+		//Protect all methods from "/link"
+		URLProtection homeURL = new URLProtection("/");
+		homeURL.setAllMethods();
+		authenticationFilter.addUrlToProtect(homeURL);
 
 		//Protect GET, DELETE and PUT from "/user"
 		URLProtection userURL = new URLProtection("/user.*");

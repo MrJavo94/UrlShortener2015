@@ -55,7 +55,6 @@ public class WebTokenFilter extends GenericFilterBean {
                 sendErrorResponse(request,response,
                         "Authorization error: No token is supplied. Please obtain one from /login.");
             }
-
             else{
                 //Authentication in the request
                 final String token = getTokenFromCookies(request);
