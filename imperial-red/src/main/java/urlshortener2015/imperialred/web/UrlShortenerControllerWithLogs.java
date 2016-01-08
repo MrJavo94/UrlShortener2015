@@ -129,6 +129,7 @@ public class UrlShortenerControllerWithLogs {
 
 		logger.info("Requested redirection with hash " + id);
 		ShortURL l = shortURLRepository.findByHash(id);
+		logger.info("su: " + l);
 		logger.info(l == null ? "null" : "not null");
 		if (l != null) {
 			/*
@@ -290,16 +291,37 @@ public class UrlShortenerControllerWithLogs {
 			@RequestParam(value = "url", required = false) String url,
 			@RequestParam(value = "expire", required = false) String expire,
 			@RequestParam(value = "days", required = false) String days) {
+		url = url.substring(1, url.length()-1);
+		logger.info("Entered with url " + url);
+		/* Changes expire date */
+		ShortURL su = shortURLRepository.findByHash(url);
+		logger.info("su: " + su);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date newExpire = null;
+		try {
+			newExpire = sdf.parse(expire);
+		}
+		catch (ParseException e) {
+			e.printStackTrace();
+			logger.info("Fecha mal introducida");
+		}
+		su.setExpire(newExpire);
+		logger.info("Updating ShortURL: " + su);
+		shortURLRepository.save(su);
+		
+		/* Changes alert date */
 		Alert a = alertRepository.findByUrl(url);
 		Date alertDate = processAlertDate(expire, days);
 		if (a != null) {
 			/* If alert already exists, updates its alert date */
 			a.setDate(alertDate);
+			logger.info("Updating alert: " + a);
 			alertRepository.save(a);
 		} else {
 			//String mail = UrlShortenerControllerWithLogs.getOwnerMail();
 			// TODO: get real email when that part is fixed. Until then, always test@expire
 			String mail = "test@expire";
+			logger.info("Setting new alert");
 			alertRepository.save(new Alert(mail, url, alertDate));
 		}
 		return new ResponseEntity<>(HttpStatus.OK);
@@ -432,6 +454,7 @@ public class UrlShortenerControllerWithLogs {
 		 * Check if url comes through http or https
 		 */
 		if (urlValidator.isValid(url)) {
+			logger.info("Valid url " + url);
 			/*
 			 * Hash of URL or custom
 			 */
@@ -443,7 +466,7 @@ public class UrlShortenerControllerWithLogs {
 			else {
 				id = custom;
 			}
-
+			logger.info("1");
 			/*
 			 * Has Token
 			 */
@@ -466,7 +489,7 @@ public class UrlShortenerControllerWithLogs {
 					logger.info("Fecha mal introducida");
 				}
 			}
-
+			logger.info("2");
 			/*
 			 * Checks every mail inserted by the user, and maintains a list with
 			 * those corresponding to registered users.
@@ -494,17 +517,18 @@ public class UrlShortenerControllerWithLogs {
 			else {
 				trueEmails = null;
 			}
-			
+			logger.info("3");
 			/*
 			 * Gets email
 			 */
-			String owner = getOwnerMail();
-			logger.info("Mail: " + owner);			
-
+			//String owner = getOwnerMail();
+			String owner = "test@expire";
+			logger.info("Mail: " + owner);
+			logger.info("4");
 			/*
 			 * Creates ShortURL object
 			 */
-
+			
 			ShortURL su = new ShortURL(id, url, linkTo(
 					methodOn(UrlShortenerControllerWithLogs.class).redirectTo(
 							id, null, null,null,null)).toUri(), new Date(
@@ -517,6 +541,7 @@ public class UrlShortenerControllerWithLogs {
 			return shortURLRepository.save(su);
 		}
 		else {
+			logger.info("Not valid url " + url);
 			return null;
 		}
 	}

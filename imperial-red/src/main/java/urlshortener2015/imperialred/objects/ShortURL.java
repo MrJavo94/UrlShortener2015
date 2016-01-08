@@ -78,6 +78,54 @@ public class ShortURL {
 		return ip;
 	}
 
+	public void setHash(String hash) {
+		this.hash = hash;
+	}
+
+	public void setTarget(String target) {
+		this.target = target;
+	}
+
+	public void setUri(URI uri) {
+		this.uri = uri;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+
+	public void setExpire(Date expire) {
+		this.expire = expire;
+	}
+
+	public void setOwner(String owner) {
+		this.owner = owner;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	public void setMode(Integer mode) {
+		this.mode = mode;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	public void setPrivate(boolean isPrivate) {
+		this.isPrivate = isPrivate;
+	}
+
+	public void setAllowedUsers(List<String> allowedUsers) {
+		this.allowedUsers = allowedUsers;
+	}
+
 	public String getCountry() {
 		return country;
 	}

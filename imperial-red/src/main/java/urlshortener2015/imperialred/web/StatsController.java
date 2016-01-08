@@ -2,8 +2,6 @@ package urlshortener2015.imperialred.web;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,14 +20,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.mongodb.DBObject;
 
 import urlshortener2015.imperialred.exception.CustomException;
 import urlshortener2015.imperialred.objects.StatsURL;
 import urlshortener2015.imperialred.objects.WebSocketsData;
+import urlshortener2015.imperialred.objects.Alert;
 import urlshortener2015.imperialred.objects.ShortURL;
+import urlshortener2015.imperialred.repository.AlertRepository;
 import urlshortener2015.imperialred.repository.ClickRepository;
 import urlshortener2015.imperialred.repository.ShortURLRepository;
 
@@ -42,6 +39,9 @@ public class StatsController {
 
 	@Autowired
 	ShortURLRepository shortURLRepository;
+	
+	@Autowired
+	protected AlertRepository alertRepository;
 
 	@Autowired
 	private SimpMessagingTemplate template;
@@ -211,7 +211,7 @@ public class StatsController {
 	 * that url is owned by authenticated user, false otherwise.
 	 */
 	@RequestMapping(value = "/checkAuth", method = RequestMethod.GET)
-	public ResponseEntity<Boolean> checkIfOwner(
+	public ResponseEntity<String> checkIfOwner(
 			@RequestParam(value = "url", required = true) String hash) {
 		//String mail = UrlShortenerControllerWithLogs.getOwnerMail();
 		// TODO: get real email when that part is fixed. Until then, always test@expire
@@ -229,10 +229,15 @@ public class StatsController {
 		/* Checks if authed user is owner of that link */
 		if (owner!= null && owner.equals(mail)) {
 			logger.info("equals");
-			return new ResponseEntity<>(true, HttpStatus.OK);
+			String result = su.getExpire().toString() + "##";
+			Alert a = alertRepository.findByUrl(su.getUri().toString());
+			if (a != null) {
+				result += a.getDate().toString();
+			}
+			return new ResponseEntity<>(result, HttpStatus.OK);
 		} else {
 			logger.info("not equals");
-			return new ResponseEntity<>(false, HttpStatus.OK);
+			return new ResponseEntity<>(null, HttpStatus.OK);
 		}
 	}
 	

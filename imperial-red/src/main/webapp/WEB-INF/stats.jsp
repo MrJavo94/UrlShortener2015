@@ -246,10 +246,7 @@
 				<button type="button" class="btn btn-default" onclick='filterStats()'>Update</button>
 			</form>
 			</br>
-			<div id="alert_changer">
-				<p>Hola kio</p>
-			</div>
-			
+			<div id="alert_changer"></div>
 		</div>
 		<div class="col-sm-8">
 			<button type="button" id="button_change" class="btn btn-default" value='0' onclick='changeMap()'>Change View</button>
