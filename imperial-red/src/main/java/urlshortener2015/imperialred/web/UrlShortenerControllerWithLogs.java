@@ -270,7 +270,7 @@ public class UrlShortenerControllerWithLogs {
 				Date alertDate = processAlertDate(expireDate, days);
 				logger.info("New alert date: " + alertDate);
 
-				Alert alert = new Alert(alertEmail, su.getUri().toString(),
+				Alert alert = new Alert(alertEmail, su.getHash(),
 						alertDate);
 				alertRepository.save(alert);
 			}
@@ -288,13 +288,13 @@ public class UrlShortenerControllerWithLogs {
 	 */
 	@RequestMapping(value = "/changeExpire", method = RequestMethod.GET)
 	public ResponseEntity<?> changeExpireDate(HttpServletRequest request,
-			@RequestParam(value = "url", required = false) String url,
+			@RequestParam(value = "url", required = false) String hash,
 			@RequestParam(value = "expire", required = false) String expire,
 			@RequestParam(value = "days", required = false) String days) {
-		url = url.substring(1, url.length()-1);
-		logger.info("Entered with url " + url);
+		hash = hash.substring(1, hash.length()-1);
+		logger.info("Entered with hash " + hash);
 		/* Changes expire date */
-		ShortURL su = shortURLRepository.findByHash(url);
+		ShortURL su = shortURLRepository.findByHash(hash);
 		logger.info("su: " + su);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		Date newExpire = null;
@@ -310,7 +310,7 @@ public class UrlShortenerControllerWithLogs {
 		shortURLRepository.save(su);
 		
 		/* Changes alert date */
-		Alert a = alertRepository.findByUrl(url);
+		Alert a = alertRepository.findByHash(hash);
 		Date alertDate = processAlertDate(expire, days);
 		if (a != null) {
 			/* If alert already exists, updates its alert date */
@@ -322,7 +322,7 @@ public class UrlShortenerControllerWithLogs {
 			// TODO: get real email when that part is fixed. Until then, always test@expire
 			String mail = "test@expire";
 			logger.info("Setting new alert");
-			alertRepository.save(new Alert(mail, url, alertDate));
+			alertRepository.save(new Alert(mail, hash, alertDate));
 		}
 		return new ResponseEntity<>(HttpStatus.OK);
 	}

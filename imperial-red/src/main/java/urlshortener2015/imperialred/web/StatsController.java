@@ -230,7 +230,7 @@ public class StatsController {
 		if (owner!= null && owner.equals(mail)) {
 			logger.info("equals");
 			String result = su.getExpire().toString() + "##";
-			Alert a = alertRepository.findByUrl(su.getUri().toString());
+			Alert a = alertRepository.findByHash(su.getHash());
 			if (a != null) {
 				result += a.getDate().toString();
 			}

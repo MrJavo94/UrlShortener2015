@@ -43,7 +43,7 @@ public class MailSender {
 	
 	public MailSender(Alert a) {
 		mail = a.getMail();
-		url = a.getUrl();	
+		url = a.getHash();	
 		msgBody = MSG_1 + url + MSG_2;
 		
 		Properties p = new Properties();
