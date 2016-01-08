@@ -13,6 +13,12 @@ public class User {
 	private String password;
 	private String twitter;
 	
+	public User() {
+		/*
+		 * Default constructor is necessary for JSON to object conversion
+		 */
+	}
+	
 	public User(String mail, String nick, String password, String twitter) {
 		this.mail = mail;
 		this.nick = nick;

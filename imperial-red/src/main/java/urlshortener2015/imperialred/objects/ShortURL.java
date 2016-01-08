@@ -15,6 +15,7 @@ public class ShortURL {
 	private Date created;
 	private Date expire;
 	private String owner;
+	private String token;
 	private Integer mode;
 	private String ip;
 	private String country;
@@ -22,20 +23,20 @@ public class ShortURL {
 	private List<String> allowedUsers;
 
 	public ShortURL(String hash, String target, URI uri, Date created,
-			Date expire, String owner, Integer mode, String ip, String country,
-			boolean isPrivate, List<String> allowedUsers) {
+			Date expire, String owner, String token, Integer mode, String ip, 
+			String country, boolean isPrivate, List<String> allowedUsers) {
 		this.hash = hash;
 		this.target = target;
 		this.uri = uri;
 		this.created = created;
 		this.expire = expire;
 		this.owner = owner;
+		this.token = token;
 		this.mode = mode;
 		this.ip = ip;
 		this.country = country;
 		this.isPrivate = isPrivate;
 		this.allowedUsers = allowedUsers;
-		
 	}
 
 	public ShortURL() {
@@ -63,6 +64,10 @@ public class ShortURL {
 
 	public String getOwner() {
 		return owner;
+	}
+	
+	public String getToken() {
+		return token;
 	}
 
 	public Integer getMode() {

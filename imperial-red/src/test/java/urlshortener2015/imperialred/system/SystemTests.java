@@ -120,7 +120,7 @@ public class SystemTests {
 	public void testRedirectionTokenOK() throws Exception {
 		ResponseEntity<String> entityPost = postLink("http://example.com/", null, null, "true", null);
 		ReadContext rc = JsonPath.parse(entityPost.getBody());
-		String token = rc.read("$.owner");
+		String token = rc.read("$.token");
 		ResponseEntity<?> entity = new TestRestTemplate()
 				.getForEntity("http://localhost:" + this.port + "/f684a3c4?token=" + token, String.class);
 		assertThat(entity.getHeaders().getLocation(), is(new URI("http://example.com/")));

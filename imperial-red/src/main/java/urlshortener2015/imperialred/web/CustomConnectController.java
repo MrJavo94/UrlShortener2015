@@ -1,9 +1,12 @@
 package urlshortener2015.imperialred.web;
 
 import java.io.Serializable;
+import java.net.URLEncoder;
+import java.security.Principal;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +19,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.social.connect.Connection;
 import org.springframework.social.connect.ConnectionFactory;
@@ -50,6 +54,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
+import urlshortener2015.imperialred.objects.User;
 import urlshortener2015.imperialred.repository.UserRepository;
 
 @Controller
@@ -97,7 +102,7 @@ public class CustomConnectController extends ConnectController {
 		this.connectionFactoryLocator = connectionFactoryLocator;
 		// super.setApplicationUrl("http://ired.ml");
 	}
-	
+
 	/**
 	 * Process the authorization callback from an OAuth 2 service provider.
 	 * Called after the user authorizes the connection, generally done by having
@@ -119,19 +124,32 @@ public class CustomConnectController extends ConnectController {
 			OAuth2ConnectionFactory<?> connectionFactory = (OAuth2ConnectionFactory<?>) connectionFactoryLocator
 					.getConnectionFactory(providerId);
 			Connection<?> connection = connectSupport.completeConnection(connectionFactory, request);
+
+			String uniqueId = "";
+
 			Serializable userProfile = null;
 			switch (providerId) {
 			case ("google"):
 				google = (Google) connection.getApi();
-				// uniqueId =
-				// google.plusOperations().getGoogleProfile().getAccountEmail();
+				uniqueId = google.plusOperations().getGoogleProfile().getAccountEmail();
 				userProfile = google.plusOperations().getGoogleProfile().toString();
+				User aux = userRepository.findByMail(uniqueId);
+				if (aux == null) {
+					User user = new User(uniqueId, userProfile.toString(), null, null);
+					userRepository.save(user);
+				}
 				break;
 			case ("facebook"):
 				facebook = (Facebook) connection.getApi();
 				userProfile = facebook.userOperations().getUserProfile();
-				// uniqueId =
-				// facebook.userOperations().getUserProfile().getEmail();
+
+				uniqueId = facebook.userOperations().getUserProfile().getEmail();
+				aux = userRepository.findByMail(uniqueId);
+				if (aux == null) {
+					User userf = new User(uniqueId, facebook.userOperations().getUserProfile().getFirstName() + " "
+							+ facebook.userOperations().getUserProfile().getLastName(), null, null);
+					userRepository.save(userf);
+				}
 				break;
 			case ("twitter"):
 				twitter = (Twitter) connection.getApi();
@@ -142,11 +160,13 @@ public class CustomConnectController extends ConnectController {
 			}
 			SecurityContextHolder.getContext()
 					.setAuthentication(new SocialAuthenticationToken(connection, userProfile, null, null));
+
 			// SecurityContextHolder.getContext().setAuthentication(new
 			// UsernamePasswordAuthenticationToken(uniqueId, null, null));
 			addConnection(connection, connectionFactory, request);
 		} catch (Exception e) {
 			sessionStrategy.setAttribute(request, PROVIDER_ERROR_ATTRIBUTE, e);
+
 			logger.warn("Exception while handling OAuth2 callback (" + e.getMessage() + "). Redirecting to "
 					+ providerId + " connection status page.");
 		}
@@ -170,34 +190,44 @@ public class CustomConnectController extends ConnectController {
 	 */
 	@Override
 	@RequestMapping(value = "/{providerId}", method = RequestMethod.GET, params = "oauth_token")
+
 	public RedirectView oauth1Callback(@PathVariable String providerId, NativeWebRequest request) {
 		connectSupport = new ConnectSupport(sessionStrategy);
 		try {
 			OAuth1ConnectionFactory<?> connectionFactory = (OAuth1ConnectionFactory<?>) connectionFactoryLocator
 					.getConnectionFactory(providerId);
 			Connection<?> connection = connectSupport.completeConnection(connectionFactory, request);
+			String uniqueId = "";
 			Serializable userProfile = null;
 			switch (providerId) {
 			case ("google"):
 				google = (Google) connection.getApi();
-				// uniqueId =
-				// google.plusOperations().getGoogleProfile().getAccountEmail();
+				uniqueId = google.plusOperations().getGoogleProfile().getAccountEmail();
 				userProfile = google.plusOperations().getGoogleProfile().toString();
+				User aux = userRepository.findByMail(uniqueId);
+				if (aux == null) {
+					User user = new User(uniqueId, userProfile.toString(), null, null);
+					userRepository.save(user);
+				}
 				break;
 			case ("facebook"):
 				facebook = (Facebook) connection.getApi();
 				userProfile = facebook.userOperations().getUserProfile();
-				// uniqueId =
-				// facebook.userOperations().getUserProfile().getEmail();
+				uniqueId = facebook.userOperations().getUserProfile().getEmail();
+				aux = userRepository.findByMail(uniqueId);
+				if (aux == null) {
+					User userf = new User(uniqueId, facebook.userOperations().getUserProfile().getFirstName() + " "
+							+ facebook.userOperations().getUserProfile().getLastName(), null, null);
+					userRepository.save(userf);
+				}
 				break;
 			case ("twitter"):
 				twitter = (Twitter) connection.getApi();
 				userProfile = twitter.userOperations().getUserProfile();
-				// uniqueId =
-				// twitter.userOperations().getUserProfile().getScreenName();
 				break;
 			}
-			SecurityContextHolder.getContext().setAuthentication(new SocialAuthenticationToken(connection, userProfile, null, null));
+			SecurityContextHolder.getContext()
+					.setAuthentication(new UsernamePasswordAuthenticationToken(uniqueId, null, null));
 			addConnection(connection, connectionFactory, request);
 		} catch (Exception e) {
 			sessionStrategy.setAttribute(request, PROVIDER_ERROR_ATTRIBUTE, e);
