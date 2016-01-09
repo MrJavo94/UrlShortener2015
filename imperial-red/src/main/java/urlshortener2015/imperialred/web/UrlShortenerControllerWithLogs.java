@@ -68,7 +68,6 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mongodb.DBObject;
 
-
 import urlshortener2015.imperialred.exception.CustomException;
 import urlshortener2015.imperialred.objects.Alert;
 import urlshortener2015.imperialred.objects.Click;
@@ -160,21 +159,18 @@ public class UrlShortenerControllerWithLogs {
 
 					List<String> authorizedMails = l.getAllowedUsers();
 					if (authorizedMails != null && !authorizedMails.isEmpty()) {
-						try{
-							if (!authentication(authorizedMails)) {
-								request.getSession().setAttribute("redirect", id);;
-								//model.addAttribute("hash", id);
-								return "login";
-							}
-						} catch(CustomException e){
-							/*
-							 * No permission handler
-							 */
+
+						if (!authentication(authorizedMails)) {
+							request.getSession().setAttribute("redirect", id);
+
+							// model.addAttribute("hash", id);
+							return "login";
 						}
+
 					}
 					createAndSaveClick(id, request);
 					long click = clickRepository.clicksByHash(l.getHash(), null,
-							null,null,null,null,null);
+							null, null, null, null, null);
 					// countryData
 					DBObject groupObject = clickRepository
 							.getClicksByCountry(id, null, null).getRawResults();
@@ -183,7 +179,8 @@ public class UrlShortenerControllerWithLogs {
 							.processCountryJSON(list);
 					// dityData
 					DBObject groupObjectCity = clickRepository
-							.getClicksByCity(id, null, null, null, null, null, null)
+							.getClicksByCity(id, null, null, null, null, null,
+									null)
 							.getRawResults();
 					String listCities = groupObjectCity.get("retval")
 							.toString();
@@ -204,61 +201,27 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	private boolean authentication(List<String> authorizedMails) {
-		Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
-		if (currentAuthentication instanceof SocialAuthenticationToken) {
-			SocialAuthenticationToken social = (SocialAuthenticationToken) currentAuthentication;
-			String email = "";
-			/*
-			 * 
-			 */
-			switch(social.getProviderId()){
-				case("google"):
-					Google google = (Google) social.getConnection().getApi();
-					email = google.plusOperations().getGoogleProfile().getAccountEmail();
-					if(!authorizedMails.contains(email))
-						throw new CustomException("401", "You don't have permissions to use this URL");
-					break;
-				case("fascebook"):
-					Facebook facebook = (Facebook) social.getConnection().getApi();
-					email = facebook.userOperations().getUserProfile().getEmail();
-					if(!authorizedMails.contains(email))
-						throw new CustomException("401", "You don't have permissions to use this URL");
-					break;
+		String email = getOwnerMail();
+		if (email != null) {
+			if (!authorizedMails.contains(email)) {
+				/*
+				 * Not authorized
+				 */
+				throw new CustomException("401",
+						"You don't have permissions to use this URL");
 			}
+			/*
+			 * Authorized
+			 */
 			return true;
-		} else if (currentAuthentication instanceof UsernamePasswordAuthenticationToken) {
-			UsernamePasswordAuthenticationToken local = (UsernamePasswordAuthenticationToken) currentAuthentication;
-			String email = (String) local.getPrincipal();
-			if(!authorizedMails.contains(email))
-				throw new CustomException("401", "You don't have permissions to use this URL");
-		} else if (currentAuthentication instanceof AnonymousAuthenticationToken) {
+		}
+		else {
+			/*
+			 * Not logged
+			 */
 			return false;
 		}
-		return true;
-	}
 
-	private String mailByAuthentication() {
-		Authentication aux = SecurityContextHolder.getContext()
-				.getAuthentication();
-		if (aux instanceof SocialAuthenticationToken) {
-			SocialAuthenticationToken social = (SocialAuthenticationToken) aux;
-			// google or facebook
-			if (social.getProviderId().equals("google")) {
-				// google
-				Google google = (Google) social.getConnection().getApi();
-				return google.plusOperations().getGoogleProfile()
-						.getAccountEmail();
-			}
-			else if (social.getProviderId().equals("facebook")) {
-				// facebook
-				Facebook google = (Facebook) social.getConnection().getApi();
-				return google.userOperations().getUserProfile().getEmail();
-			}
-		}
-		else if (aux instanceof AnonymousAuthenticationToken) {
-			return "";
-		}
-		return "";
 	}
 
 	@RequestMapping(value = "/link", method = RequestMethod.POST)
@@ -278,8 +241,7 @@ public class UrlShortenerControllerWithLogs {
 				Date alertDate = processAlertDate(expireDate, days);
 				logger.info("New alert date: " + alertDate);
 
-				Alert alert = new Alert(alertEmail, su.getHash(),
-						alertDate);
+				Alert alert = new Alert(alertEmail, su.getHash(), alertDate);
 				alertRepository.save(alert);
 			}
 			HttpHeaders h = new HttpHeaders();
@@ -290,7 +252,7 @@ public class UrlShortenerControllerWithLogs {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	/**
 	 * Changes the expire date and alert for the new specified
 	 */
@@ -299,8 +261,8 @@ public class UrlShortenerControllerWithLogs {
 			@RequestParam(value = "url", required = false) String hash,
 			@RequestParam(value = "expire", required = false) String expire,
 			@RequestParam(value = "days", required = false) String days) {
-		hash = hash.substring(1, hash.length()-1);
-		
+		hash = hash.substring(1, hash.length() - 1);
+
 		/* Changes expire date */
 		ShortURL su = shortURLRepository.findByHash(hash);
 		logger.info("su: " + su);
@@ -316,7 +278,7 @@ public class UrlShortenerControllerWithLogs {
 		su.setExpire(newExpire);
 		logger.info("Updating ShortURL: " + su);
 		shortURLRepository.save(su);
-		
+
 		/* Changes alert date */
 		Alert a = alertRepository.findByHash(hash);
 		Date alertDate = processAlertDate(expire, days);
@@ -325,7 +287,8 @@ public class UrlShortenerControllerWithLogs {
 			a.setDate(alertDate);
 			logger.info("Updating alert: " + a);
 			alertRepository.save(a);
-		} else {
+		}
+		else {
 			/* If alert does not exist, creates a new one */
 			String mail = UrlShortenerControllerWithLogs.getOwnerMail();
 			logger.info("Setting new alert");
@@ -448,8 +411,8 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	/**
-	 * If shortURL is valid, creates it and saves it 
-	 * XXX: at the moment, it just ignores unknown emails, with no feedback for users.
+	 * If shortURL is valid, creates it and saves it XXX: at the moment, it just
+	 * ignores unknown emails, with no feedback for users.
 	 */
 	protected ShortURL createAndSaveIfValid(String url, String custom,
 			String hasToken, String expireDate, String ip, String[] emails,
@@ -528,20 +491,21 @@ public class UrlShortenerControllerWithLogs {
 			/*
 			 * Gets email
 			 */
-			//String owner = getOwnerMail();
+			// String owner = getOwnerMail();
 			String owner = "test@expire";
 			logger.info("Mail: " + owner);
 			logger.info("4");
 			/*
 			 * Creates ShortURL object
 			 */
-			
-			ShortURL su = new ShortURL(id, url, linkTo(
-					methodOn(UrlShortenerControllerWithLogs.class).redirectTo(
-							id, null, null,null,null)).toUri(), new Date(
-					System.currentTimeMillis()), expire, owner, token,
-					HttpStatus.TEMPORARY_REDIRECT.value(), ip, null, isPrivate, trueEmails);
-			
+
+			ShortURL su = new ShortURL(id, url,
+					linkTo(methodOn(UrlShortenerControllerWithLogs.class)
+							.redirectTo(id, null, null, null, null)).toUri(),
+					new Date(System.currentTimeMillis()), expire, owner, token,
+					HttpStatus.TEMPORARY_REDIRECT.value(), ip, null, isPrivate,
+					trueEmails);
+
 			/*
 			 * Insert to DB
 			 */
@@ -584,27 +548,31 @@ public class UrlShortenerControllerWithLogs {
 			return null;
 		}
 	}
-	
+
 	protected static String getOwnerMail() {
-		Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
+		Authentication currentAuthentication = SecurityContextHolder
+				.getContext().getAuthentication();
 		String email = "";
 		if (currentAuthentication instanceof SocialAuthenticationToken) {
 			SocialAuthenticationToken social = (SocialAuthenticationToken) currentAuthentication;
-			
-			switch(social.getProviderId()){
-				case("google"):
-					Google google = (Google) social.getConnection().getApi();
-					email = google.plusOperations().getGoogleProfile().getAccountEmail();
-					break;
-				case("facebook"):
-					Facebook facebook = (Facebook) social.getConnection().getApi();
-					email = facebook.userOperations().getUserProfile().getEmail();
-					break;
+
+			switch (social.getProviderId()) {
+			case ("google"):
+				Google google = (Google) social.getConnection().getApi();
+				email = google.plusOperations().getGoogleProfile()
+						.getAccountEmail();
+				break;
+			case ("facebook"):
+				Facebook facebook = (Facebook) social.getConnection().getApi();
+				email = facebook.userOperations().getUserProfile().getEmail();
+				break;
 			}
-		} else if (currentAuthentication instanceof UsernamePasswordAuthenticationToken) {
+		}
+		else if (currentAuthentication instanceof UsernamePasswordAuthenticationToken) {
 			UsernamePasswordAuthenticationToken local = (UsernamePasswordAuthenticationToken) currentAuthentication;
 			email = (String) local.getPrincipal();
-		} else if (currentAuthentication instanceof AnonymousAuthenticationToken) {
+		}
+		else if (currentAuthentication instanceof AnonymousAuthenticationToken) {
 			return null;
 		}
 		return email;
