@@ -1,5 +1,6 @@
 package urlshortener2015.imperialred.objects;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
 import org.springframework.data.annotation.Id;
@@ -9,9 +10,8 @@ public class User {
 	@Id
 	private BigInteger id;
 	private String mail;
-	private String nick;
 	private String password;
-	private String twitter;
+	private Serializable provider;
 	
 	public User() {
 		/*
@@ -19,13 +19,16 @@ public class User {
 		 */
 	}
 	
-	public User(String mail, String nick, String password, String twitter) {
+	public User(String mail, String password) {
 		this.mail = mail;
-		this.nick = nick;
 		this.password = password;
-		this.twitter = twitter;
 	}
 	
+	public User(String mail, Serializable provider) {
+		this.mail = mail;
+		this.provider = provider;
+	}
+
 	public BigInteger getId() {
 		return id;
 	}
@@ -34,16 +37,12 @@ public class User {
 		return mail;
 	}
 	
-	public String getNick() {
-		return nick;
-	}
-	
 	public String getPassword() {
 		return password;
 	}
 	
-	public String getTwitter() {
-		return twitter;
+	public Serializable getProvider() {
+		return provider;
 	}
 
 
@@ -55,22 +54,18 @@ public class User {
 		this.mail = mail;
 	}
 
-	public void setNick(String nick) {
-		this.nick = nick;
-	}
 
 	public void setPassword(String password) {
 		this.password = password;
 	}
 	
-	public void setTwitter(String twitter) {
-		this.twitter = twitter;
+	public void setProvider(Serializable provider) {
+		this.provider = provider;
 	}
 
 	@Override
 	public String toString() {
-		return "User[id=" + id + ", mail='" + mail + "', nick='" + nick + "', password='" + password 
-				+ "', twitter='" + twitter + "]";
+		return "User[id=" + id + ", mail='" + mail + "', password='" + password 
+				+ "', provider='" + provider + "]";
 	}
-	
 }
