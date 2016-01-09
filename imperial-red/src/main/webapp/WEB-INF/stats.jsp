@@ -24,10 +24,31 @@
 	      var data = google.visualization.arrayToDataTable(${clicksByCity});
 	      
 	      var options = {
+	      	mapType: 'styledMap',
 	      	showTip: true,
 	      	zoomLevel: '2',
 	        displayMode: 'markers',
-	        colorAxis: {colors: ['green', 'blue', 'red']}
+	        colorAxis: {colors: ['green', 'blue', 'red']},
+	        useMapTypeControl: true,
+	        maps: {
+	          // Your custom mapTypeId holding custom map styles.
+	          styledMap: {
+	            name: 'Styled Map', // This name will be displayed in the map type control.
+	            styles: [
+	              {featureType: 'poi.attraction',
+	               stylers: [{color: '#fce8b2'}]
+	              },
+	              {featureType: 'road.highway',
+	               stylers: [{hue: '#0277bd'}, {saturation: -50}]
+	              },
+	              {featureType: 'road.highway',
+	               elementType: 'labels.icon',
+	               stylers: [{hue: '#000'}, {saturation: 100}, {lightness: 50}]
+	              },
+	              {featureType: 'landscape',
+	               stylers: [{hue: '#259b24'}, {saturation: 10}, {lightness: -22}]
+	              }
+	        ]}}
 	      };
 
 	      var chart = new google.visualization.Map(document.getElementById('chart_div'));
@@ -51,10 +72,31 @@
 			
 
 			var options = {
+				mapType: 'styledMap',
 				showTip: true,
 	      		zoomLevel: '2',
 				displayMode: 'markers',
-				colorAxis: {colors: ['green', 'blue', 'red']}
+				colorAxis: {colors: ['green', 'blue', 'red']},
+				useMapTypeControl: true,
+		        maps: {
+		          // Your custom mapTypeId holding custom map styles.
+		          styledMap: {
+		            name: 'Styled Map', // This name will be displayed in the map type control.
+		            styles: [
+		              {featureType: 'poi.attraction',
+		               stylers: [{color: '#fce8b2'}]
+		              },
+		              {featureType: 'road.highway',
+		               stylers: [{hue: '#0277bd'}, {saturation: -50}]
+		              },
+		              {featureType: 'road.highway',
+		               elementType: 'labels.icon',
+		               stylers: [{hue: '#000'}, {saturation: 100}, {lightness: 50}]
+		              },
+		              {featureType: 'landscape',
+		               stylers: [{hue: '#259b24'}, {saturation: 10}, {lightness: -22}]
+		              }
+		        ]}}
 			};
 
 			var chart = new google.visualization.Map(document.getElementById('chart_div'));
@@ -258,7 +300,7 @@
 		<div class="col-sm-8">
 			<button type="button" id="button_change" class="btn btn-default" value='0' onclick='changeMap()'>Change View</button>
 			</br></br>
-			<div id="geo_chart" style="width: 900px; height: 500px;"></div>
+			<div id="geo_chart" style="width: 700px; height: 450px;"></div>
 			<div id="chart_div" style="width: 900px; height: 500px;"></div>
 		</div>
 	</div>
