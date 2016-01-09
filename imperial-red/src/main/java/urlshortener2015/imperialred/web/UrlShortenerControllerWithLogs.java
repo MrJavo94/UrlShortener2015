@@ -35,6 +35,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.social.facebook.api.Facebook;
@@ -156,11 +157,18 @@ public class UrlShortenerControllerWithLogs {
 				}
 				else {
 
-					List<String> list_emails = l.getAllowedUsers();
-					if (list_emails != null && !list_emails.isEmpty()) {
-						if (!authentication(list_emails)) {
-							model.addAttribute("hash", id);
-							return "login_social";
+					List<String> authorizedMails = l.getAllowedUsers();
+					if (authorizedMails != null && !authorizedMails.isEmpty()) {
+						try{
+							if (!authentication(authorizedMails)) {
+								request.getSession().setAttribute("redirect", id);;
+								//model.addAttribute("hash", id);
+								return "login";
+							}
+						} catch(CustomException e){
+							/*
+							 * No permission handler
+							 */
 						}
 					}
 					createAndSaveClick(id, request);
@@ -194,36 +202,35 @@ public class UrlShortenerControllerWithLogs {
 		}
 	}
 
-	private boolean authentication(List<String> list_emails) {
-		Authentication aux = SecurityContextHolder.getContext()
-				.getAuthentication();
-		if (aux instanceof SocialAuthenticationToken) {
-			SocialAuthenticationToken social = (SocialAuthenticationToken) aux;
-			// google or facebook
-			if (social.getProviderId().equals("google")) {
-				// google
-				Google google = (Google) social.getConnection().getApi();
-				String email = google.plusOperations().getGoogleProfile()
-						.getAccountEmail();
-				System.out.println(email);
-				if (list_emails != null && !list_emails.contains(email)) {
-					throw new CustomException("403", "NOT ALLOWED");
-				}
+	private boolean authentication(List<String> authorizedMails) {
+		Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
+		if (currentAuthentication instanceof SocialAuthenticationToken) {
+			SocialAuthenticationToken social = (SocialAuthenticationToken) currentAuthentication;
+			String email = "";
+			/*
+			 * 
+			 */
+			switch(social.getProviderId()){
+				case("google"):
+					Google google = (Google) social.getConnection().getApi();
+					email = google.plusOperations().getGoogleProfile().getAccountEmail();
+					if(!authorizedMails.contains(email))
+						throw new CustomException("401", "You don't have permissions to use this URL");
+					break;
+				case("fascebook"):
+					Facebook facebook = (Facebook) social.getConnection().getApi();
+					email = facebook.userOperations().getUserProfile().getEmail();
+					if(!authorizedMails.contains(email))
+						throw new CustomException("401", "You don't have permissions to use this URL");
+					break;
 			}
-			else if (social.getProviderId().equals("facebook")) {
-				// facebook
-				Facebook google = (Facebook) social.getConnection().getApi();
-				String email = google.userOperations().getUserProfile()
-						.getEmail();
-				System.out.println(email);
-				if (!list_emails.contains(email)) {
-					throw new CustomException("403", "NOT ALLOWED");
-				}
-			}
-		}
-		else if (aux instanceof AnonymousAuthenticationToken) {
-			// not authenticated
-			// redirect to login
+			return true;
+		} else if (currentAuthentication instanceof UsernamePasswordAuthenticationToken) {
+			UsernamePasswordAuthenticationToken local = (UsernamePasswordAuthenticationToken) currentAuthentication;
+			String email = (String) local.getPrincipal();
+			if(!authorizedMails.contains(email))
+				throw new CustomException("401", "You don't have permissions to use this URL");
+		} else if (currentAuthentication instanceof AnonymousAuthenticationToken) {
 			return false;
 		}
 		return true;
@@ -532,32 +539,28 @@ public class UrlShortenerControllerWithLogs {
 	}
 	
 	private String getOwnerMail() {
-		SocialAuthenticationToken authentication = (SocialAuthenticationToken) 
-				SecurityContextHolder.getContext().getAuthentication();
-		String providerId = authentication.getProviderId();
-		Connection connection = authentication.getConnection();
-		String owner = null;
-		switch(providerId){
-        case("google"):
-            Google google = (Google) connection.getApi();
-            Person p = google.plusOperations().getGoogleProfile();
-            owner = p.getAccountEmail();
-            break;
-        case("facebook"):
-            Facebook facebook = (Facebook) connection.getApi();
-        	org.springframework.social.facebook.api.User u = 
-        			facebook.userOperations().getUserProfile();
-        	owner = u.getEmail();
-            break;
-        case("twitter"):
-            Twitter twitter = (Twitter) connection.getApi();
-            TwitterProfile tp = twitter.userOperations().getUserProfile();
-            /*
-             * TODO: resolve Twitter mail
-             */
-            break;
-        }	
-		return owner;
+		Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
+		String email = "";
+		if (currentAuthentication instanceof SocialAuthenticationToken) {
+			SocialAuthenticationToken social = (SocialAuthenticationToken) currentAuthentication;
+			
+			switch(social.getProviderId()){
+				case("google"):
+					Google google = (Google) social.getConnection().getApi();
+					email = google.plusOperations().getGoogleProfile().getAccountEmail();
+					break;
+				case("facebook"):
+					Facebook facebook = (Facebook) social.getConnection().getApi();
+					email = facebook.userOperations().getUserProfile().getEmail();
+					break;
+			}
+		} else if (currentAuthentication instanceof UsernamePasswordAuthenticationToken) {
+			UsernamePasswordAuthenticationToken local = (UsernamePasswordAuthenticationToken) currentAuthentication;
+			email = (String) local.getPrincipal();
+		} else if (currentAuthentication instanceof AnonymousAuthenticationToken) {
+			return null;
+		}
+		return email;
 	}
 
 }

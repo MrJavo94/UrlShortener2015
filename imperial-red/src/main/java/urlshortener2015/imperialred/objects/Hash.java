@@ -1,8 +1,13 @@
-package urlshortener2015.imperialred.web;
+package urlshortener2015.imperialred.objects;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+/**
+ * Authors: Bangladesh Green
+ * Thanks.
+ */
 
 /**
  * Class used to provide methods for security reasons.
