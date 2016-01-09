@@ -2,8 +2,11 @@ $(document).ready(
     function() {
         $('#submit').click(function(event){
         
-            data = $('#password').val();
+            data = $('#passwordRegister').val();
+            
+            console.log(data);
             var len = data.length;
+            console.log(len);
             
             if(len < 1) {
                 alert("Password cannot be blank");
@@ -11,19 +14,13 @@ $(document).ready(
                 event.preventDefault();
             }
              
-            if($('#password').val() != $('#repassword').val()) {
+            if($('#passwordRegister').val() != $('#repasswordRegister').val()) {
                 alert("Password and Confirm Password don't match");
                 // Prevent form submission
                 event.preventDefault();
             }
-
-            if($('#nick').val().length < 1){
-                alert("Nick cannot be blank");
-                // Prevent form submission
-                event.preventDefault();
-            }
              
-            if($('#terms').val()!='1'){
+            if($('#t_and_c').is(":not(:checked)")){
                 alert("You have to accept Terms and Conditions");
                 // Prevent form submission
                 event.preventDefault();

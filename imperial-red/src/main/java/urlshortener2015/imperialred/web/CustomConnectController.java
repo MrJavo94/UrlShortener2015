@@ -1,12 +1,10 @@
 package urlshortener2015.imperialred.web;
 
 import java.io.Serializable;
-import java.net.URLEncoder;
-import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -20,15 +18,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.social.config.annotation.SocialConfiguration;
-import org.springframework.social.config.annotation.SocialConfigurer;
 import org.springframework.social.connect.Connection;
 import org.springframework.social.connect.ConnectionFactory;
 import org.springframework.social.connect.ConnectionFactoryLocator;
 import org.springframework.social.connect.ConnectionRepository;
 import org.springframework.social.connect.DuplicateConnectionException;
-import org.springframework.social.connect.NotConnectedException;
 import org.springframework.social.connect.support.OAuth1ConnectionFactory;
 import org.springframework.social.connect.support.OAuth2ConnectionFactory;
 import org.springframework.social.connect.web.ConnectController;
@@ -57,9 +54,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
-import urlshortener2015.imperialred.config.SocialConfig;
-import urlshortener2015.imperialred.objects.ShortURL;
-
 import urlshortener2015.imperialred.objects.User;
 import urlshortener2015.imperialred.repository.UserRepository;
 
@@ -68,8 +62,7 @@ import urlshortener2015.imperialred.repository.UserRepository;
 @RequestMapping("/connect")
 public class CustomConnectController extends ConnectController {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(ConnectController.class);
+	private static final Logger logger = LoggerFactory.getLogger(ConnectController.class);
 
 	@Autowired
 	private Twitter twitter;
@@ -102,8 +95,7 @@ public class CustomConnectController extends ConnectController {
 	private boolean deleting = false;
 
 	@Inject
-	public CustomConnectController(
-			ConnectionFactoryLocator connectionFactoryLocator,
+	public CustomConnectController(ConnectionFactoryLocator connectionFactoryLocator,
 			ConnectionRepository connectionRepository) {
 		super(connectionFactoryLocator, connectionRepository);
 		this.connectionRepository = connectionRepository;
@@ -126,43 +118,34 @@ public class CustomConnectController extends ConnectController {
 	 */
 	@Override
 	@RequestMapping(value = "/{providerId}", method = RequestMethod.GET, params = "code")
-	public RedirectView oauth2Callback(@PathVariable String providerId,
-			NativeWebRequest request) {
+	public RedirectView oauth2Callback(@PathVariable String providerId, NativeWebRequest request) {
 		connectSupport = new ConnectSupport(sessionStrategy);
 		try {
 			OAuth2ConnectionFactory<?> connectionFactory = (OAuth2ConnectionFactory<?>) connectionFactoryLocator
 					.getConnectionFactory(providerId);
-			Connection<?> connection = connectSupport
-					.completeConnection(connectionFactory, request);
+			Connection<?> connection = connectSupport.completeConnection(connectionFactory, request);
+
 			String uniqueId = "";
+
 			Serializable userProfile = null;
 			switch (providerId) {
 			case ("google"):
 				google = (Google) connection.getApi();
-				uniqueId = google.plusOperations().getGoogleProfile()
-						.getAccountEmail();
-				userProfile = google.plusOperations().getGoogleProfile()
-						.toString();
+				uniqueId = google.plusOperations().getGoogleProfile().getAccountEmail();
+				userProfile = google.plusOperations().getGoogleProfile().toString();
 				User aux = userRepository.findByMail(uniqueId);
 				if (aux == null) {
-					User user = new User(uniqueId, userProfile.toString(), null,
-							null);
+					User user = new User(uniqueId, userProfile.toString());
 					userRepository.save(user);
 				}
 				break;
 			case ("facebook"):
 				facebook = (Facebook) connection.getApi();
 				userProfile = facebook.userOperations().getUserProfile();
-				uniqueId = facebook.userOperations().getUserProfile()
-						.getEmail();
+				uniqueId = facebook.userOperations().getUserProfile().getEmail();
 				aux = userRepository.findByMail(uniqueId);
 				if (aux == null) {
-					User userf = new User(uniqueId,
-							facebook.userOperations().getUserProfile()
-									.getFirstName() + " "
-									+ facebook.userOperations().getUserProfile()
-											.getLastName(),
-							null, null);
+					User userf = new User(uniqueId, facebook.userOperations().getUserProfile());
 					userRepository.save(userf);
 				}
 				break;
@@ -173,18 +156,21 @@ public class CustomConnectController extends ConnectController {
 				// twitter.userOperations().getUserProfile().getScreenName();
 				break;
 			}
+
+			ArrayList<GrantedAuthority> ja = new ArrayList();
+			ja.add(new SimpleGrantedAuthority("USER"));
+
 			SecurityContextHolder.getContext()
-					.setAuthentication(new SocialAuthenticationToken(connection,
-							userProfile, null, null));
+					.setAuthentication(new SocialAuthenticationToken(connection, userProfile, null, ja));
+
 			// SecurityContextHolder.getContext().setAuthentication(new
 			// UsernamePasswordAuthenticationToken(uniqueId, null, null));
 			addConnection(connection, connectionFactory, request);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			sessionStrategy.setAttribute(request, PROVIDER_ERROR_ATTRIBUTE, e);
-			logger.warn("Exception while handling OAuth2 callback ("
-					+ e.getMessage() + "). Redirecting to " + providerId
-					+ " connection status page.");
+
+			logger.warn("Exception while handling OAuth2 callback (" + e.getMessage() + "). Redirecting to "
+					+ providerId + " connection status page.");
 		}
 		return connectionStatusRedirect(providerId, request);
 	}
@@ -206,62 +192,49 @@ public class CustomConnectController extends ConnectController {
 	 */
 	@Override
 	@RequestMapping(value = "/{providerId}", method = RequestMethod.GET, params = "oauth_token")
-	public RedirectView oauth1Callback(@PathVariable String providerId,
-			NativeWebRequest request) {
+
+	public RedirectView oauth1Callback(@PathVariable String providerId, NativeWebRequest request) {
 		connectSupport = new ConnectSupport(sessionStrategy);
 		try {
 			OAuth1ConnectionFactory<?> connectionFactory = (OAuth1ConnectionFactory<?>) connectionFactoryLocator
 					.getConnectionFactory(providerId);
-			Connection<?> connection = connectSupport
-					.completeConnection(connectionFactory, request);
+			Connection<?> connection = connectSupport.completeConnection(connectionFactory, request);
 			String uniqueId = "";
 			Serializable userProfile = null;
 			switch (providerId) {
 			case ("google"):
 				google = (Google) connection.getApi();
-				uniqueId = google.plusOperations().getGoogleProfile()
-						.getAccountEmail();
-				userProfile = google.plusOperations().getGoogleProfile()
-						.toString();
+				uniqueId = google.plusOperations().getGoogleProfile().getAccountEmail();
+				userProfile = google.plusOperations().getGoogleProfile().toString();
 				User aux = userRepository.findByMail(uniqueId);
 				if (aux == null) {
-					User user = new User(uniqueId, userProfile.toString(), null,
-							null);
+					User user = new User(uniqueId, userProfile.toString());
 					userRepository.save(user);
 				}
 				break;
 			case ("facebook"):
 				facebook = (Facebook) connection.getApi();
 				userProfile = facebook.userOperations().getUserProfile();
-				uniqueId = facebook.userOperations().getUserProfile()
-						.getEmail();
+
+				uniqueId = facebook.userOperations().getUserProfile().getEmail();
 				aux = userRepository.findByMail(uniqueId);
 				if (aux == null) {
-					User userf = new User(uniqueId,
-							facebook.userOperations().getUserProfile()
-									.getFirstName() + " "
-									+ facebook.userOperations().getUserProfile()
-											.getLastName(),
-							null, null);
+					User userf = new User(uniqueId, facebook.userOperations().getUserProfile());
 					userRepository.save(userf);
 				}
 				break;
 			case ("twitter"):
 				twitter = (Twitter) connection.getApi();
-				uniqueId = twitter.userOperations().getUserProfile()
-						.getScreenName();
+				userProfile = twitter.userOperations().getUserProfile();
 				break;
 			}
-			SecurityContextHolder.getContext().setAuthentication(
-					new UsernamePasswordAuthenticationToken(uniqueId, null,
-							null));
+			SecurityContextHolder.getContext()
+					.setAuthentication(new UsernamePasswordAuthenticationToken(uniqueId, null, null));
 			addConnection(connection, connectionFactory, request);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			sessionStrategy.setAttribute(request, PROVIDER_ERROR_ATTRIBUTE, e);
-			logger.warn("Exception while handling OAuth1 callback ("
-					+ e.getMessage() + "). Redirecting to " + providerId
-					+ " connection status page.");
+			logger.warn("Exception while handling OAuth1 callback (" + e.getMessage() + "). Redirecting to "
+					+ providerId + " connection status page.");
 		}
 		return connectionStatusRedirect(providerId, request);
 	}
@@ -280,15 +253,12 @@ public class CustomConnectController extends ConnectController {
 	 * @return a RedirectView to the connection status page
 	 */
 	@RequestMapping(value = "/{providerId}/remove", method = RequestMethod.DELETE)
-	public ResponseEntity<?> removeConnectionsC(@PathVariable String providerId,
-			NativeWebRequest request) {
-		deleting = true;
-		ConnectionFactory<?> connectionFactory = connectionFactoryLocator
-				.getConnectionFactory(providerId);
+	public ResponseEntity<?> removeConnectionsC(@PathVariable String providerId, NativeWebRequest request) {
+		ConnectionFactory<?> connectionFactory = connectionFactoryLocator.getConnectionFactory(providerId);
 		preDisconnect(connectionFactory, request);
 		connectionRepository.removeConnections(providerId);
 		postDisconnect(connectionFactory, request);
-		deleting = false;
+		SecurityContextHolder.getContext().setAuthentication(null);
 		return connectionStatusRedirectC(providerId, request);
 	}
 
@@ -340,10 +310,8 @@ public class CustomConnectController extends ConnectController {
 	 * @return a RedirectView to the page to be displayed after a connection is
 	 * created or deleted
 	 */
-	protected ResponseEntity<?> connectionStatusRedirectC(String providerId,
-			NativeWebRequest request) {
-		HttpServletRequest servletRequest = request
-				.getNativeRequest(HttpServletRequest.class);
+	protected ResponseEntity<?> connectionStatusRedirectC(String providerId, NativeWebRequest request) {
+		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
 		String path = getPathExtension(servletRequest);
 		Iterator<String> it = request.getHeaderNames();
 		String har = request.getContextPath();
@@ -355,8 +323,7 @@ public class CustomConnectController extends ConnectController {
 	}
 
 	@RequestMapping(value = "/{providerId}/mail", method = RequestMethod.POST)
-	public ResponseEntity<?> mailChecker(@PathVariable String providerId,
-			NativeWebRequest request,
+	public ResponseEntity<?> mailChecker(@PathVariable String providerId, NativeWebRequest request,
 			@RequestParam(value = "mail", required = true) String mail) {
 		this.mail = mail;
 		HttpHeaders h = new HttpHeaders();
@@ -369,36 +336,26 @@ public class CustomConnectController extends ConnectController {
 		HttpHeaders h = new HttpHeaders();
 		switch (providerId) {
 		case ("twitter"):
-			if (!connectionRepository.findConnections(Twitter.class)
-					.isEmpty()) {
-				twitter = (Twitter) connectionRepository
-						.getPrimaryConnection(Twitter.class).getApi();
+			if (!connectionRepository.findConnections(Twitter.class).isEmpty()) {
+				twitter = (Twitter) connectionRepository.getPrimaryConnection(Twitter.class).getApi();
 				TwitterProfile a = twitter.userOperations().getUserProfile();
 				return new ResponseEntity<>(a, h, HttpStatus.OK);
-			}
-			else {
+			} else {
 				return new ResponseEntity<>(h, HttpStatus.FORBIDDEN);
 			}
 		case ("facebook"):
-			if (!connectionRepository.findConnections(Facebook.class)
-					.isEmpty()) {
-				facebook = (Facebook) connectionRepository
-						.getPrimaryConnection(Facebook.class).getApi();
-				byte[] a = facebook.userOperations().getUserProfileImage();
+			if (!connectionRepository.findConnections(Facebook.class).isEmpty()) {
+				String a = connectionRepository.getPrimaryConnection(Facebook.class).getImageUrl();
 				return new ResponseEntity<>(a, h, HttpStatus.OK);
-			}
-			else {
+			} else {
 				return new ResponseEntity<>(h, HttpStatus.FORBIDDEN);
 			}
 		case ("google"):
 			if (!connectionRepository.findConnections(Google.class).isEmpty()) {
-				google = (Google) connectionRepository
-						.getPrimaryConnection(Google.class).getApi();
-				String a = google.plusOperations().getGoogleProfile()
-						.getImageUrl();
+				google = (Google) connectionRepository.getPrimaryConnection(Google.class).getApi();
+				String a = google.plusOperations().getGoogleProfile().getImageUrl();
 				return new ResponseEntity<>(a, h, HttpStatus.OK);
-			}
-			else {
+			} else {
 				return new ResponseEntity<>(h, HttpStatus.FORBIDDEN);
 			}
 		default:
@@ -407,15 +364,12 @@ public class CustomConnectController extends ConnectController {
 
 	}
 
-	private void addConnection(Connection<?> connection,
-			ConnectionFactory<?> connectionFactory, WebRequest request) {
+	private void addConnection(Connection<?> connection, ConnectionFactory<?> connectionFactory, WebRequest request) {
 		try {
 			connectionRepository.addConnection(connection);
 			postConnect(connectionFactory, connection, request);
-		}
-		catch (DuplicateConnectionException e) {
-			sessionStrategy.setAttribute(request,
-					DUPLICATE_CONNECTION_ATTRIBUTE, e);
+		} catch (DuplicateConnectionException e) {
+			sessionStrategy.setAttribute(request, DUPLICATE_CONNECTION_ATTRIBUTE, e);
 		}
 	}
 
@@ -426,71 +380,58 @@ public class CustomConnectController extends ConnectController {
 	 * there is no extension.
 	 */
 	private String getPathExtension(HttpServletRequest request) {
-		String fileName = WebUtils
-				.extractFullFilenameFromUrlPath(request.getRequestURI());
+		String fileName = WebUtils.extractFullFilenameFromUrlPath(request.getRequestURI());
 		String extension = StringUtils.getFilenameExtension(fileName);
 		return extension != null ? "." + extension : "";
 	}
 
 	private boolean prependServletPath(HttpServletRequest request) {
-		return !this.urlPathHelper.getPathWithinServletMapping(request)
-				.equals("");
+		return !this.urlPathHelper.getPathWithinServletMapping(request).equals("");
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void preConnect(ConnectionFactory<?> connectionFactory,
-			MultiValueMap<String, String> parameters, WebRequest request) {
-		for (ConnectInterceptor interceptor : interceptingConnectionsTo(
-				connectionFactory)) {
+	private void preConnect(ConnectionFactory<?> connectionFactory, MultiValueMap<String, String> parameters,
+			WebRequest request) {
+		for (ConnectInterceptor interceptor : interceptingConnectionsTo(connectionFactory)) {
 			interceptor.preConnect(connectionFactory, parameters, request);
 		}
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void postConnect(ConnectionFactory<?> connectionFactory,
-			Connection<?> connection, WebRequest request) {
-		for (ConnectInterceptor interceptor : interceptingConnectionsTo(
-				connectionFactory)) {
+	private void postConnect(ConnectionFactory<?> connectionFactory, Connection<?> connection, WebRequest request) {
+		for (ConnectInterceptor interceptor : interceptingConnectionsTo(connectionFactory)) {
 			interceptor.postConnect(connection, request);
 		}
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void preDisconnect(ConnectionFactory<?> connectionFactory,
-			WebRequest request) {
-		for (DisconnectInterceptor interceptor : interceptingDisconnectionsTo(
-				connectionFactory)) {
+	private void preDisconnect(ConnectionFactory<?> connectionFactory, WebRequest request) {
+		for (DisconnectInterceptor interceptor : interceptingDisconnectionsTo(connectionFactory)) {
 			interceptor.preDisconnect(connectionFactory, request);
 		}
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void postDisconnect(ConnectionFactory<?> connectionFactory,
-			WebRequest request) {
-		for (DisconnectInterceptor interceptor : interceptingDisconnectionsTo(
-				connectionFactory)) {
+	private void postDisconnect(ConnectionFactory<?> connectionFactory, WebRequest request) {
+		for (DisconnectInterceptor interceptor : interceptingDisconnectionsTo(connectionFactory)) {
 			interceptor.postDisconnect(connectionFactory, request);
 		}
 	}
 
-	private List<ConnectInterceptor<?>> interceptingConnectionsTo(
-			ConnectionFactory<?> connectionFactory) {
-		Class<?> serviceType = GenericTypeResolver.resolveTypeArgument(
-				connectionFactory.getClass(), ConnectionFactory.class);
-		List<ConnectInterceptor<?>> typedInterceptors = connectInterceptors
-				.get(serviceType);
+	private List<ConnectInterceptor<?>> interceptingConnectionsTo(ConnectionFactory<?> connectionFactory) {
+		Class<?> serviceType = GenericTypeResolver.resolveTypeArgument(connectionFactory.getClass(),
+				ConnectionFactory.class);
+		List<ConnectInterceptor<?>> typedInterceptors = connectInterceptors.get(serviceType);
 		if (typedInterceptors == null) {
 			typedInterceptors = Collections.emptyList();
 		}
 		return typedInterceptors;
 	}
 
-	private List<DisconnectInterceptor<?>> interceptingDisconnectionsTo(
-			ConnectionFactory<?> connectionFactory) {
-		Class<?> serviceType = GenericTypeResolver.resolveTypeArgument(
-				connectionFactory.getClass(), ConnectionFactory.class);
-		List<DisconnectInterceptor<?>> typedInterceptors = disconnectInterceptors
-				.get(serviceType);
+	private List<DisconnectInterceptor<?>> interceptingDisconnectionsTo(ConnectionFactory<?> connectionFactory) {
+		Class<?> serviceType = GenericTypeResolver.resolveTypeArgument(connectionFactory.getClass(),
+				ConnectionFactory.class);
+		List<DisconnectInterceptor<?>> typedInterceptors = disconnectInterceptors.get(serviceType);
 		if (typedInterceptors == null) {
 			typedInterceptors = Collections.emptyList();
 		}

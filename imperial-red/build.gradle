@@ -106,6 +106,9 @@ dependencies {
     // Spring Security REST plugin
     //compile 'org.grails.plugins:spring-security-rest:1.5.0.M1'
     
+    // JWT
+    compile 'io.jsonwebtoken:jjwt:0.6.0'
+    
 	// WebSocket
 	compile 'org.springframework.boot:spring-boot-starter-websocket'
 	compile 'org.springframework:spring-messaging'

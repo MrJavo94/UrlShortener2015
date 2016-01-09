@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import urlshortener2015.imperialred.exception.CustomException;
 import urlshortener2015.imperialred.objects.ShortURL;
@@ -79,9 +80,16 @@ public class UsersController {
 	 * Creates a new user from a JSON object.
 	 */
 	@RequestMapping(value = "/users", method = RequestMethod.POST, produces = "application/json")
-	public User addUser(@RequestBody User user) {
-		logger.info("New user: " + user.getMail() + " " + user.getNick() + " " + 
-				user.getPassword() + " " + user.getTwitter());
+	public User addUser(@RequestParam(value = "mail", required = true) String mail,
+			@RequestParam(value = "password", required = true) String password) {
+		User prev = userRepository.findByMail(mail);
+		/*
+		 * Mail already used
+		 */
+		if(prev != null){
+			return null;
+		}
+		User user = new User(mail, Hash.makeHash(password));
 		return userRepository.save(user);
 	}
 	

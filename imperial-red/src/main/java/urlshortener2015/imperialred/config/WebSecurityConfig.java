@@ -1,17 +1,14 @@
 package urlshortener2015.imperialred.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.social.security.SocialUserDetailsService;
 import org.springframework.social.security.SpringSocialConfigurer;
 
 import urlshortener2015.imperialred.social.SimpleSocialUsersDetailService;
-
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 @Configuration
 @EnableWebSecurity
@@ -21,11 +18,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-                	.antMatchers("/**,/**/**", "/home").permitAll()
+            		.antMatchers("/css/**/*", "/js/**/*", "/img/**/*", "/image/**/*", "/fonts/**/*", "/webjars/**/*", "/favicon.ico",
+            				"/users", "/userlogin", "/connect/google", "/connect/facebook")
+            		.permitAll()
+                	.antMatchers("/**", "/**/*")
+                	.authenticated()
             .and()
             	.formLogin()
-                .loginPage("/login")
-                .permitAll()
+            		.loginPage("/login")
+            			.usernameParameter("email")
+            			.passwordParameter("password")
+            				.permitAll()
             .and()
                 .logout()
                 	.permitAll()
@@ -34,16 +37,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
                 .csrf()
                 	.disable();
-    }
-
-//    @Autowired
-//    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-//        auth
-//            .inMemoryAuthentication()
-//                .withUser("user").password("password").roles("USER");
-//    }
+	}
     
-	@Bean
+    @Bean
 	public SocialUserDetailsService socialUsersDetailService() {
 		return new SimpleSocialUsersDetailService(userDetailsService());
 	}

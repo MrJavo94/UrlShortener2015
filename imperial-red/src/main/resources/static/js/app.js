@@ -146,45 +146,6 @@ $(document).ready(function(){
       }
     });
   });
-        /*
-        $("#tw_signin").submit(
-                function(event) {
-                    event.preventDefault();
-                    $.ajax({
-                        type : "POST",
-                        url : "/connect/twitter",
-                        success : function(msg) {
-                            var custom = document.getElementsByName("custom");
-                            if(msg.profileImageUrl!=null){
-                                $("#result").html(
-                                    "<h3>Aquí tiene su enlace acortado</h3>"
-                                    + "<div class='alert alert-success lead'><a target='_blank' href='"
-                                    + msg.uri
-                                    + "'>"
-                                    + msg.uri
-                                    + "</a></div></br><h3>Token: <h3>"
-                                    + " <div class='alert alert-success lead'>?token="
-                                    + msg.owner
-                                    + "</div>");
-                            }
-                            else{
-                                $("#result").html(
-                                    "<h3>Aquí tiene su enlace acortado</h3>"
-                                    + "<div class='alert alert-success lead'><a target='_blank' href='"
-                                    + msg.uri
-                                    + "'>"
-                                    + msg.uri
-                                    + "</a></div>");
-                            }
-
-                        },
-                        error : function() {
-                            $("#result").html(
-                                    "<div class='alert alert-danger lead'>ERROR</div>");
-                        }
-                    });
-                });*/
-
   $(".vc").click(function() {
   	if ($(this).attr("value")=="option1") {
   		$(".vcard").hide();
@@ -217,6 +178,7 @@ $(document).ready(function(){
     type : "GET",
     url : "/connect/twitter/check",
     success : function(msg) {
+    	console.log(msg);
       var custom = document.getElementsByName("custom");
       if(msg.profileImageUrl!=null){
         $("#sign-in-message").hide();
@@ -238,10 +200,7 @@ $(document).ready(function(){
             success : function(msg) {
               console.log("success");
               $("#sign-in-buttons").html("");
-              $("#sign-in-message").show();
-              $("#gl_div").show();
-              $("#fb_div").show();
-              $("#tw_div").show();
+              window.location = window.location;
             },
             error : function(err) {
               console.log("err");
@@ -272,7 +231,7 @@ $(document).ready(function(){
         $("#fb_div").hide();
         $("#tw_div").hide();
         $("#sign-in-buttons").html(
-            "<img src=\"data:image/png;base64," + msg + "\" alt=\"Facebook image\">"+
+        		"<img id=\"fb-img\" src=\"" + msg + "\" alt=\"Facebook image\">"+
             "<button id=\"fb\" class=\"disconnect-button\">"+
               "<a class=\"btn btn-block btn-social \">"+
                 "<span class=\"fa\"></span> Disconnect"+
@@ -286,10 +245,7 @@ $(document).ready(function(){
             success : function(msg) {
               console.log("success");
               $("#sign-in-buttons").html("");
-              $("#sign-in-message").show();
-              $("#gl_div").show();
-              $("#fb_div").show();
-              $("#tw_div").show();
+              location.reload();
             },
             error : function(err) {
               console.log("err");
@@ -335,10 +291,7 @@ $(document).ready(function(){
             success : function(msg) {
               console.log("success");
               $("#sign-in-buttons").html("");
-              $("#sign-in-message").show();
-              $("#gl_div").show();
-              $("#fb_div").show();
-              $("#tw_div").show();
+              location.reload();
             },
             error : function(err) {
               console.log("err");
