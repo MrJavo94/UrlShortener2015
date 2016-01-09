@@ -1,6 +1,8 @@
 package urlshortener2015.imperialred.web;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import urlshortener2015.imperialred.objects.Hash;
 import urlshortener2015.imperialred.objects.User;
 import urlshortener2015.imperialred.repository.UserRepository;
 
@@ -76,7 +79,12 @@ public class LoginController {
 			 */
 			SecurityContextHolder.getContext()
 					.setAuthentication(new UsernamePasswordAuthenticationToken(email, password, ja));
-
+			
+			String red = (String) request.getSession().getAttribute("redirect");
+			request.getSession().removeAttribute("redirect");
+			if(red != null){
+				return "redirect:/" + red;
+			}
 			return "redirect:/";
 		} else {
 			// User or password incorrect

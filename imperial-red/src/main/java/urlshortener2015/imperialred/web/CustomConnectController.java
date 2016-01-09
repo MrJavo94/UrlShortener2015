@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ import org.springframework.social.security.SocialAuthenticationToken;
 import org.springframework.social.twitter.api.Twitter;
 import org.springframework.social.twitter.api.TwitterProfile;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -162,9 +164,6 @@ public class CustomConnectController extends ConnectController {
 
 			SecurityContextHolder.getContext()
 					.setAuthentication(new SocialAuthenticationToken(connection, userProfile, null, ja));
-
-			// SecurityContextHolder.getContext().setAuthentication(new
-			// UsernamePasswordAuthenticationToken(uniqueId, null, null));
 			addConnection(connection, connectionFactory, request);
 		} catch (Exception e) {
 			sessionStrategy.setAttribute(request, PROVIDER_ERROR_ATTRIBUTE, e);
@@ -173,6 +172,29 @@ public class CustomConnectController extends ConnectController {
 					+ providerId + " connection status page.");
 		}
 		return connectionStatusRedirect(providerId, request);
+	}
+	
+	
+	/**
+	 * Render the status of the connections to the service provider to the user as HTML in their web browser.
+	 * @param providerId the ID of the provider to show connection status
+     * @param request the request
+     * @param model the model
+     * @return the view name of the connection status page for all providers
+	 */
+	@Override
+	@RequestMapping(value="/{providerId}", method=RequestMethod.GET)
+	public String connectionStatus(@PathVariable String providerId, NativeWebRequest request, Model model) {
+		setNoCache(request);
+		processFlash(request, model);
+		List<Connection<?>> connections = connectionRepository.findConnections(providerId);
+		setNoCache(request);
+		if (connections.isEmpty()) {
+			return connectView(providerId); 
+		} else {
+			model.addAttribute("connections", connections);
+			return connectedView(providerId, request);			
+		}
 	}
 
 	/**
@@ -262,7 +284,7 @@ public class CustomConnectController extends ConnectController {
 		return connectionStatusRedirectC(providerId, request);
 	}
 
-	protected String connectedView(String providerId) {
+	protected String connectedView(String providerId, NativeWebRequest request) {
 		// if (providerId.equals("facebook")) {
 		// facebook = (Facebook)
 		// connectionRepository.getPrimaryConnection(Facebook.class).getApi();
@@ -288,8 +310,11 @@ public class CustomConnectController extends ConnectController {
 		// }
 		// connectionRepository.removeConnections(providerId);
 
-		if (deleting) {
-			return "";
+		HttpServletRequest nativeReq = request.getNativeRequest(HttpServletRequest.class);
+		String red = (String) nativeReq.getSession().getAttribute("redirect");
+		nativeReq.getSession().removeAttribute("redirect");
+		if(red != null){
+			return "redirect:/" + red;
 		}
 		logger.info("Deleting : " + deleting);
 		return "redirect:/";
@@ -426,6 +451,30 @@ public class CustomConnectController extends ConnectController {
 			typedInterceptors = Collections.emptyList();
 		}
 		return typedInterceptors;
+	}
+	
+	private void processFlash(WebRequest request, Model model) {
+		convertSessionAttributeToModelAttribute(DUPLICATE_CONNECTION_ATTRIBUTE, request, model);
+		convertSessionAttributeToModelAttribute(PROVIDER_ERROR_ATTRIBUTE, request, model);
+		model.addAttribute(AUTHORIZATION_ERROR_ATTRIBUTE, sessionStrategy.getAttribute(request, AUTHORIZATION_ERROR_ATTRIBUTE));
+		sessionStrategy.removeAttribute(request, AUTHORIZATION_ERROR_ATTRIBUTE);
+	}
+	
+	private void convertSessionAttributeToModelAttribute(String attributeName, WebRequest request, Model model) {
+		if (sessionStrategy.getAttribute(request, attributeName) != null) {
+			model.addAttribute(attributeName, Boolean.TRUE);
+			sessionStrategy.removeAttribute(request, attributeName);
+		}
+	}
+	
+	private void setNoCache(NativeWebRequest request) {
+		HttpServletResponse response = request.getNativeResponse(HttpServletResponse.class);
+		if (response != null) {
+			response.setHeader("Pragma", "no-cache");
+			response.setDateHeader("Expires", 1L);
+			response.setHeader("Cache-Control", "no-cache");
+			response.addHeader("Cache-Control", "no-store");
+		}
 	}
 
 	private List<DisconnectInterceptor<?>> interceptingDisconnectionsTo(ConnectionFactory<?> connectionFactory) {
