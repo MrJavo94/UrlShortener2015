@@ -1,6 +1,7 @@
 package urlshortener2015.imperialred.web;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +18,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.social.connect.Connection;
 import org.springframework.social.connect.ConnectionFactory;
@@ -139,7 +142,6 @@ public class CustomConnectController extends ConnectController {
 			case ("facebook"):
 				facebook = (Facebook) connection.getApi();
 				userProfile = facebook.userOperations().getUserProfile();
-
 				uniqueId = facebook.userOperations().getUserProfile().getEmail();
 				aux = userRepository.findByMail(uniqueId);
 				if (aux == null) {
@@ -154,8 +156,12 @@ public class CustomConnectController extends ConnectController {
 				// twitter.userOperations().getUserProfile().getScreenName();
 				break;
 			}
+
+			ArrayList<GrantedAuthority> ja = new ArrayList();
+			ja.add(new SimpleGrantedAuthority("USER"));
+
 			SecurityContextHolder.getContext()
-					.setAuthentication(new SocialAuthenticationToken(connection, userProfile, null, null));
+					.setAuthentication(new SocialAuthenticationToken(connection, userProfile, null, ja));
 
 			// SecurityContextHolder.getContext().setAuthentication(new
 			// UsernamePasswordAuthenticationToken(uniqueId, null, null));
@@ -248,12 +254,11 @@ public class CustomConnectController extends ConnectController {
 	 */
 	@RequestMapping(value = "/{providerId}/remove", method = RequestMethod.DELETE)
 	public ResponseEntity<?> removeConnectionsC(@PathVariable String providerId, NativeWebRequest request) {
-		deleting = true;
 		ConnectionFactory<?> connectionFactory = connectionFactoryLocator.getConnectionFactory(providerId);
 		preDisconnect(connectionFactory, request);
 		connectionRepository.removeConnections(providerId);
 		postDisconnect(connectionFactory, request);
-		deleting = false;
+		SecurityContextHolder.getContext().setAuthentication(null);
 		return connectionStatusRedirectC(providerId, request);
 	}
 
@@ -340,8 +345,7 @@ public class CustomConnectController extends ConnectController {
 			}
 		case ("facebook"):
 			if (!connectionRepository.findConnections(Facebook.class).isEmpty()) {
-				facebook = (Facebook) connectionRepository.getPrimaryConnection(Facebook.class).getApi();
-				byte[] a = facebook.userOperations().getUserProfileImage();
+				String a = connectionRepository.getPrimaryConnection(Facebook.class).getImageUrl();
 				return new ResponseEntity<>(a, h, HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>(h, HttpStatus.FORBIDDEN);

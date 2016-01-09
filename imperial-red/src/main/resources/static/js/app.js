@@ -200,10 +200,7 @@ $(document).ready(function(){
             success : function(msg) {
               console.log("success");
               $("#sign-in-buttons").html("");
-              $("#sign-in-message").show();
-              $("#gl_div").show();
-              $("#fb_div").show();
-              $("#tw_div").show();
+              window.location = window.location;
             },
             error : function(err) {
               console.log("err");
@@ -234,7 +231,7 @@ $(document).ready(function(){
         $("#fb_div").hide();
         $("#tw_div").hide();
         $("#sign-in-buttons").html(
-            "<img src=\"data:image/png;base64," + msg + "\" alt=\"Facebook image\">"+
+        		"<img id=\"fb-img\" src=\"" + msg + "\" alt=\"Facebook image\">"+
             "<button id=\"fb\" class=\"disconnect-button\">"+
               "<a class=\"btn btn-block btn-social \">"+
                 "<span class=\"fa\"></span> Disconnect"+
@@ -248,10 +245,7 @@ $(document).ready(function(){
             success : function(msg) {
               console.log("success");
               $("#sign-in-buttons").html("");
-              $("#sign-in-message").show();
-              $("#gl_div").show();
-              $("#fb_div").show();
-              $("#tw_div").show();
+              location.reload();
             },
             error : function(err) {
               console.log("err");
@@ -297,10 +291,7 @@ $(document).ready(function(){
             success : function(msg) {
               console.log("success");
               $("#sign-in-buttons").html("");
-              $("#sign-in-message").show();
-              $("#gl_div").show();
-              $("#fb_div").show();
-              $("#tw_div").show();
+              location.reload();
             },
             error : function(err) {
               console.log("err");

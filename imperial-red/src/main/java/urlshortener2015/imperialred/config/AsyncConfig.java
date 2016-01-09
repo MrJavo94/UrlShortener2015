@@ -13,23 +13,21 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 @EnableAsync
 @EnableScheduling
-public class AsyncConfig implements AsyncConfigurer{
+public class AsyncConfig implements AsyncConfigurer {
 
-
-    @Override
-    public Executor getAsyncExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(5);
-        executor.setQueueCapacity(50);
-        executor.setThreadNamePrefix("Mail Executor");
-        executor.initialize();
-        return executor;
-    }
-	
+	@Override
+	public Executor getAsyncExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(2);
+		executor.setMaxPoolSize(5);
+		executor.setQueueCapacity(50);
+		executor.setThreadNamePrefix("Mail Executor");
+		executor.initialize();
+		return executor;
+	}
 
 	@Override
 	public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-		return new SimpleAsyncUncaughtExceptionHandler() ;
+		return new SimpleAsyncUncaughtExceptionHandler();
 	}
 }
