@@ -45,20 +45,16 @@ public class UsersController {
 	 */
 	@RequestMapping(value = "/userlinks", method = RequestMethod.GET, produces = "text/html")
 	public ResponseEntity<String> getUserLinks(HttpServletRequest request) {
-		//String mail = UrlShortenerControllerWithLogs.getOwnerMail();
-		// TODO: get real email when that part is fixed. Until then, always test@expire
-		String mail = "test@expire";
-		logger.info("Getting links made by " + mail);
+		/* Retrieves authenticated user */
+		String mail = UrlShortenerControllerWithLogs.getOwnerMail();
 		User user = userRepository.findByMail(mail);
-		logger.info("User: " + user);
+		logger.info("Getting links made by " + mail);
 		
 		/* If user exists, retrieves its shortURLs */
 		if (user != null) {
 			List<ShortURL> links = shortURLRepository.findByOwner(mail);
 			String urls = "";
 			for (int i=0; i<links.size(); i++) {
-				logger.info("ShortURL: " + links.get(i));
-				logger.info(">" + links.get(i).getTarget());
 				urls += links.get(i).getTarget() + " ";
 			}
 			return new ResponseEntity<>(urls, HttpStatus.CREATED);
@@ -109,7 +105,6 @@ public class UsersController {
 	
 	/**
 	 * Deletes the user identified by {mail}
-	 * XXX: I don't know what should be returned here
 	 */
 	@CacheEvict("users")
 	@RequestMapping(value = "/users/{mail}", method = RequestMethod.DELETE, produces = "application/json")

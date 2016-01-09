@@ -69,6 +69,7 @@ public class StatsController {
 			model.addAttribute("clicks", click);
 			model.addAttribute("from", from);
 			model.addAttribute("to", to);
+			
 			/* Adds JSON array for clicks by city */
 			DBObject groupObjectCity = clickRepository
 					.getClicksByCity(id, from, to, null, null, null, null)
@@ -76,6 +77,7 @@ public class StatsController {
 			String listCities = groupObjectCity.get("retval").toString();
 			String cityData = processCityJSON(listCities);
 			model.addAttribute("clicksByCity", cityData);
+			
 			/* Adds JSON array for clicks by country */
 			DBObject groupObject = clickRepository
 					.getClicksByCountry(id, from, to).getRawResults();
@@ -214,26 +216,33 @@ public class StatsController {
 	@RequestMapping(value = "/checkAuth", method = RequestMethod.GET)
 	public ResponseEntity<String> checkIfOwner(
 			@RequestParam(value = "url", required = true) String hash) {
-		//String mail = UrlShortenerControllerWithLogs.getOwnerMail();
-		// TODO: get real email when that part is fixed. Until then, always test@expire
-		String mail = "test@expire";
+		/* Retrieves authenticated user */
+		String mail = UrlShortenerControllerWithLogs.getOwnerMail();
 		logger.info("Checking if user " + mail + " is owner of url");
 		
-		/* Retrieves owners' mail of link */
+		/* Retrieves owner's mail of link */
 		hash = hash.substring(1,hash.length()-1);
-		logger.info("hash: " + hash);
 		ShortURL su = shortURLRepository.findByHash(hash);
-		logger.info("shorturl: "+ su);
 		String owner = su.getOwner();
-		logger.info("owner: " + owner);
 		
 		/* Checks if authed user is owner of that link */
 		if (owner!= null && owner.equals(mail)) {
 			logger.info("equals");
-			String result = su.getExpire().toString() + "##";
+			Date expire = su.getExpire();
+			String result = "";
+			if (expire != null) {
+				/* Only adds expire date if it has been introduced */
+				result += su.getExpire().toString();
+			} else {
+				result += "never";
+			}
+			result += "##";
 			Alert a = alertRepository.findByHash(su.getHash());
 			if (a != null) {
+				/* Only adds alert date if it has been introduced */
 				result += a.getDate().toString();
+			} else {
+				result += "no alert specified";
 			}
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		} else {

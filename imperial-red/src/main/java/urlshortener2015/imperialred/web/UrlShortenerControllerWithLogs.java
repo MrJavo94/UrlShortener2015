@@ -300,7 +300,7 @@ public class UrlShortenerControllerWithLogs {
 			@RequestParam(value = "expire", required = false) String expire,
 			@RequestParam(value = "days", required = false) String days) {
 		hash = hash.substring(1, hash.length()-1);
-		logger.info("Entered with hash " + hash);
+		
 		/* Changes expire date */
 		ShortURL su = shortURLRepository.findByHash(hash);
 		logger.info("su: " + su);
@@ -311,7 +311,7 @@ public class UrlShortenerControllerWithLogs {
 		}
 		catch (ParseException e) {
 			e.printStackTrace();
-			logger.info("Fecha mal introducida");
+			logger.info("Error with introduced alert date");
 		}
 		su.setExpire(newExpire);
 		logger.info("Updating ShortURL: " + su);
@@ -326,9 +326,8 @@ public class UrlShortenerControllerWithLogs {
 			logger.info("Updating alert: " + a);
 			alertRepository.save(a);
 		} else {
-			//String mail = UrlShortenerControllerWithLogs.getOwnerMail();
-			// TODO: get real email when that part is fixed. Until then, always test@expire
-			String mail = "test@expire";
+			/* If alert does not exist, creates a new one */
+			String mail = UrlShortenerControllerWithLogs.getOwnerMail();
 			logger.info("Setting new alert");
 			alertRepository.save(new Alert(mail, hash, alertDate));
 		}
@@ -449,8 +448,8 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	/**
-	 * If shortURL is valid, creates it and saves it XXX: at the moment, it just
-	 * ignores unknown emails, with no feedback for users.
+	 * If shortURL is valid, creates it and saves it 
+	 * XXX: at the moment, it just ignores unknown emails, with no feedback for users.
 	 */
 	protected ShortURL createAndSaveIfValid(String url, String custom,
 			String hasToken, String expireDate, String ip, String[] emails,
@@ -586,7 +585,7 @@ public class UrlShortenerControllerWithLogs {
 		}
 	}
 	
-	private String getOwnerMail() {
+	protected static String getOwnerMail() {
 		Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
 		String email = "";
 		if (currentAuthentication instanceof SocialAuthenticationToken) {
