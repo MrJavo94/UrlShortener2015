@@ -1,5 +1,6 @@
 package urlshortener2015.imperialred.repository;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -12,17 +13,13 @@ public interface UserRepository extends MongoRepository<User, BigInteger>  {
 	
 	User findByMail(String mail);
 	
-	User findByNick(String nick);
-	
-	User findByTwitter(String twitter);
+	User findByProvider(Serializable provider);
 	
 	User save(User u);
 	
 	void deleteById(BigInteger id);
 	
 	void deleteByMail(String mail);
-	
-	void deleteByNick(String nick);
 	
 	List<User> findAll();
 	

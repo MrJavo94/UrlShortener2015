@@ -1,14 +1,8 @@
 package urlshortener2015.imperialred.web;
 
-import java.io.IOException;
-
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.mashape.unirest.http.exceptions.UnirestException;
 
 import urlshortener2015.imperialred.exception.CustomException;
 

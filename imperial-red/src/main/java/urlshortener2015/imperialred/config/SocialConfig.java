@@ -28,24 +28,7 @@ public class SocialConfig implements SocialConfigurer{
 	
 	@Autowired
 	MongoTemplate mongoTemplate;
-
-   
-
-	@Override
-	public void addConnectionFactories(ConnectionFactoryConfigurer connectionFactoryConfigurer,
-			Environment environment) {
-//		connectionFactoryConfigurer.addConnectionFactory(new TwitterConnectionFactory(
-//				environment.getProperty("spring.social.twitter.appId"),
-//				environment.getProperty("spring.social.twitter.appSecret")));
-//		connectionFactoryConfigurer.addConnectionFactory(new FacebookConnectionFactory(
-//				environment.getProperty("spring.social.facebook.appId"),
-//				environment.getProperty("spring.social.facebook.appSecret")));
-//		connectionFactoryConfigurer.addConnectionFactory(new GoogleConnectionFactory(
-//				environment.getProperty("spring.social.google.appId"),
-//				environment.getProperty("spring.social.google.appSecret")));
-		
-	}
-
+	
 	@Override
 	public UserIdSource getUserIdSource() {
 		return new AuthenticationNameUserIdSource();
@@ -56,5 +39,7 @@ public class SocialConfig implements SocialConfigurer{
 		return new MongoUsersConnectionRepository(mongoTemplate, connectionFactoryLocator, new MongoConnectionTransformers(connectionFactoryLocator, Encryptors.noOpText()));
 	}
 
-}
+	@Override
+	public void addConnectionFactories(ConnectionFactoryConfigurer connectionFactoryConfigurer,Environment environment) {}
 
+}
