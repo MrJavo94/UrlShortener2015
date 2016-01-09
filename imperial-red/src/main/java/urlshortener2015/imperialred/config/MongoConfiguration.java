@@ -20,11 +20,9 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 
 import urlshortener2015.imperialred.web.UrlShortenerControllerWithLogs;
-import urlshortener2015.imperialred.web.WebPackage;
 
 @Configuration
 @EnableMongoRepositories(basePackageClasses=urlshortener2015.imperialred.repository.ClickRepository.class)
-@ComponentScan(basePackageClasses=WebPackage.class)
 @PropertySource("classpath:mongo.properties")
 public class MongoConfiguration extends AbstractMongoConfiguration {
 	
