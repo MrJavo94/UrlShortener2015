@@ -370,8 +370,9 @@ $(document).ready(function() {
 	    	  var content = "";
 	    	  var urls = links.split(" ");
 	    	  for (var i=0; i<links.length; i++) {
-	    		  if (urls[i] != undefined) {
-	    			  content += "<p><a href=\"" + urls[i] + "\">"+urls[i]+"</p><br>";
+	    		  if (urls[i] != undefined && urls[i] != "") {
+	    			  content += "<p><a href=\"" + urls[i] + "\">"
+	    			  				+ window.location.hostname + "/" +urls[i]+"</p><br>";
 	    		  }
 	    	  }
 	          $("#links_list").html(content);

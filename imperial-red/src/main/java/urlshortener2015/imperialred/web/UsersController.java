@@ -55,7 +55,7 @@ public class UsersController {
 			List<ShortURL> links = shortURLRepository.findByOwner(mail);
 			String urls = "";
 			for (int i=0; i<links.size(); i++) {
-				urls += links.get(i).getTarget() + " ";
+				urls += links.get(i).getHash() + " ";
 			}
 			return new ResponseEntity<>(urls, HttpStatus.CREATED);
 		} else {
