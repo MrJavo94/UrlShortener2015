@@ -11,6 +11,7 @@
     <script type="text/javascript" src="js/stomp.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script type='text/javascript' src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="js/stats_functions.js"></script>
 	
 	<script type="text/javascript">
 		var stompClient = null;
@@ -118,6 +119,7 @@
 			var chart = new google.visualization.GeoChart(document.getElementById('geo_chart'));
 			chart.draw(data, options);
 		}
+		
 		function showStats(message) {
             var clicks=document.createTextNode("Clicks " + message);
             var old=document.getElementById('clicks');
@@ -295,7 +297,7 @@
 				<button type="button" class="btn btn-default" onclick='filterStats()'>Update</button>
 			</form>
 			</br>
-			
+			<div id="alert_changer"></div>
 		</div>
 		<div class="col-sm-8">
 			<button type="button" id="button_change" class="btn btn-default" value='0' onclick='changeMap()'>Change View</button>

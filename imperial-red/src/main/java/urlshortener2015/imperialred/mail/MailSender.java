@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
 import java.util.Properties;
 
 import javax.mail.Authenticator;
@@ -20,9 +19,6 @@ import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
-
 import urlshortener2015.imperialred.objects.Alert;
 
 public class MailSender {
@@ -43,7 +39,7 @@ public class MailSender {
 	
 	public MailSender(Alert a) {
 		mail = a.getMail();
-		url = a.getUrl();	
+		url = a.getHash();	
 		msgBody = MSG_1 + url + MSG_2;
 		
 		Properties p = new Properties();

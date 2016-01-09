@@ -2,8 +2,6 @@ package urlshortener2015.imperialred.web;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +26,9 @@ import com.mongodb.DBObject;
 import urlshortener2015.imperialred.exception.CustomException;
 import urlshortener2015.imperialred.objects.StatsURL;
 import urlshortener2015.imperialred.objects.WebSocketsData;
+import urlshortener2015.imperialred.objects.Alert;
 import urlshortener2015.imperialred.objects.ShortURL;
+import urlshortener2015.imperialred.repository.AlertRepository;
 import urlshortener2015.imperialred.repository.ClickRepository;
 import urlshortener2015.imperialred.repository.ShortURLRepository;
 
@@ -40,6 +40,9 @@ public class StatsController {
 
 	@Autowired
 	ShortURLRepository shortURLRepository;
+	
+	@Autowired
+	protected AlertRepository alertRepository;
 
 	@Autowired
 	private SimpMessagingTemplate template;
@@ -66,6 +69,7 @@ public class StatsController {
 			model.addAttribute("clicks", click);
 			model.addAttribute("from", from);
 			model.addAttribute("to", to);
+			
 			/* Adds JSON array for clicks by city */
 			DBObject groupObjectCity = clickRepository
 					.getClicksByCity(id, from, to, null, null, null, null)
@@ -73,6 +77,7 @@ public class StatsController {
 			String listCities = groupObjectCity.get("retval").toString();
 			String cityData = processCityJSON(listCities);
 			model.addAttribute("clicksByCity", cityData);
+			
 			/* Adds JSON array for clicks by country */
 			DBObject groupObject = clickRepository
 					.getClicksByCountry(id, from, to).getRawResults();
@@ -207,5 +212,48 @@ public class StatsController {
 		this.template.convertAndSend("/topic/" + hash, wb);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
+	
+	/**
+	 * Given a request from a ShortURL stats page, returns true if
+	 * that url is owned by authenticated user, false otherwise.
+	 */
+	@RequestMapping(value = "/checkAuth", method = RequestMethod.GET)
+	public ResponseEntity<String> checkIfOwner(
+			@RequestParam(value = "url", required = true) String hash) {
+		/* Retrieves authenticated user */
+		String mail = UrlShortenerControllerWithLogs.getOwnerMail();
+		logger.info("Checking if user " + mail + " is owner of url");
+		
+		/* Retrieves owner's mail of link */
+		hash = hash.substring(1,hash.length()-1);
+		ShortURL su = shortURLRepository.findByHash(hash);
+		String owner = su.getOwner();
+		
+		/* Checks if authed user is owner of that link */
+		if (owner!= null && owner.equals(mail)) {
+			logger.info("equals");
+			Date expire = su.getExpire();
+			String result = "";
+			if (expire != null) {
+				/* Only adds expire date if it has been introduced */
+				result += su.getExpire().toString();
+			} else {
+				result += "never";
+			}
+			result += "##";
+			Alert a = alertRepository.findByHash(su.getHash());
+			if (a != null) {
+				/* Only adds alert date if it has been introduced */
+				result += a.getDate().toString();
+			} else {
+				result += "no alert specified";
+			}
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		} else {
+			logger.info("not equals");
+			return new ResponseEntity<>(null, HttpStatus.OK);
+		}
+	}
+	
 
 }

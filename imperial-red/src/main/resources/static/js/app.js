@@ -355,3 +355,30 @@ function createQRData(uri) {
 		console.log('Entered unexpected state in QR option function');
 	}
 }
+
+// AJAX function retrieving links from user
+$(document).ready(function() {
+	$("#links_btn").click(function() {
+		console.log('1');
+	    $.ajax({
+	      type : "GET",
+	      url : "/userlinks",
+	      data : $(this).serialize(),
+	      success : function(links) {
+	    	  console.log('2');
+	    	  console.log(links);
+	    	  var content = "";
+	    	  var urls = links.split(" ");
+	    	  for (var i=0; i<links.length; i++) {
+	    		  if (urls[i] != undefined && urls[i] != "") {
+	    			  content += "<p><a href=\"" + urls[i] + "\">"
+	    			  				+ window.location.hostname + "/" +urls[i]+"</p><br>";
+	    		  }
+	    	  }
+	          $("#links_list").html(content);
+	      }
+	    });
+   });
+});
+
+	

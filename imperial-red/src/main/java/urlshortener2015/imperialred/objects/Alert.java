@@ -10,12 +10,12 @@ public class Alert {
 	@Id
 	private BigInteger id;
 	private String mail;
-	private String url;
+	private String hash;
 	private Date date;
 	
-	public Alert(String mail, String url, Date date) {
+	public Alert(String mail, String hash, Date date) {
 		this.mail = mail;
-		this.url = url;
+		this.hash = hash;
 		this.date = date;
 	}
 
@@ -27,12 +27,12 @@ public class Alert {
 		this.mail = mail;
 	}
 
-	public String getUrl() {
-		return url;
+	public String getHash() {
+		return hash;
 	}
 
-	public void setUrl(String url) {
-		this.url = url;
+	public void setHash(String hash) {
+		this.hash = hash;
 	}
 
 	public Date getDate() {
