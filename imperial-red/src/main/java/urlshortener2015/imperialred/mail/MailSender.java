@@ -19,15 +19,24 @@ import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import urlshortener2015.imperialred.objects.Alert;
+import org.springframework.ws.server.endpoint.annotation.Endpoint;
+import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
+import org.springframework.ws.server.endpoint.annotation.RequestPayload;
+import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 
+import es.imred.soap.ProcessAlertRequest;
+import es.imred.soap.ProcessAlertResponse;
+
+@Endpoint
 public class MailSender {
 	
 	private static final Logger logger = LoggerFactory.getLogger(MailSender.class);
+
+	private static final String NAMESPACE_URI = "http://imred.es/soap";
 	
 	private final String MSG_1 = "Dear user, your shortened link is about to expire. If you " +
-			"desire to extend it, please head to http://ired.ml:8090 and check your links.\n" +
-			"\nThis is your shortened link: ";
+			"desire to extend it, please head to http://imred.es and check your links.\n" +
+			"\nThis is your shortened link: http://imred.es/";
 	private final String MSG_2 = "\n\nThanks for using Imperial Red's URL Shortener.";
 	
 	private String username;	
@@ -37,11 +46,11 @@ public class MailSender {
 	private String url;
 	private String msgBody;
 	
-	public MailSender(Alert a) {
-		mail = a.getMail();
-		url = a.getHash();	
-		msgBody = MSG_1 + url + MSG_2;
-		
+	/**
+	 * When a MailSender is created, it is configured from the
+	 * properties file.
+	 */
+	public MailSender() {
 		Properties p = new Properties();
 		try {
 			InputStream input = new FileInputStream("src/main/resources/application.properties");
@@ -60,7 +69,15 @@ public class MailSender {
 	 * Given the url in the alert and the mail introduced by the user, it
 	 * sends an email to that address informing of the near expiration.
 	 */
-	public boolean send() {
+	@PayloadRoot(namespace = NAMESPACE_URI, localPart = "processAlertRequest")
+	@ResponsePayload
+	public ProcessAlertResponse send(@RequestPayload ProcessAlertRequest request) {
+    	ProcessAlertResponse response = new ProcessAlertResponse();
+    	/* Gets url and mail from request */
+    	mail = request.getMail();
+		url = request.getHash();	
+		msgBody = MSG_1 + url + MSG_2;
+
 		/* Configures Gmail properties */
 		Properties props = new Properties();
 		props.put("mail.smtp.port", "587");
@@ -88,7 +105,10 @@ public class MailSender {
         	/* Sends the message */
         	Transport.send(msg);
         	logger.info("Mail sent to " + mail);
-        	return true;
+        	
+        	/* Response code is set to 0 (OK) */
+        	response.setCode("0");
+        	return response;
         } catch (AddressException e) {
         	logger.info("AddressException when sending mail");
         	e.printStackTrace();
@@ -99,6 +119,8 @@ public class MailSender {
         	logger.info("UnsupportedEncodingException when sending mail");
         	e.printStackTrace();
 		}
-        return false;
+        /* Response code is set to 1 (error) */
+        response.setCode("1");
+        return response;
 	}
 }
