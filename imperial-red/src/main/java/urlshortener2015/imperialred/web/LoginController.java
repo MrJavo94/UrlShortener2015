@@ -9,6 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,6 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.NativeWebRequest;
 
 import urlshortener2015.imperialred.objects.Hash;
 import urlshortener2015.imperialred.objects.User;
@@ -56,8 +60,40 @@ public class LoginController {
 			return null;
 		}
 		User user = new User(mail, Hash.makeHash(password));
+		
 		userRepository.save(user);
+		
+		/* POSIBLE ALMACENAMIENTO DE AUTORIZACION EN BD */
+		ArrayList<GrantedAuthority> ja = new ArrayList();
+		ja.add(new SimpleGrantedAuthority("USER"));
+		
+		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(mail, password, ja));
+		
 		return "redirect:/";
+	}
+	
+	/**
+	 * Creates a new user from the form
+	 */
+	@RequestMapping(value = "/users/disconnect", method = RequestMethod.DELETE)
+	public ResponseEntity<?> disconnectUser(NativeWebRequest request) {
+		SecurityContextHolder.getContext().setAuthentication(null);
+		HttpHeaders h = new HttpHeaders();
+		return new ResponseEntity<>(h, HttpStatus.ACCEPTED);
+	}
+	
+	/**
+	 * Checks id the mail provided is already registered
+	 */
+	@RequestMapping(value = "/users/checkmail", method = RequestMethod.GET)
+	public ResponseEntity<?> checkMailUsed(@RequestParam(value = "mail", required = true) String email, NativeWebRequest request) {
+		User requestedUser = userRepository.findByMail(email);
+		HttpHeaders h = new HttpHeaders();
+		if(requestedUser == null){
+			return new ResponseEntity<>(h, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(h, HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	@RequestMapping(value = "/userlogin", method = RequestMethod.POST)

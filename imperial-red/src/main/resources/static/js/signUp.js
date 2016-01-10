@@ -1,7 +1,22 @@
 $(document).ready(
     function() {
         $('#submit').click(function(event){
-        
+           	$.ajax({
+				type : "GET",
+				data : $("#mail")
+				.serialize(),
+				async: false,
+				url : "/users/checkmail",
+				success : function() {
+					return true;
+				},
+				error : function(msg) {
+					alert("Mail already registered");
+					event.preventDefault();
+					}
+				});
+        	
+        	
             data = $('#passwordRegister').val();
             
             console.log(data);
