@@ -297,7 +297,7 @@ $(document)
 												"<img id=\"fb-img\" src=\""
 														+ msg
 														+ "\" alt=\"Facebook image\">"
-														+ "<button id=\"fb\" class=\"btn btn-lg btn-primary disconnect-button\" style=\"margin-left: 20px;\">"
+														+ "<button id=\"gl\" class=\"btn btn-lg btn-primary disconnect-button\" style=\"margin-left: 20px;\">"
 														+ "Disconnect"
 														+ "</button>");
 
