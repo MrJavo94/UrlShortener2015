@@ -19,7 +19,6 @@ import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
@@ -36,8 +35,8 @@ public class MailSender {
 	private static final String NAMESPACE_URI = "http://imred.es/soap";
 	
 	private final String MSG_1 = "Dear user, your shortened link is about to expire. If you " +
-			"desire to extend it, please head to http://ired.ml:8090 and check your links.\n" +
-			"\nThis is your shortened link: ";
+			"desire to extend it, please head to http://imred.es and check your links.\n" +
+			"\nThis is your shortened link: http://imred.es/";
 	private final String MSG_2 = "\n\nThanks for using Imperial Red's URL Shortener.";
 	
 	private String username;	
@@ -47,6 +46,10 @@ public class MailSender {
 	private String url;
 	private String msgBody;
 	
+	/**
+	 * When a MailSender is created, it is configured from the
+	 * properties file.
+	 */
 	public MailSender() {
 		Properties p = new Properties();
 		try {

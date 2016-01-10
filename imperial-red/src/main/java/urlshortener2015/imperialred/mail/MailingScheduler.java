@@ -23,7 +23,6 @@ public class MailingScheduler extends WebServiceGatewaySupport {
 	
 	private static final Logger logger = LoggerFactory.getLogger(MailingScheduler.class);
 	
-	
 	/**
 	 * Every <fixedRate> ms, a new thread is created. It looks for the oldest alert
 	 * in the database and, if older than today, sends a mail to the creator.
