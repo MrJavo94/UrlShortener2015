@@ -194,12 +194,12 @@ public class StatsController {
 		}
 		long clicks = clickRepository.clicksByHash(hash, dateF, dateT,
 				min_latitude, max_longitude, max_latitude, min_longitude);
-		// countryData
+		/* Data from countries */
 		DBObject groupObject = clickRepository
 				.getClicksByCountry(hash, dateF, dateT).getRawResults();
 		String list = groupObject.get("retval").toString();
 		String countryData = StatsController.processCountryJSON(list);
-		// cityData
+		/* Data from cities */
 		DBObject groupObjectCity = clickRepository
 				.getClicksByCity(hash, dateF, dateT, min_latitude,
 						max_longitude, max_latitude, min_longitude)
@@ -209,6 +209,7 @@ public class StatsController {
 		System.out.println(clicks);
 		WebSocketsData wb = new WebSocketsData(true, clicks, countryData,
 				cityData);
+		/* Send through the Web Ssocket */
 		this.template.convertAndSend("/topic/" + hash, wb);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}

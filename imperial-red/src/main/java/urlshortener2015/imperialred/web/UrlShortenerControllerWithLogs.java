@@ -171,13 +171,13 @@ public class UrlShortenerControllerWithLogs {
 					createAndSaveClick(id, request);
 					long click = clickRepository.clicksByHash(l.getHash(), null,
 							null, null, null, null, null);
-					// countryData
+					/* Data from countries */
 					DBObject groupObject = clickRepository
 							.getClicksByCountry(id, null, null).getRawResults();
 					String list = groupObject.get("retval").toString();
 					String countryData = StatsController
 							.processCountryJSON(list);
-					// dityData
+					/* Data from cities */
 					DBObject groupObjectCity = clickRepository
 							.getClicksByCity(id, null, null, null, null, null,
 									null)
