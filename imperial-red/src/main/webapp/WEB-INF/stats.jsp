@@ -241,6 +241,17 @@
 				$("#show_to").show();
 			}
 		}
+
+		function displayAtts(){
+			if(document.getElementById("atts").value==1){
+				document.getElementById("atts").value=0;
+				$("#list").hide();
+			}
+			else{
+				document.getElementById("atts").value=1;
+				$("#list").show();
+			}
+		}
 	</script>
 </head>
 <body onload=init()>
@@ -298,6 +309,26 @@
 			</form>
 			</br>
 			<div id="alert_changer"></div>
+			<form id="rules">
+				<div class="col-lg-12">
+					<div class="form-group">
+						<textarea name="rule" id="rule" cols="50" rows="5" placeholder="expire>yyyy-MM-dd"></textarea><br>
+						<input id="url" name="url" style="display:none;"></input>
+						<button type="submit" class="btn btn-default" >Add Rule</button>
+						<button type="button" class="btn btn-default" onclick='displayAtts()' id="atts" value='0'>Variables permitted</button>
+					</div>
+				</div>
+				<div id="result"></div>
+			</form>
+			<div class="col-lg-offset-2 col-lg-6 text-center" id="list" style="display:none;">
+				<ul style="list-style-type:none">
+				  <li>created (date)</li>
+				  <li>expire (date)</li>
+				  <li>token (boolean)</li>
+				  <li>country (string)</li>
+				  <li>clicks (long)</li>
+				</ul>
+			</div>
 		</div>
 		<div class="col-sm-8">
 			<button type="button" id="button_change" class="btn btn-default" value='0' onclick='changeMap()'>Change View</button>

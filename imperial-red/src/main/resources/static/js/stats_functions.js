@@ -20,6 +20,7 @@ $(document).ready(function(){
 						"</select>" +
 						"<button type=\"submit\" class=\"btn btn-default\" onClick=\"changeExpire()\">Update</button>"
 				);
+				//$("#rules").show();
 				console.log('Metido html');
 			} else {
 				console.log('Authenticated user is not owner.');
@@ -29,6 +30,26 @@ $(document).ready(function(){
 		    console.log('Error in owner-checker');
 		}
 	});
+
+  $("#rules").submit(function(event) {
+    event.preventDefault();
+    var urlActual= document.URL.split("/");
+	var idActual=urlActual[3].substring(0, urlActual[3].length-1);
+    document.getElementById("url").value=idActual;
+    console.log($(this).serialize());
+    $.ajax({
+      type : "POST",
+      url : "/setRules",
+      data : $(this).serialize(),
+      success : function(msg) {
+          $("#result").html("<div class='alert alert-success lead'>OK</div>");
+
+      },
+      error : function() {
+          $("#result").html("<div class='alert alert-danger lead'>ERROR</div>");
+      }
+    });
+  });
 });
 
 function changeExpire() {
@@ -49,3 +70,5 @@ function changeExpire() {
 		}
 	});
 }
+
+

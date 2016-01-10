@@ -1,7 +1,11 @@
 package urlshortener2015.imperialred.web;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +44,7 @@ public class StatsController {
 
 	@Autowired
 	ShortURLRepository shortURLRepository;
-	
+
 	@Autowired
 	protected AlertRepository alertRepository;
 
@@ -69,7 +73,7 @@ public class StatsController {
 			model.addAttribute("clicks", click);
 			model.addAttribute("from", from);
 			model.addAttribute("to", to);
-			
+
 			/* Adds JSON array for clicks by city */
 			DBObject groupObjectCity = clickRepository
 					.getClicksByCity(id, from, to, null, null, null, null)
@@ -77,7 +81,7 @@ public class StatsController {
 			String listCities = groupObjectCity.get("retval").toString();
 			String cityData = processCityJSON(listCities);
 			model.addAttribute("clicksByCity", cityData);
-			
+
 			/* Adds JSON array for clicks by country */
 			DBObject groupObject = clickRepository
 					.getClicksByCountry(id, from, to).getRawResults();
@@ -122,29 +126,29 @@ public class StatsController {
 		text = text.replace("[", "").replace("]", "").replace("{", "")
 				.replace("}", "").replace(" ", "").replace("\"", "'");
 		String[] parts = text.split(",");
-		String aux="";
+		String aux = "";
 		if (!text.equals("")) {
 			for (int i = 0; i < parts.length; i++) {
 				String[] keyValue = parts[i].split(":");
-				if (keyValue[0].equals("'latitude'")) { 
+				if (keyValue[0].equals("'latitude'")) {
 					res += ",[" + keyValue[1];
 				}
 				else if (keyValue[0].equals("'longitude'")) {
-					res += ","+keyValue[1] ;
+					res += "," + keyValue[1];
 				}
 				else if (keyValue[0].equals("'city'")) {
-					aux = ","+keyValue[1]+ "]";
+					aux = "," + keyValue[1] + "]";
 				}
 				else if (keyValue[0].equals("'count'")) {
-					res += ","+keyValue[1]+aux ;
+					res += "," + keyValue[1] + aux;
 				}
 			}
 			res += "]";
 		}
-		else{
-			res="";
+		else {
+			res = "";
 		}
-		
+
 		return res;
 	}
 
@@ -213,10 +217,10 @@ public class StatsController {
 		this.template.convertAndSend("/topic/" + hash, wb);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
-	
+
 	/**
-	 * Given a request from a ShortURL stats page, returns true if
-	 * that url is owned by authenticated user, false otherwise.
+	 * Given a request from a ShortURL stats page, returns true if that url is
+	 * owned by authenticated user, false otherwise.
 	 */
 	@RequestMapping(value = "/checkAuth", method = RequestMethod.GET)
 	public ResponseEntity<String> checkIfOwner(
@@ -224,21 +228,22 @@ public class StatsController {
 		/* Retrieves authenticated user */
 		String mail = UrlShortenerControllerWithLogs.getOwnerMail();
 		logger.info("Checking if user " + mail + " is owner of url");
-		
+
 		/* Retrieves owner's mail of link */
-		hash = hash.substring(1,hash.length()-1);
+		hash = hash.substring(1, hash.length() - 1);
 		ShortURL su = shortURLRepository.findByHash(hash);
 		String owner = su.getOwner();
-		
+
 		/* Checks if authed user is owner of that link */
-		if (owner!= null && owner.equals(mail)) {
+		if (owner != null && owner.equals(mail)) {
 			logger.info("equals");
 			Date expire = su.getExpire();
 			String result = "";
 			if (expire != null) {
 				/* Only adds expire date if it has been introduced */
 				result += su.getExpire().toString();
-			} else {
+			}
+			else {
 				result += "never";
 			}
 			result += "##";
@@ -246,15 +251,155 @@ public class StatsController {
 			if (a != null) {
 				/* Only adds alert date if it has been introduced */
 				result += a.getDate().toString();
-			} else {
+			}
+			else {
 				result += "no alert specified";
 			}
 			return new ResponseEntity<>(result, HttpStatus.OK);
-		} else {
+		}
+		else {
 			logger.info("not equals");
 			return new ResponseEntity<>(null, HttpStatus.OK);
 		}
 	}
-	
+
+	/**
+	 * Set or modify the rules about expiration of an URL
+	 */
+	@RequestMapping(value = "/setRules", method = RequestMethod.POST)
+	public ResponseEntity<?> setRules(
+			@RequestParam(value = "url", required = true) String hash,
+			@RequestParam(value = "rule", required = true) String rule,
+			HttpServletRequest request) {
+		ShortURL l = shortURLRepository.findByHash(hash);
+		if (l != null) { 
+			if (executeJS(rule, l) != null) {
+				l.addRule(rule);
+				shortURLRepository.save(l);
+				return new ResponseEntity<>(HttpStatus.OK);
+			}
+			else {
+				return new ResponseEntity<>("No compila",
+						HttpStatus.BAD_REQUEST);
+			}
+		}
+		else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+
+	}
+
+	public Boolean executeJS(String rules, ShortURL l) {
+		try {
+			if (rules.contains("<")) {
+				String[] partes = rules.split("==");
+				if (partes[0].equals("created")) {
+					if (l.getCreated().before(new SimpleDateFormat("yyyy-MM-dd")
+							.parse(partes[1]))) {
+						return true;
+					}
+					else{return false;}
+				}
+				else if (partes[0].equals("expire")) {
+					if (l.getExpire().before(new SimpleDateFormat("yyyy-MM-dd")
+							.parse(partes[1]))) {
+						return true;
+					}else{return false;}
+				}
+				else if (partes[0].equals("token")) {
+					return null;
+				}
+				else if (partes[0].equals("country")) {
+
+					return null;
+				}
+				else if (partes[0].equals("clicks")) {
+					if (clickRepository.clicksByHash(l.getHash(), null, null,
+							null, null, null, null) < Long.valueOf(partes[1])) {
+						return true;
+					}else{return false;}
+				}
+				return null;
+			}
+			else if (rules.contains(">")) {
+				String[] partes = rules.split(">");
+				if (partes[0].equals("created")) {
+					if (l.getCreated().after(new SimpleDateFormat("yyyy-MM-dd")
+							.parse(partes[1]))) {
+						return true;
+					}else{return false;}
+				}
+				else if (partes[0].equals("expire")) {
+					if (l.getExpire().after(new SimpleDateFormat("yyyy-MM-dd")
+							.parse(partes[1]))) {
+						return true;
+					}else{return false;}
+				}
+				else if (partes[0].equals("token")) {
+					return null;
+				}
+				else if (partes[0].equals("country")) {
+
+					return null;
+				}
+				else if (partes[0].equals("clicks")) {
+					if (clickRepository.clicksByHash(l.getHash(), null, null,
+							null, null, null, null) > Long.valueOf(partes[1])) {
+						return true;
+					}
+					else{
+						return false;
+					}
+				}
+				return null;
+			}
+			else if (rules.contains("==")) {
+				String[] partes = rules.split("==");
+				if (partes[0].equals("created")) {
+					if (l.getCreated()
+							.compareTo((new SimpleDateFormat("yyyy-MM-dd")
+									.parse(partes[1]))) == 0) {
+						return true;
+					}else{return false;}
+				}
+				else if (partes[0].equals("expire")) {
+					if (l.getExpire()
+							.compareTo((new SimpleDateFormat("yyyy-MM-dd")
+									.parse(partes[1]))) == 0) {
+						return true;
+					}else{return false;}
+				}
+				else if (partes[0].equals("token")) {
+					if (partes[1].equals("true")) {
+						return l.getToken() != null;
+					}
+					else if (partes[1].equals("false")) {
+						return l.getToken() == null;
+					}else{return false;}
+				}
+				else if (partes[0].equals("country")) {
+
+					return l.getCountry().equals(partes[1]);
+				}
+				else if (partes[0].equals("clicks")) {
+					if (clickRepository.clicksByHash(l.getHash(), null, null,
+							null, null, null,
+							null) == Long.valueOf(partes[1])) {
+						return true;
+					}else{return false;}
+				}
+				return null;
+
+			}
+
+			else {
+				return null;
+			}
+		}
+		catch (Exception e) {
+			return null;
+		}
+
+	}
 
 }

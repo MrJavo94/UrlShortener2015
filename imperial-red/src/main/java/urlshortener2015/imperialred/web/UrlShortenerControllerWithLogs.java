@@ -142,7 +142,7 @@ public class UrlShortenerControllerWithLogs {
 				 * Wrong Token
 				 */
 				response.setStatus(HttpStatus.BAD_REQUEST.value());
-				throw new CustomException("400", "Se necesita un token");
+				throw new CustomException("400", "It is need a token");
 			}
 			else {
 
@@ -152,10 +152,33 @@ public class UrlShortenerControllerWithLogs {
 					 * Date has expired
 					 */
 					response.setStatus(HttpStatus.BAD_REQUEST.value());
-					throw new CustomException("400", "Enlace ha expirado");
+					throw new CustomException("400", "Link has expired");
 
 				}
 				else {
+					ArrayList<String> rules = l.getRules();
+					if (rules != null && !rules.isEmpty()) {
+						/*
+						 * Execute javascript
+						 */
+						for (int i = 0; i < rules.size(); i++) { 
+							Boolean resul = executeJS(rules.get(i), l);
+							if (resul != null) {
+								if (resul == true) {
+									response.setStatus(
+											HttpStatus.BAD_REQUEST.value());
+									throw new CustomException("400",
+											"Link has expired");
+								}
+							}
+							else{
+								response.setStatus(
+										HttpStatus.BAD_REQUEST.value());
+								throw new CustomException("400",
+										"Bad rule");
+							}
+						}
+					}
 
 					List<String> authorizedMails = l.getAllowedUsers();
 					if (authorizedMails != null && !authorizedMails.isEmpty()) {
@@ -233,8 +256,10 @@ public class UrlShortenerControllerWithLogs {
 			@RequestParam(value = "alert_email", required = false) String alertEmail,
 			@RequestParam(value = "days", required = false) String days,
 			HttpServletRequest request, Principal principal) throws Exception {
+		JSONObject jn = getFreegeoip(request);
+		String country = jn.getString("country_name");
 		ShortURL su = createAndSaveIfValid(url, custom, hasToken, expireDate,
-				extractIP(request), emails, principal);
+				extractIP(request), emails, principal,country);
 		if (su != null) {
 			/* If there is an expire date, it sets an alert */
 			if (!expireDate.equals("")) {
@@ -416,7 +441,7 @@ public class UrlShortenerControllerWithLogs {
 	 */
 	protected ShortURL createAndSaveIfValid(String url, String custom,
 			String hasToken, String expireDate, String ip, String[] emails,
-			Principal principal) {
+			Principal principal ,String country) {
 
 		UrlValidator urlValidator = new UrlValidator(
 				new String[] { "http", "https" });
@@ -498,12 +523,11 @@ public class UrlShortenerControllerWithLogs {
 			/*
 			 * Creates ShortURL object
 			 */
-
 			ShortURL su = new ShortURL(id, url,
 					linkTo(methodOn(UrlShortenerControllerWithLogs.class)
 							.redirectTo(id, null, null, null, null)).toUri(),
 					new Date(System.currentTimeMillis()), expire, owner, token,
-					HttpStatus.TEMPORARY_REDIRECT.value(), ip, null, isPrivate,
+					HttpStatus.TEMPORARY_REDIRECT.value(), ip, country, isPrivate,
 					trueEmails);
 
 			/*
@@ -577,5 +601,119 @@ public class UrlShortenerControllerWithLogs {
 		}
 		return email;
 	}
+
+	public Boolean executeJS(String rules, ShortURL l) {
+		try {
+			if (rules.contains("<")) {
+				String[] partes = rules.split("==");
+				if (partes[0].equals("created")) {
+					if (l.getCreated().before(new SimpleDateFormat("yyyy-MM-dd")
+							.parse(partes[1]))) {
+						return true;
+					}
+					else{return false;}
+				}
+				else if (partes[0].equals("expire")) {
+					if (l.getExpire().before(new SimpleDateFormat("yyyy-MM-dd")
+							.parse(partes[1]))) {
+						return true;
+					}else{return false;}
+				}
+				else if (partes[0].equals("token")) {
+					return null;
+				}
+				else if (partes[0].equals("country")) {
+
+					return null;
+				}
+				else if (partes[0].equals("clicks")) {
+					if (clickRepository.clicksByHash(l.getHash(), null, null,
+							null, null, null, null) < Long.valueOf(partes[1])) {
+						return true;
+					}else{return false;}
+				}
+				return null;
+			}
+			else if (rules.contains(">")) {
+				String[] partes = rules.split(">");
+				if (partes[0].equals("created")) {
+					if (l.getCreated().after(new SimpleDateFormat("yyyy-MM-dd")
+							.parse(partes[1]))) {
+						return true;
+					}else{return false;}
+				}
+				else if (partes[0].equals("expire")) {
+					if (l.getExpire().after(new SimpleDateFormat("yyyy-MM-dd")
+							.parse(partes[1]))) {
+						return true;
+					}else{return false;}
+				}
+				else if (partes[0].equals("token")) {
+					return null;
+				}
+				else if (partes[0].equals("country")) {
+
+					return null;
+				}
+				else if (partes[0].equals("clicks")) {
+					if (clickRepository.clicksByHash(l.getHash(), null, null,
+							null, null, null, null) > Long.valueOf(partes[1])) {
+						return true;
+					}
+					else{
+						return false;
+					}
+				}
+				return null;
+			}
+			else if (rules.contains("==")) {
+				String[] partes = rules.split("==");
+				if (partes[0].equals("created")) {
+					if (l.getCreated()
+							.compareTo((new SimpleDateFormat("yyyy-MM-dd")
+									.parse(partes[1]))) == 0) {
+						return true;
+					}else{return false;}
+				}
+				else if (partes[0].equals("expire")) {
+					if (l.getExpire()
+							.compareTo((new SimpleDateFormat("yyyy-MM-dd")
+									.parse(partes[1]))) == 0) {
+						return true;
+					}else{return false;}
+				}
+				else if (partes[0].equals("token")) {
+					if (partes[1].equals("true")) {
+						return l.getToken() != null;
+					}
+					else if (partes[1].equals("false")) {
+						return l.getToken() == null;
+					}else{return false;}
+				}
+				else if (partes[0].equals("country")) {
+
+					return l.getCountry().equals(partes[1]);
+				}
+				else if (partes[0].equals("clicks")) {
+					if (clickRepository.clicksByHash(l.getHash(), null, null,
+							null, null, null,
+							null) == Long.valueOf(partes[1])) {
+						return true;
+					}else{return false;}
+				}
+				return null;
+
+			}
+
+			else {
+				return null;
+			}
+		}
+		catch (Exception e) {
+			return null;
+		}
+
+	}
+
 
 }
