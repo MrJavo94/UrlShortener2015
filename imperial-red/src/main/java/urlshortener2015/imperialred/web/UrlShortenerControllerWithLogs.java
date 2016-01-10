@@ -234,7 +234,7 @@ public class UrlShortenerControllerWithLogs {
 						"You don't have permissions to use this URL");
 			}
 			/*
-			 * Authorized
+			 * 																	
 			 */
 			return true;
 		}

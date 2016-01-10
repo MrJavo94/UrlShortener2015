@@ -104,16 +104,50 @@ public class StatsController {
 	public ResponseEntity<?> statsJSON(@PathVariable String id,
 			@RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
 			@RequestParam(value = "to", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date to,
+			@RequestParam(value = "min_lon", required = false) String minLon,
+			@RequestParam(value = "max_lon", required = false) String maxLon,
+			@RequestParam(value = "min_lat", required = false) String minLat,
+			@RequestParam(value = "max_lat", required = false) String maxLat,
 			HttpServletRequest request) {
-
 		logger.info("Requested json with hash " + id);
-		logger.info("From: " + from);
-		logger.info("To: " + to);
+		logger.info("From: " + from + ", To: " + to + ", minLat: " + minLat + 
+				", maxLat: " + maxLat + ", minLon: " + minLon + ", maxLon: " + maxLon);
+		
+		/* Converts lat and lon strings to float if they are not null */
+		Float latMin = null;
+		Float latMax = null;
+		Float lonMin = null;
+		Float lonMax = null;
+		if (minLon != null) {
+			lonMin = Float.parseFloat(minLon);
+		}
+		if (maxLon != null) {
+			lonMax = Float.parseFloat(maxLon);
+		}
+		if (minLat != null) {
+			latMin = Float.parseFloat(minLat);
+		}
+		if (maxLat != null) {
+			latMax = Float.parseFloat(maxLat);
+		}
+		DBObject groupObject = clickRepository
+				.getClicksByCountry(id, from, to).getRawResults();
+		logger.info("obj: " +groupObject.toString());
+		String list = groupObject.get("retval").toString();
+		String countryList = StatsController.processCountryJSON(list);
+		logger.info("list: " + countryList);
+		DBObject groupObjectCity = clickRepository
+				.getClicksByCity(id, from, to, latMin,
+						lonMax, latMax, lonMin)
+				.getRawResults();
+		String listCities = groupObjectCity.get("retval").toString();
+		String cityList = processCityJSON(listCities);
+		logger.info("lonmin: " + lonMin + ", lonMax: " + lonMax + ", latMin: " + latMin + ", latMax: " + latMax);
 		ShortURL l = shortURLRepository.findByHash(id);
 		StatsURL stats = new StatsURL(l.getTarget(), l.getCreated().toString(),
-				clickRepository.clicksByHash(l.getHash(), from, to, null, null,
-						null, null),
-				from, to);
+				clickRepository.clicksByHash(l.getHash(), from, to, latMin, lonMax,
+						latMax, lonMin),
+				from, to, latMin, latMax, lonMin, lonMax, countryList, cityList);
 		return new ResponseEntity<>(stats, HttpStatus.OK);
 	}
 
