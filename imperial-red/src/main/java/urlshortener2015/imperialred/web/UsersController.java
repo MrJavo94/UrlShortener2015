@@ -64,6 +64,44 @@ public class UsersController {
 	}
 	
 	/**
+	 * Changes the password of a user
+	 */
+	@RequestMapping(value = "/changePassword", method = RequestMethod.POST)
+	public ResponseEntity<String> changePassword(HttpServletRequest request,
+			@RequestParam(value = "currentPassword", required = true) String oldPassword,
+			@RequestParam(value = "newPassword", required = true) String newPassword1,
+			@RequestParam(value = "repeatPassword", required = true) String newPassword2) {
+		/* Retrieves authenticated user */
+		String mail = UrlShortenerControllerWithLogs.getOwnerMail();
+		User user = userRepository.findByMail(mail);
+		logger.info("Changing password of user " + mail);
+		
+		if (user != null) {
+			/* Checks if user has introduced the same password in both inputs */
+			if (newPassword1.equals(newPassword2)) {
+				/* Checks if user introduced the right old password */
+				String trueOldPassword = user.getPassword();
+				if (trueOldPassword.equals(Hash.makeHash(oldPassword))) {
+					/* Sets the new password */
+					user.setPassword(Hash.makeHash(newPassword1));
+					userRepository.save(user);
+					logger.info("Password changed for user " + mail);
+					
+					return new ResponseEntity<>("0", HttpStatus.OK);
+				} else {
+					return new ResponseEntity<>("1", HttpStatus.BAD_REQUEST);
+				}
+			} else {
+				return new ResponseEntity<>("2", HttpStatus.BAD_REQUEST);
+			}
+		} else {
+			/* If user does not exist, throws 404 */
+			logger.info("Error: non existing user trying to change his password");
+			throw new CustomException("404", "NOT_FOUND");
+		}
+	}
+	
+	/**
 	 * Returns the user identified by {mail} in a JSON representation
 	 */
 	@Cacheable("users")
