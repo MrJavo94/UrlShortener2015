@@ -252,7 +252,6 @@ public class UrlShortenerControllerWithLogs {
 			@RequestParam(value = "expire", required = false) String expireDate,
 			@RequestParam(value = "hasToken", required = false) String hasToken,
 			@RequestParam(value = "emails[]", required = false) String[] emails,
-			@RequestParam(value = "alert_email", required = false) String alertEmail,
 			@RequestParam(value = "days", required = false) String days,
 			HttpServletRequest request, Principal principal) throws Exception {
 		JSONObject jn = getFreegeoip(request);
@@ -264,8 +263,8 @@ public class UrlShortenerControllerWithLogs {
 			if (!expireDate.equals("")) {
 				Date alertDate = processAlertDate(expireDate, days);
 				logger.info("New alert date: " + alertDate);
-
-				Alert alert = new Alert(alertEmail, su.getHash(), alertDate);
+				String mail = UrlShortenerControllerWithLogs.getOwnerMail();
+				Alert alert = new Alert(mail, su.getHash(), alertDate);
 				alertRepository.save(alert);
 			}
 			HttpHeaders h = new HttpHeaders();
@@ -435,8 +434,8 @@ public class UrlShortenerControllerWithLogs {
 	}
 
 	/**
-	 * If shortURL is valid, creates it and saves it XXX: at the moment, it just
-	 * ignores unknown emails, with no feedback for users.
+	 * If shortURL is valid, creates it and saves it 
+	 * XXX: at the moment, it just ignores unknown emails, with no feedback for users.
 	 */
 	protected ShortURL createAndSaveIfValid(String url, String custom,
 			String hasToken, String expireDate, String ip, String[] emails,
@@ -448,7 +447,7 @@ public class UrlShortenerControllerWithLogs {
 		 * Check if url comes through http or https
 		 */
 		if (urlValidator.isValid(url)) {
-			logger.info("Valid url " + url);
+			logger.info("Shortening valid url " + url);
 			/*
 			 * Hash of URL or custom
 			 */
@@ -460,7 +459,7 @@ public class UrlShortenerControllerWithLogs {
 			else {
 				id = custom;
 			}
-			logger.info("1");
+			
 			/*
 			 * Has Token
 			 */
@@ -480,10 +479,10 @@ public class UrlShortenerControllerWithLogs {
 				}
 				catch (ParseException e) {
 					e.printStackTrace();
-					logger.info("Fecha mal introducida");
+					logger.info("Error: badly introduced date.");
 				}
 			}
-			logger.info("2");
+			
 			/*
 			 * Checks every mail inserted by the user, and maintains a list with
 			 * those corresponding to registered users.
@@ -500,6 +499,7 @@ public class UrlShortenerControllerWithLogs {
 
 				}
 			}
+			
 			/*
 			 * If no valid emails are introduced, link will be public and it
 			 * wont have an email list.
@@ -511,13 +511,12 @@ public class UrlShortenerControllerWithLogs {
 			else {
 				trueEmails = null;
 			}
-			logger.info("3");
+			
 			/*
 			 * Gets email
 			 */
 			String owner = getOwnerMail();
-			logger.info("Mail: " + owner);
-			logger.info("4");
+			
 			/*
 			 * Creates ShortURL object
 			 */

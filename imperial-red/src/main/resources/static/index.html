@@ -90,17 +90,10 @@
 									title="Expire Date" name="expire">
 							</div>
 						</div>
-						<!-- Alert Email -->
-						<div class="row" style="margin-top: 15px">
-							<div class="input-group input-group-lg col-lg-offset-2 col-lg-8">
-								<p class="lead"><small>We will alert you to the following address when your link is about to expire</small></p>
-								<input type="text" class="center-block form-control input-lg"
-									title="Alert Email" placeholder="Enter the email where you want to receive the alert" name="alert_email">
-							</div>
-						</div>
 						<!-- Days Before Expiring -->
 						<!-- I have no idea what im doing with bootstrap in this part -->
 						<div class="row" style="margin-top: 15px">
+							<p class="lead"><small>We will alert you to your email account when your link is about to expire</small></p>
 							<label class="col-lg-offset-3 col-lg-3">Days before expiring</label>
 							<div class="col-lg-3">
 								<select class="form-control" name="days">
@@ -113,7 +106,7 @@
 						</div>
 						<!-- Emails for Private Links -->
 						<div class="row" style="margin-top: 15px">
-							<h3>Private link? Insert emails allowed to open it</h3>
+							<h3>Private link? Insert email accounts allowed to open it</h3>
 							<p class="lead"><small>If no emails are inserted, link will be public</small></p>
 							<div class="list_emails">
 								<div class="entry input-group col-lg-offset-2 col-lg-8" style="margin-bottom: 10px">
@@ -174,22 +167,18 @@
 				</div>
 			</div>
 			
-			<!-- SEGUNDA COLUMNA -->
+			<!-- Second column -->
 			<br>
 			<div class="col-lg-3">
-				<form action="profile.html">
-				    <input type="submit" value="Go to profile">
-				</form>
+				<div class="row" style="text-align: center">
+					<form action="profile.html">
+					    <input class="btn btn-primary" type="submit" value="Go to profile">
+					</form>
+				</div>
 				<div class="row" style="text-align: center">
 					<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 pull-left" id="picture-button"></div>
 				</div>
 			</div>
-			<!-- Resulting URL and QR (hidden) -->
-			<div class="row">
-				<div class="col-lg-offset-2 col-lg-8 text-center">
-					<br />
-					<div id="result"></div>
-				</div>
-			</div>
+
 	</body>
 </html>
