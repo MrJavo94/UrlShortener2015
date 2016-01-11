@@ -8,6 +8,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,6 +40,8 @@ public class LoginController {
 
 	@Autowired
 	protected UserRepository userRepository;
+	
+	private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
 	public LoginController() {}
 
@@ -128,6 +132,24 @@ public class LoginController {
 			return "login";
 		}
 
+	}
+	
+	/**
+	 * Deletes a user from the system and redirects him to login page
+	 */
+	@RequestMapping(value = "/deleteUser", method = RequestMethod.POST)
+	public String deleteUser(HttpServletRequest request) {
+		/* Retrieves authenticated user */
+		String mail = UrlShortenerControllerWithLogs.getOwnerMail();
+		logger.info("Deleting user " + mail);
+		
+		/* Deletes user from database */
+		userRepository.deleteByMail(mail);
+		
+		/* Removes current session from user */
+		SecurityContextHolder.getContext().setAuthentication(null);
+		
+		return "login";
 	}
 
 }
