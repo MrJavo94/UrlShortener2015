@@ -31,25 +31,7 @@
 	        displayMode: 'markers',
 	        colorAxis: {colors: ['green', 'blue', 'red']},
 	        useMapTypeControl: true,
-	        maps: {
-	          // Your custom mapTypeId holding custom map styles.
-	          styledMap: {
-	            name: 'Styled Map', // This name will be displayed in the map type control.
-	            styles: [
-	              {featureType: 'poi.attraction',
-	               stylers: [{color: '#fce8b2'}]
-	              },
-	              {featureType: 'road.highway',
-	               stylers: [{hue: '#0277bd'}, {saturation: -50}]
-	              },
-	              {featureType: 'road.highway',
-	               elementType: 'labels.icon',
-	               stylers: [{hue: '#000'}, {saturation: 100}, {lightness: 50}]
-	              },
-	              {featureType: 'landscape',
-	               stylers: [{hue: '#259b24'}, {saturation: 10}, {lightness: -22}]
-	              }
-	        ]}}
+
 	      };
 
 	      var chart = new google.visualization.Map(document.getElementById('chart_div'));
@@ -79,25 +61,6 @@
 				displayMode: 'markers',
 				colorAxis: {colors: ['green', 'blue', 'red']},
 				useMapTypeControl: true,
-		        maps: {
-		          // Your custom mapTypeId holding custom map styles.
-		          styledMap: {
-		            name: 'Styled Map', // This name will be displayed in the map type control.
-		            styles: [
-		              {featureType: 'poi.attraction',
-		               stylers: [{color: '#fce8b2'}]
-		              },
-		              {featureType: 'road.highway',
-		               stylers: [{hue: '#0277bd'}, {saturation: -50}]
-		              },
-		              {featureType: 'road.highway',
-		               elementType: 'labels.icon',
-		               stylers: [{hue: '#000'}, {saturation: 100}, {lightness: 50}]
-		              },
-		              {featureType: 'landscape',
-		               stylers: [{hue: '#259b24'}, {saturation: 10}, {lightness: -22}]
-		              }
-		        ]}}
 			};
 
 			var chart = new google.visualization.Map(document.getElementById('chart_div'));
@@ -241,6 +204,17 @@
 				$("#show_to").show();
 			}
 		}
+
+		function displayAtts(){
+			if(document.getElementById("atts").value==1){
+				document.getElementById("atts").value=0;
+				$("#list").hide();
+			}
+			else{
+				document.getElementById("atts").value=1;
+				$("#list").show();
+			}
+		}
 	</script>
 </head>
 <body onload=init()>
@@ -296,8 +270,40 @@
 				</div>
 				<button type="button" class="btn btn-default" onclick='filterStats()'>Update</button>
 			</form>
-			</br>
+			</br><br>
 			<div id="alert_changer"></div>
+			<form id="rules" style="display:none;">
+				<h3>Add your own rules to the expire date.</h3>
+				<div class="col-lg-12">
+					<div class="form-group">
+						<textarea name="rule" id="rule" cols="50" rows="5" placeholder="expire>yyyy-MM-dd"></textarea><br>
+						<input id="url" name="url" style="display:none;"></input>
+						<button type="submit" class="btn btn-default" >Add Rule</button>
+						<button type="button" class="btn btn-default" onclick='displayAtts()' id="atts" value='0'>Variables allowed</button>
+						<br><div id="result"></div>
+					</div>
+				</div>
+				<br>
+				
+			</form>
+			
+			<div class="col-lg-offset-2 col-lg-6 text-center" id="list" style="display:none;">
+				<ul style="list-style-type:none">
+				  <li>created (date:yyyy-MM-dd)</li>
+				  <li>expire (date:yyyy-MM-dd)</li>
+				  <li>token (boolean)</li>
+				  <li>country (string)</li>
+				  <li>clicks (long)</li>
+				</ul>
+			</div>
+				
+			<div class="col-lg-offset-1 col-lg-10 text-center">
+				<form id="rules_btn">
+					<input id="url1" name="url1" style="display:none;"></input>
+					<button class="btn btn-default" id="rules_boton" value='0'>Show rules</button>
+				</form>
+				<div id="rules_result"></div>
+			</div>
 		</div>
 		<div class="col-sm-8">
 			<button type="button" id="button_change" class="btn btn-default" value='0' onclick='changeMap()'>Change View</button>
