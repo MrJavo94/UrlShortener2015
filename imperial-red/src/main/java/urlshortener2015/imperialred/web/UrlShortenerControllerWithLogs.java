@@ -449,12 +449,13 @@ public class UrlShortenerControllerWithLogs {
 		if (urlValidator.isValid(url)) {
 			logger.info("Shortening valid url " + url);
 			/*
-			 * Hash of URL or custom
+			 * Creates a hash from the current date in case this is not custom
 			 */
 			String id;
+			String now = new Date().toString();
 			if (custom.equals("")) {
 				id = Hashing.murmur3_32()
-						.hashString(url, StandardCharsets.UTF_8).toString();
+						.hashString(now, StandardCharsets.UTF_8).toString();
 			}
 			else {
 				id = custom;
