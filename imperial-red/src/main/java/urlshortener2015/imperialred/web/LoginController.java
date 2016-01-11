@@ -149,7 +149,7 @@ public class LoginController {
 		/* Removes current session from user */
 		SecurityContextHolder.getContext().setAuthentication(null);
 		
-		return "login";
+		return "redirect:login";
 	}
 
 }
