@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.gson.Gson;
+
 import urlshortener2015.imperialred.exception.CustomException;
 import urlshortener2015.imperialred.objects.ShortURL;
 import urlshortener2015.imperialred.objects.Hash;
@@ -53,10 +55,7 @@ public class UsersController {
 		/* If user exists, retrieves its shortURLs */
 		if (user != null) {
 			List<ShortURL> links = shortURLRepository.findByOwner(mail);
-			String urls = "";
-			for (int i=0; i<links.size(); i++) {
-				urls += links.get(i).getHash() + " ";
-			}
+			String urls = new Gson().toJson(links);
 			return new ResponseEntity<>(urls, HttpStatus.CREATED);
 		} else {
 			/* Throws 404 if user does not exist */

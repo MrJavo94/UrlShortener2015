@@ -122,7 +122,7 @@ public class UrlShortenerControllerWithLogs {
 	private static final Logger logger = LoggerFactory
 			.getLogger(UrlShortenerControllerWithLogs.class);
 
-	@RequestMapping(value = "/{id:(?!link|index).*}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{id:(?!link|index|profile).*}", method = RequestMethod.GET)
 	public Object redirectTo(@PathVariable String id,
 			@RequestParam(value = "token", required = false) String token,
 			HttpServletResponse response, HttpServletRequest request,
