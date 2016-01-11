@@ -186,7 +186,7 @@ public class UrlShortenerControllerWithLogs {
 							request.getSession().setAttribute("redirect", id);
 
 							// model.addAttribute("hash", id);
-							return "login";
+							return "login_special";
 						}
 
 					}
