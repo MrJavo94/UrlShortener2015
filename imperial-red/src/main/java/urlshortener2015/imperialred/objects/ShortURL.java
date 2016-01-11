@@ -1,6 +1,7 @@
 package urlshortener2015.imperialred.objects;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class ShortURL {
 	private String country;
 	private boolean isPrivate;
 	private List<String> allowedUsers;
+	private ArrayList<String> rules=new ArrayList<String>();
 
 	public ShortURL(String hash, String target, URI uri, Date created,
 			Date expire, String owner, String token, Integer mode, String ip, 
@@ -125,6 +127,10 @@ public class ShortURL {
 	public void setAllowedUsers(List<String> allowedUsers) {
 		this.allowedUsers = allowedUsers;
 	}
+	
+	public void setRules(ArrayList<String> rules){
+		this.rules=rules;
+	}
 
 	public String getCountry() {
 		return country;
@@ -137,5 +143,18 @@ public class ShortURL {
 	public List<String> getAllowedUsers() {
 		return allowedUsers;
 	}
+	
+	public ArrayList<String> getRules(){
+		return rules;
+	}
+	
+	public void addRule(String rule){
+		rules.add(rule);
+	}
+	
+	public void removeRule(int i){
+		rules.remove(i);
+	}
+	
 
 }
