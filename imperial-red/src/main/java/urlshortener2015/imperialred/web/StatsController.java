@@ -394,10 +394,16 @@ public class StatsController {
 		}
 	}
 
-	public Boolean executeS(String rules, ShortURL l) {
+	/**
+	 * Check if the rule can be executed, if not return null
+	 * @param rules
+	 * @param l
+	 * @return
+	 */
+	public Boolean executeS(String rule, ShortURL l) {
 		try {
-			if (rules.contains("<")) {
-				String[] partes = rules.split("<");
+			if (rule.contains("<")) {
+				String[] partes = rule.split("<");
 				if (partes[0].equals("created")) {
 					if (l.getCreated().before(new SimpleDateFormat("yyyy-MM-dd")
 							.parse(partes[1]))) {
@@ -434,8 +440,8 @@ public class StatsController {
 				}
 				return null;
 			}
-			else if (rules.contains(">")) {
-				String[] partes = rules.split(">");
+			else if (rule.contains(">")) {
+				String[] partes = rule.split(">");
 				if (partes[0].equals("created")) {
 					if (l.getCreated().after(new SimpleDateFormat("yyyy-MM-dd")
 							.parse(partes[1]))) {
@@ -472,8 +478,8 @@ public class StatsController {
 				}
 				return null;
 			}
-			else if (rules.contains("==")) {
-				String[] partes = rules.split("==");
+			else if (rule.contains("==")) {
+				String[] partes = rule.split("==");
 				if (partes[0].equals("created")) {
 					if (l.getCreated()
 							.compareTo((new SimpleDateFormat("yyyy-MM-dd")
