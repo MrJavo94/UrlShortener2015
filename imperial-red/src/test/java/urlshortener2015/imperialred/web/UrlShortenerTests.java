@@ -47,17 +47,6 @@ public class UrlShortenerTests {
 		this.mockMvc = MockMvcBuilders.standaloneSetup(urlShortener).build();
 	}
 
-	/*@Test
-	public void thatRedirectToReturnsTemporaryRedirectIfKeyExists()
-			throws Exception {
-		configureTransparentSaveClick();
-		when(shortURLRepository.findByHash("someKey")).thenReturn(someUrl());
-
-		mockMvc.perform(get("/{id}", "someKey")).andDo(print())
-				.andExpect(status().isTemporaryRedirect())
-				.andExpect(redirectedUrl("http://example.com/"));
-	}*/
-	
 	@Test
 	public void thatShortenerFailsIfTheURLisWrong() throws Exception {
 		configureTransparentSave();
@@ -66,15 +55,14 @@ public class UrlShortenerTests {
 				.andExpect(status().isBadRequest());
 	}
 
-	//@Test
+	@Test
 	public void thatShortenerCreatesARedirectIfTheURLisOK() throws Exception {
 		configureTransparentSave();
-		
-		mockMvc.perform(
-				post("/link").param("url", "http://example.com/")
-						.param("custom", "hola").param("expire", "2016-11-15")
-						.param("hasToken", "true").param("emails[]", "")
-						.param("alert_email", "example@example.com").param("days", "1"))
+
+		mockMvc.perform(post("/link").param("url", "http://example.com/")
+				.param("custom", "hola").param("expire", "")
+				.param("hasToken", "true").param("emails[]", "")
+				.param("alert_email", "").param("days", "1"))
 				.andDo(print())
 				.andExpect(redirectedUrl("http://localhost/hola"))
 				.andExpect(status().isCreated())
@@ -82,20 +70,6 @@ public class UrlShortenerTests {
 				.andExpect(jsonPath("$.uri", is("http://localhost/hola")))
 				.andExpect(jsonPath("$.target", is("http://example.com/")));
 	}
-	
-	/*@Test
-    public void thatSavePersistsTheClickURL() {
-		configureTransparentSaveClick();
-        //Saves the test Click
-        clickRepository.save(click(url1()));
-
-        int count = (int) clickRepository.count();
-
-        assertEquals(count,1);
-        
-        
-
-    }*/
 
 	private void configureTransparentSave() {
 		when(shortURLRepository.save(org.mockito.Matchers.any(ShortURL.class)))
@@ -107,16 +81,6 @@ public class UrlShortenerTests {
 					}
 				});
 	}
-	
-	private void configureTransparentSaveClick() {
-		when(clickRepository.save(org.mockito.Matchers.any(Click.class)))
-				.then(new Answer<Click>() {
-					@Override
-					public Click answer(InvocationOnMock invocation)
-							throws Throwable {
-						return (Click) invocation.getArguments()[0];
-					}
-				});
-	}
+
 
 }

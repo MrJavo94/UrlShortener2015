@@ -15,6 +15,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import com.google.common.hash.Hashing;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
 
@@ -27,6 +28,8 @@ import static org.junit.Assert.*;
 
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)
@@ -42,9 +45,7 @@ public class SystemTests {
 	public void testHome() throws Exception {
 		ResponseEntity<String> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port,
 				String.class);
-		assertThat(entity.getStatusCode(), is(HttpStatus.OK));
-		assertThat(entity.getHeaders().getContentType(), is(new MediaType("text", "html", Charset.forName("UTF-8"))));
-		assertThat(entity.getBody(), containsString("<title>URL"));
+		assertThat(entity.getStatusCode(), is(HttpStatus.FOUND));
 	}
 
 	@Test
@@ -58,24 +59,24 @@ public class SystemTests {
 
 	@Test
 	public void testCreateLink() throws Exception {
-		ResponseEntity<String> entity = postLink("http://example.com/", null, null, null, null);
+		ResponseEntity<String> entity = postLink("http://example.com/", "prueba", null, null, null);
 		assertThat(entity.getStatusCode(), is(HttpStatus.CREATED));
-		assertThat(entity.getHeaders().getLocation(), is(new URI("http://localhost:" + this.port + "/f684a3c4")));
+		assertThat(entity.getHeaders().getLocation(), is(new URI("http://localhost:" + this.port + "/prueba")));
 		assertThat(entity.getHeaders().getContentType(),
 				is(new MediaType("application", "json", Charset.forName("UTF-8"))));
 		ReadContext rc = JsonPath.parse(entity.getBody());
-		assertThat(rc.read("$.hash"), is("f684a3c4"));
-		assertThat(rc.read("$.uri"), is("http://localhost:" + this.port + "/f684a3c4"));
+		assertThat(rc.read("$.hash"), is("prueba"));
+		assertThat(rc.read("$.uri"), is("http://localhost:" + this.port + "/prueba"));
 		assertThat(rc.read("$.target"), is("http://example.com/"));
 
 	}
 
 	@Test
 	public void testRedirection() throws Exception {
-		postLink("http://example.com/", null, null, null, null);
+		postLink("http://example.com/", "prueba", null, null, null);
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
 		parts.add("token", null);
-		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/f684a3c4",
+		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/prueba",
 				String.class, parts);
 		assertThat(entity.getHeaders().getLocation(), is(new URI("http://example.com/")));
 		assertThat(entity.getStatusCode(), is(HttpStatus.TEMPORARY_REDIRECT));
@@ -96,10 +97,10 @@ public class SystemTests {
 
 	@Test
 	public void testRedirectionExpireOK() throws Exception {
-		postLink("http://example.com/", null, "2500-05-05", null, null);
+		postLink("http://example.com/", "prueba", "2500-05-05", null, null);
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
 		parts.add("token", null);
-		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/f684a3c4",
+		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/prueba",
 				String.class, parts);
 		assertThat(entity.getHeaders().getLocation(), is(new URI("http://example.com/")));
 		assertThat(entity.getStatusCode(), is(HttpStatus.TEMPORARY_REDIRECT));
@@ -108,21 +109,21 @@ public class SystemTests {
 
 	@Test
 	public void testRedirectionExpireBAD() throws Exception {
-		postLink("http://example.com/", null, "2014-01-01", null, null);
+		postLink("http://example.com/", "prueba", "2014-01-01", null, null);
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
 		parts.add("token", null);
-		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/f684a3c4",
+		ResponseEntity<?> entity = new TestRestTemplate().getForEntity("http://localhost:" + this.port + "/prueba",
 				String.class, parts);
 		assertThat(entity.getStatusCode(), is(HttpStatus.BAD_REQUEST));
 	}
 
 	@Test
 	public void testRedirectionTokenOK() throws Exception {
-		ResponseEntity<String> entityPost = postLink("http://example.com/", null, null, "true", null);
+		ResponseEntity<String> entityPost = postLink("http://example.com/", "prueba", null, "true", null);
 		ReadContext rc = JsonPath.parse(entityPost.getBody());
 		String token = rc.read("$.token");
 		ResponseEntity<?> entity = new TestRestTemplate()
-				.getForEntity("http://localhost:" + this.port + "/f684a3c4?token=" + token, String.class);
+				.getForEntity("http://localhost:" + this.port + "/prueba?token=" + token, String.class);
 		assertThat(entity.getHeaders().getLocation(), is(new URI("http://example.com/")));
 		assertThat(entity.getStatusCode(), is(HttpStatus.TEMPORARY_REDIRECT));
 
