@@ -110,9 +110,10 @@ public class StatsController {
 			@RequestParam(value = "max_lat", required = false) String maxLat,
 			HttpServletRequest request) {
 		logger.info("Requested json with hash " + id);
-		logger.info("From: " + from + ", To: " + to + ", minLat: " + minLat + 
-				", maxLat: " + maxLat + ", minLon: " + minLon + ", maxLon: " + maxLon);
-		
+		logger.info("From: " + from + ", To: " + to + ", minLat: " + minLat
+				+ ", maxLat: " + maxLat + ", minLon: " + minLon + ", maxLon: "
+				+ maxLon);
+
 		/* Converts lat and lon strings to float if they are not null */
 		Float latMin = null;
 		Float latMax = null;
@@ -130,24 +131,25 @@ public class StatsController {
 		if (maxLat != null) {
 			latMax = Float.parseFloat(maxLat);
 		}
-		DBObject groupObject = clickRepository
-				.getClicksByCountry(id, from, to).getRawResults();
-		logger.info("obj: " +groupObject.toString());
+		DBObject groupObject = clickRepository.getClicksByCountry(id, from, to)
+				.getRawResults();
+		logger.info("obj: " + groupObject.toString());
 		String list = groupObject.get("retval").toString();
 		String countryList = StatsController.processCountryJSON(list);
 		logger.info("list: " + countryList);
 		DBObject groupObjectCity = clickRepository
-				.getClicksByCity(id, from, to, latMin,
-						lonMax, latMax, lonMin)
+				.getClicksByCity(id, from, to, latMin, lonMax, latMax, lonMin)
 				.getRawResults();
 		String listCities = groupObjectCity.get("retval").toString();
 		String cityList = processCityJSON(listCities);
-		logger.info("lonmin: " + lonMin + ", lonMax: " + lonMax + ", latMin: " + latMin + ", latMax: " + latMax);
+		logger.info("lonmin: " + lonMin + ", lonMax: " + lonMax + ", latMin: "
+				+ latMin + ", latMax: " + latMax);
 		ShortURL l = shortURLRepository.findByHash(id);
 		StatsURL stats = new StatsURL(l.getTarget(), l.getCreated().toString(),
-				clickRepository.clicksByHash(l.getHash(), from, to, latMin, lonMax,
-						latMax, lonMin),
-				from, to, latMin, latMax, lonMin, lonMax, countryList, cityList);
+				clickRepository.clicksByHash(l.getHash(), from, to, latMin,
+						lonMax, latMax, lonMin),
+				from, to, latMin, latMax, lonMin, lonMax, countryList,
+				cityList);
 		return new ResponseEntity<>(stats, HttpStatus.OK);
 	}
 
@@ -298,6 +300,33 @@ public class StatsController {
 	}
 
 	/**
+	 * Return the list of rules from a link
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/getRules", method = RequestMethod.GET, produces = "text/html")
+	public ResponseEntity<?> getRules(
+			@RequestParam(value = "url", required = true) String hash) {
+		ShortURL l = shortURLRepository.findByHash(hash);
+		if (l != null) {
+			if (l.getRules() != null && !l.getRules().isEmpty()) {
+				String rules = "";
+				for (int i = 0; i < l.getRules().size(); i++) {
+					rules += l.getRules().get(i).toString() + " ";
+				}
+				return new ResponseEntity<>(rules, HttpStatus.OK);
+			}
+			else {
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
+		}
+		else {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	/**
 	 * Set or modify the rules about expiration of an URL
 	 */
 	@RequestMapping(value = "/setRules", method = RequestMethod.POST)
@@ -306,8 +335,8 @@ public class StatsController {
 			@RequestParam(value = "rule", required = true) String rule,
 			HttpServletRequest request) {
 		ShortURL l = shortURLRepository.findByHash(hash);
-		if (l != null) { 
-			if (executeJS(rule, l) != null) {
+		if (l != null) {
+			if (executeS(rule, l) != null) {
 				l.addRule(rule);
 				shortURLRepository.save(l);
 				return new ResponseEntity<>(HttpStatus.OK);
@@ -323,22 +352,69 @@ public class StatsController {
 
 	}
 
-	public Boolean executeJS(String rules, ShortURL l) {
+	@RequestMapping(value = "/editRule", method = RequestMethod.POST)
+	public ResponseEntity<?> editRules(
+			@RequestParam(value = "url", required = true) String hash,
+			@RequestParam(value = "rule", required = true) String rule,
+			@RequestParam(value = "edit", required = true) String edit,
+			HttpServletRequest request) {
+		ShortURL l = shortURLRepository.findByHash(hash);
+		if (l != null) {
+			if (executeS(edit, l) != null) {
+
+				ArrayList<String> array = l.getRules();
+				array.set(Integer.valueOf(rule), edit);
+				l.setRules(array);
+				shortURLRepository.save(l);
+				return new ResponseEntity<>(HttpStatus.OK);
+			}
+			else {
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			}
+		}
+		else {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@RequestMapping(value = "/deleteRule", method = RequestMethod.POST)
+	public ResponseEntity<?> deleteRules(
+			@RequestParam(value = "url", required = true) String hash,
+			@RequestParam(value = "rule", required = true) String rule,
+			HttpServletRequest request) {
+		ShortURL l = shortURLRepository.findByHash(hash);
+		if (l != null) {
+
+			l.removeRule(Integer.valueOf(rule));
+			shortURLRepository.save(l);
+			return new ResponseEntity<>(HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	public Boolean executeS(String rules, ShortURL l) {
 		try {
 			if (rules.contains("<")) {
-				String[] partes = rules.split("==");
+				String[] partes = rules.split("<");
 				if (partes[0].equals("created")) {
 					if (l.getCreated().before(new SimpleDateFormat("yyyy-MM-dd")
 							.parse(partes[1]))) {
 						return true;
 					}
-					else{return false;}
+					else {
+						return false;
+					}
 				}
 				else if (partes[0].equals("expire")) {
 					if (l.getExpire().before(new SimpleDateFormat("yyyy-MM-dd")
 							.parse(partes[1]))) {
 						return true;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				else if (partes[0].equals("token")) {
 					return null;
@@ -351,7 +427,10 @@ public class StatsController {
 					if (clickRepository.clicksByHash(l.getHash(), null, null,
 							null, null, null, null) < Long.valueOf(partes[1])) {
 						return true;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				return null;
 			}
@@ -361,13 +440,19 @@ public class StatsController {
 					if (l.getCreated().after(new SimpleDateFormat("yyyy-MM-dd")
 							.parse(partes[1]))) {
 						return true;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				else if (partes[0].equals("expire")) {
 					if (l.getExpire().after(new SimpleDateFormat("yyyy-MM-dd")
 							.parse(partes[1]))) {
 						return true;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				else if (partes[0].equals("token")) {
 					return null;
@@ -381,7 +466,7 @@ public class StatsController {
 							null, null, null, null) > Long.valueOf(partes[1])) {
 						return true;
 					}
-					else{
+					else {
 						return false;
 					}
 				}
@@ -394,14 +479,20 @@ public class StatsController {
 							.compareTo((new SimpleDateFormat("yyyy-MM-dd")
 									.parse(partes[1]))) == 0) {
 						return true;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				else if (partes[0].equals("expire")) {
 					if (l.getExpire()
 							.compareTo((new SimpleDateFormat("yyyy-MM-dd")
 									.parse(partes[1]))) == 0) {
 						return true;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				else if (partes[0].equals("token")) {
 					if (partes[1].equals("true")) {
@@ -409,7 +500,10 @@ public class StatsController {
 					}
 					else if (partes[1].equals("false")) {
 						return l.getToken() == null;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				else if (partes[0].equals("country")) {
 
@@ -420,7 +514,10 @@ public class StatsController {
 							null, null, null,
 							null) == Long.valueOf(partes[1])) {
 						return true;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				return null;
 

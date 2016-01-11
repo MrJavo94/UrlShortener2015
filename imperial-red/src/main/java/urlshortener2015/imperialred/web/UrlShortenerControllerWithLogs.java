@@ -161,8 +161,8 @@ public class UrlShortenerControllerWithLogs {
 						/*
 						 * Execute javascript
 						 */
-						for (int i = 0; i < rules.size(); i++) { 
-							Boolean resul = executeJS(rules.get(i), l);
+						for (int i = 0; i < rules.size(); i++) {
+							Boolean resul = executeS(rules.get(i), l);
 							if (resul != null) {
 								if (resul == true) {
 									response.setStatus(
@@ -171,11 +171,10 @@ public class UrlShortenerControllerWithLogs {
 											"Link has expired");
 								}
 							}
-							else{
+							else {
 								response.setStatus(
 										HttpStatus.BAD_REQUEST.value());
-								throw new CustomException("400",
-										"Bad rule");
+								throw new CustomException("400", "Bad rule");
 							}
 						}
 					}
@@ -259,7 +258,7 @@ public class UrlShortenerControllerWithLogs {
 		JSONObject jn = getFreegeoip(request);
 		String country = jn.getString("country_name");
 		ShortURL su = createAndSaveIfValid(url, custom, hasToken, expireDate,
-				extractIP(request), emails, principal,country);
+				extractIP(request), emails, principal, country);
 		if (su != null) {
 			/* If there is an expire date, it sets an alert */
 			if (!expireDate.equals("")) {
@@ -441,7 +440,7 @@ public class UrlShortenerControllerWithLogs {
 	 */
 	protected ShortURL createAndSaveIfValid(String url, String custom,
 			String hasToken, String expireDate, String ip, String[] emails,
-			Principal principal ,String country) {
+			Principal principal, String country) {
 
 		UrlValidator urlValidator = new UrlValidator(
 				new String[] { "http", "https" });
@@ -516,8 +515,7 @@ public class UrlShortenerControllerWithLogs {
 			/*
 			 * Gets email
 			 */
-			// String owner = getOwnerMail();
-			String owner = "test@expire";
+			String owner = getOwnerMail();
 			logger.info("Mail: " + owner);
 			logger.info("4");
 			/*
@@ -527,8 +525,8 @@ public class UrlShortenerControllerWithLogs {
 					linkTo(methodOn(UrlShortenerControllerWithLogs.class)
 							.redirectTo(id, null, null, null, null)).toUri(),
 					new Date(System.currentTimeMillis()), expire, owner, token,
-					HttpStatus.TEMPORARY_REDIRECT.value(), ip, country, isPrivate,
-					trueEmails);
+					HttpStatus.TEMPORARY_REDIRECT.value(), ip, country,
+					isPrivate, trueEmails);
 
 			/*
 			 * Insert to DB
@@ -602,22 +600,27 @@ public class UrlShortenerControllerWithLogs {
 		return email;
 	}
 
-	public Boolean executeJS(String rules, ShortURL l) {
+	public Boolean executeS(String rules, ShortURL l) {
 		try {
 			if (rules.contains("<")) {
-				String[] partes = rules.split("==");
+				String[] partes = rules.split("<");
 				if (partes[0].equals("created")) {
 					if (l.getCreated().before(new SimpleDateFormat("yyyy-MM-dd")
 							.parse(partes[1]))) {
 						return true;
 					}
-					else{return false;}
+					else {
+						return false;
+					}
 				}
 				else if (partes[0].equals("expire")) {
 					if (l.getExpire().before(new SimpleDateFormat("yyyy-MM-dd")
 							.parse(partes[1]))) {
 						return true;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				else if (partes[0].equals("token")) {
 					return null;
@@ -630,7 +633,10 @@ public class UrlShortenerControllerWithLogs {
 					if (clickRepository.clicksByHash(l.getHash(), null, null,
 							null, null, null, null) < Long.valueOf(partes[1])) {
 						return true;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				return null;
 			}
@@ -640,13 +646,19 @@ public class UrlShortenerControllerWithLogs {
 					if (l.getCreated().after(new SimpleDateFormat("yyyy-MM-dd")
 							.parse(partes[1]))) {
 						return true;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				else if (partes[0].equals("expire")) {
 					if (l.getExpire().after(new SimpleDateFormat("yyyy-MM-dd")
 							.parse(partes[1]))) {
 						return true;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				else if (partes[0].equals("token")) {
 					return null;
@@ -660,7 +672,7 @@ public class UrlShortenerControllerWithLogs {
 							null, null, null, null) > Long.valueOf(partes[1])) {
 						return true;
 					}
-					else{
+					else {
 						return false;
 					}
 				}
@@ -673,14 +685,20 @@ public class UrlShortenerControllerWithLogs {
 							.compareTo((new SimpleDateFormat("yyyy-MM-dd")
 									.parse(partes[1]))) == 0) {
 						return true;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				else if (partes[0].equals("expire")) {
 					if (l.getExpire()
 							.compareTo((new SimpleDateFormat("yyyy-MM-dd")
 									.parse(partes[1]))) == 0) {
 						return true;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				else if (partes[0].equals("token")) {
 					if (partes[1].equals("true")) {
@@ -688,7 +706,10 @@ public class UrlShortenerControllerWithLogs {
 					}
 					else if (partes[1].equals("false")) {
 						return l.getToken() == null;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				else if (partes[0].equals("country")) {
 
@@ -699,7 +720,10 @@ public class UrlShortenerControllerWithLogs {
 							null, null, null,
 							null) == Long.valueOf(partes[1])) {
 						return true;
-					}else{return false;}
+					}
+					else {
+						return false;
+					}
 				}
 				return null;
 
@@ -714,6 +738,4 @@ public class UrlShortenerControllerWithLogs {
 		}
 
 	}
-
-
 }
