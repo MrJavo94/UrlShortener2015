@@ -106,7 +106,11 @@ $(document)
 													.addClass(
 															"has-success");
 										},
-										error : function(msg) {
+										error : function(msg, error, status) {
+											console.log(msg);
+											console.log(status);
+											console.log(error);
+
 											$("#loading").hide();
 											$("#yes").hide();
 											$("#no").show();
@@ -115,27 +119,37 @@ $(document)
 															"has-success")
 													.addClass(
 															"has-error");
-											if (msg.responseJSON.length > 0) {
-												$("#anunc").show();
-												$("#anunc")
-														.html(
-																"<h3>URL already on use. Sugestions :<h3>");
-												var botones = "";
-												for (var i = 0; i < msg.responseJSON.length; i++) {
-													var seg = msg.responseJSON[i];
-													botones += "<button id='"
-															+ seg
-															+ "' onclick='refrescarSugerencia(this.id)' type='button' class='btn btn-link'>"
-															+ seg
-															+ " </button>";
+											if(status=="Bad Request"){
+												
+												
+												if (msg.responseJSON.length > 0) {
+													$("#anunc").show();
+													$("#anunc")
+															.html(
+																	"<h3>URL already on use. Sugestions :<h3>");
+													var botones = "";
+													for (var i = 0; i < msg.responseJSON.length; i++) {
+														var seg = msg.responseJSON[i];
+														botones += "<button id='"
+																+ seg
+																+ "' onclick='refrescarSugerencia(this.id)' type='button' class='btn btn-link'>"
+																+ seg
+																+ " </button>";
+													}
+													$("#recom").show();
+													$("#recom").html(
+															botones);
+													$("#recom")
+															.addClass(
+																	"alert alert-success lead");
 												}
-												$("#recom").show();
-												$("#recom").html(
-														botones);
-												$("#recom")
-														.addClass(
-																"alert alert-success lead");
 											}
+											else if(status=="Request-URI Too Long"){
+													$("#anunc").show();
+													$("#anunc")
+															.html(
+																	"<h3>Please, first introduce properly the url.<h3>");
+												}
 										}
 									});
 								});
