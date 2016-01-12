@@ -18,10 +18,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
+            		.antMatchers("/*.html")
+            		.authenticated()
             		.antMatchers("/css/**/*", "/js/**/*", "/img/**/*", "/image/**/*", "/fonts/**/*", "/webjars/**/*", "/favicon.ico",
             				"/users", "/userlogin", "/connect/google", "/connect/facebook", "/{link}")
             		.permitAll()
-                	.antMatchers("/")
+//            		.anyRequest()
+            		.antMatchers("/")
                 	.authenticated()
             .and()
             	.formLogin()
