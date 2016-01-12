@@ -3,10 +3,8 @@ package urlshortener2015.imperialred.web;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.text.ParseException;
@@ -23,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.validator.routines.UrlValidator;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -43,23 +38,10 @@ import org.springframework.social.google.api.Google;
 import org.springframework.social.security.SocialAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.social.connect.Connection;
-import org.springframework.social.connect.UserProfile;
-import org.springframework.social.facebook.api.Facebook;
-import org.springframework.social.google.api.Google;
-import org.springframework.social.google.api.plus.Person;
-import org.springframework.social.security.SocialAuthenticationToken;
-import org.springframework.social.twitter.api.Twitter;
-import org.springframework.social.twitter.api.TwitterProfile;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.Hashing;
 import com.mashape.unirest.http.HttpResponse;
@@ -186,7 +168,7 @@ public class UrlShortenerControllerWithLogs {
 							request.getSession().setAttribute("redirect", id);
 
 							// model.addAttribute("hash", id);
-							return "login_special";
+							return "login";
 						}
 
 					}
@@ -233,7 +215,7 @@ public class UrlShortenerControllerWithLogs {
 						"You don't have permissions to use this URL");
 			}
 			/*
-			 * 																	
+			 * User logged in														
 			 */
 			return true;
 		}
