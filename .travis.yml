@@ -2,8 +2,6 @@ language: java
 jdk:
 - oraclejdk8
 before_install:
-- openssl aes-256-cbc -K $encrypted_ffaeb9902a39_key -iv $encrypted_ffaeb9902a39_iv
-  -in imperial-red/src/main/resources/auth.properties.enc -out imperial-red/src/main/resources/auth.properties -d
 - openssl aes-256-cbc -K $encrypted_7ff58609b516_key -iv $encrypted_7ff58609b516_iv
   -in imperial-red/src/main/resources/application.properties.enc -out imperial-red/src/main/resources/application.properties
   -d

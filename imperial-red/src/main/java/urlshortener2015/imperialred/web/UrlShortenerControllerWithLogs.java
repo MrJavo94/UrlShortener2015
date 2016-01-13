@@ -337,11 +337,9 @@ public class UrlShortenerControllerWithLogs {
 				id = custom;
 
 				if (shortURLRepository.findByHash(id) == null) {
-					System.out.println("1");
 					return new ResponseEntity<>(HttpStatus.CREATED);
 				}
 				else {
-					System.out.println("2");
 					try {
 						HttpResponse<JsonNode> response = Unirest
 								.get("https://wordsapiv1.p.mashape.com/words/"
@@ -370,7 +368,6 @@ public class UrlShortenerControllerWithLogs {
 			}
 		}
 		else {
-			System.out.println("3");
 			return new ResponseEntity<>(HttpStatus.URI_TOO_LONG);
 		}
 	}
@@ -438,7 +435,6 @@ public class UrlShortenerControllerWithLogs {
 
 	/**
 	 * If shortURL is valid, creates it and saves it 
-	 * XXX: at the moment, it just ignores unknown emails, with no feedback for users.
 	 */
 	protected ShortURL createAndSaveIfValid(String url, String custom,
 			String hasToken, String expireDate, String ip, String[] emails,
