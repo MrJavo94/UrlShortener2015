@@ -167,7 +167,6 @@ public class UrlShortenerControllerWithLogs {
 						if (!authentication(authorizedMails)) {
 							request.getSession().setAttribute("redirect", id);
 
-							// model.addAttribute("hash", id);
 							return "login";
 						}
 
