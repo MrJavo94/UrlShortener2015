@@ -360,7 +360,8 @@ public class UrlShortenerControllerWithLogs {
 						 * Caso en el que la id seleccionada esta cogida y la
 						 * API no da alternativas
 						 */
-						return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+						ArrayList<String> res=generateSuffix(custom);
+						return new ResponseEntity<>(res,HttpStatus.BAD_REQUEST);
 					}
 				}
 			}
@@ -370,8 +371,29 @@ public class UrlShortenerControllerWithLogs {
 		}
 		else {
 			System.out.println("3");
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.URI_TOO_LONG);
 		}
+	}
+	
+	/**
+	 * Generate a custom url with a suffix
+	 * The url isnt in the DB
+	 * @param custom
+	 * @return
+	 */
+	public ArrayList<String> generateSuffix(String custom){
+		ArrayList<String>array=new ArrayList<String>();
+		boolean found=false;
+		int i=0;
+		String result=custom+i;
+		while(!found){
+			if(shortURLRepository.findByHash(result)==null){
+				found=true;
+			}
+			i++;
+		}
+		array.add(result);
+		return array;
 	}
 
 	protected void createAndSaveClick(String hash, HttpServletRequest request) {
